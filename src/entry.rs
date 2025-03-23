@@ -11,9 +11,9 @@ const SERVER_ADDR: &str = "127.0.0.1:1305";
 #[ctor]
 fn entry() {
     thread::spawn(|| {
-        thread::sleep(Duration::from_secs(10));
         unsafe { windows::Win32::System::Console::AllocConsole() };
         // Wait for il2cpp to initialize
+        thread::sleep(Duration::from_secs(5));
         globals::BATTLE_LINEUP_TURN_DAMAGE.set(std::sync::RwLock::new(
             globals::BattleLineupTurnDamage::default(),
         ));

@@ -59,11 +59,9 @@ pub fn game_mode_end(instance: *const c_void) {
 
     let battle_end_packet = BattleEndPacket { id: 0xFFFFFFFF };
 
-    let mut sockets: std::sync::MutexGuard<'_, crate::globals::Sockets> =
-        SOCKETS.get().unwrap().lock().unwrap();
-    let mut buf = String::new();
-    let packet = serde_json::to_string(&battle_end_packet).unwrap();
-    BASE64_STANDARD.encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
+    let mut buf: String = String::new();
+    BASE64_STANDARD.encode_string(serde_json::to_string(&battle_end_packet).unwrap(), &mut buf);
+    let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
     sockets.broadcast(unsafe { buf.as_mut_vec().as_slice() });
 
     RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour.call(instance);
@@ -106,8 +104,7 @@ pub fn set_battle_lineup_data(
 
         let battle_lineup_packet = BattleLineupPacket { id: 0, avatars };
         let mut buf: String = String::new();
-        let packet = serde_json::to_string(&battle_lineup_packet).unwrap();
-        BASE64_STANDARD.encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
+        BASE64_STANDARD.encode_string(serde_json::to_string(&battle_lineup_packet).unwrap(), &mut buf);
         let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
         sockets.broadcast(buf.as_mut_vec().as_slice());
     }
@@ -163,13 +160,12 @@ pub fn damage_chunk(
                             damage_chunk: damage,
                         };
 
-                        let mut buf: String = String::new();
-                        BASE64_STANDARD
-                            .encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
 
+                        let mut buf: String = String::new();
+                        BASE64_STANDARD.encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
                         let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
                         sockets.broadcast(buf.as_mut_vec().as_slice());
-
+                
                         println!(
                             "[VERITAS] ({}: {}) dealt {} damage",
                             avatar_id, avatar_name, damage
@@ -258,9 +254,7 @@ pub fn ProcessOnLevelTurnActionEndEvent(instance: *const c_void, a1: i32) -> *co
         let turn_damage_packet = TurnDamagePacket { id: 2, damages };
 
         let mut buf: String = String::new();
-        let packet = serde_json::to_string(&turn_damage_packet).unwrap();
-        BASE64_STANDARD.encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
-
+        BASE64_STANDARD.encode_string(serde_json::to_string(&turn_damage_packet).unwrap(), &mut buf);
         let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
         sockets.broadcast(buf.as_mut_vec().as_slice());
     }
