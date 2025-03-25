@@ -4,5 +4,6 @@
 #![allow(non_camel_case_types)]
 pub mod functions;
 pub mod globals;
+pub mod helpers;
 pub mod il2cpp_types;
 pub mod types;

@@ -1,37 +1,24 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-use crate::sr::{
-    functions::rpg::client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar},
-    globals::GlobalVars,
-    types::RPG::Client::ModuleManager,
-};
-use crate::{
-    globals::{
-        Avatar, AvatarTurnDamage, BattleLineupTurnDamage, BATTLE_LINEUP_TURN_DAMAGE,
-        GAMEASSEMBLY_HANDLE, SOCKETS,
-    },
-    packets::{
-        AvatarKillPacket, BattleEndPacket, BattleLineupPacket, Damage, DamageChunkPacket,
-        TurnDamagePacket,
-    },
-    sr::{
-        functions::rpg::{
-            client::UIGameEntityUtils_GetAvatarID,
-            gamecore::{
-                AbilityStatic_GetActualOwner, EntityManager__GetEntitySummoner,
-                GamePlayStatic_GetEntityManager,
-            },
-        },
-        types::{
-            HBIAGLPHICO, NOPBAAAGGLA,
-            RPG::GameCore::{BattleLineupData, EntityType, GameEntity, TeamType},
-        },
-    },
-};
-use base64::{prelude::BASE64_STANDARD, Engine};
+
+use std::{ffi::c_void, mem};
 use retour::static_detour;
-use std::{error, ffi::c_void, mem};
+use crate::{battle::BattleContext, models::{events::{OnKillEvent, OnDamageEvent, Event, SetBattleLineupEvent}, misc::Avatar}, sr::{functions::rpg::{client::{AvatarData_get_AvatarName, UIGameEntityUtils_GetAvatarID}, gamecore::{AbilityStatic_GetActualOwner, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager}}, helpers, types::{rpg::gamecore::{BattleLineupData, EntityType, GameEntity, TeamType}, HBIAGLPHICO, NOPBAAAGGLA}}, GAMEASSEMBLY_HANDLE};
+use anyhow::Result;
+
+// NOTE: Wrap logic in unsafe block even when safe, else might encounter some UB
+
+macro_rules! hook_function {
+    (
+        $detour:ident,
+        $target:expr,
+        $reroute:ident
+    ) => {
+        $detour.initialize($target, $reroute)?;
+        $detour.enable()?;
+    };
+}
 
 static_detour! {
     static DMFMLMJKKHB_OMPLOLLELLK_Detour: fn(
@@ -53,65 +40,27 @@ static_detour! {
     static RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour: fn(*const c_void, i32) -> *const c_void;
 }
 
-pub fn game_mode_end(instance: *const c_void) {
-    let mut battle_lineup = BATTLE_LINEUP_TURN_DAMAGE.get().unwrap().write().unwrap();
-    *battle_lineup = BattleLineupTurnDamage::default();
-
-    let battle_end_packet = BattleEndPacket { id: 0xFFFFFFFF };
-
-    let mut buf: String = String::new();
-    BASE64_STANDARD.encode_string(serde_json::to_string(&battle_end_packet).unwrap(), &mut buf);
-    let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
-    sockets.broadcast(unsafe { buf.as_mut_vec().as_slice() });
-
-    RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour.call(instance);
-}
-
-pub fn set_battle_lineup_data(
-    instance: *const c_void,
-    battle_lineup_data: *const BattleLineupData,
-) {
+fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const BattleLineupData) {
     unsafe {
-        let s_module_manager =
-            GlobalVars::get_global_var(GlobalVars::s_ModuleManager) as *const ModuleManager;
-        let avatar_module = (*s_module_manager).AvatarModule;
-
         let light_team = (*battle_lineup_data).LightTeam;
         let mut avatars = Vec::<Avatar>::new();
-        for (i, character_ptr) in (*light_team).to_slice().iter().enumerate() {
+        for character_ptr in (*light_team).to_slice() {
             let character = *character_ptr;
             let avatar_id = (*character).CharacterID;
-            let avatar_data = AvatarModule_GetAvatar(avatar_module, avatar_id);
-            let avatar_name = (*AvatarData_get_AvatarName(avatar_data))
-                .to_string()
-                .unwrap();
+            let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
+            let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
 
-            let mut battle_lineup = BATTLE_LINEUP_TURN_DAMAGE.get().unwrap().write().unwrap();
-            // implement constructor
-            battle_lineup.lineup[i as usize] = AvatarTurnDamage::default();
-            battle_lineup.lineup[i as usize].avatar.avatar_id = avatar_id;
-            battle_lineup.lineup[i as usize].avatar.avatar_name = avatar_name.clone();
             avatars.push(Avatar {
-                avatar_id,
-                avatar_name: avatar_name.clone(),
+                id: avatar_id,
+                name: avatar_name.clone(),
             });
-
-            println!(
-                "[VERITAS] ({}: {}) was loaded in lineup",
-                avatar_id, avatar_name
-            );
         }
-
-        let battle_lineup_packet = BattleLineupPacket { id: 0, avatars };
-        let mut buf: String = String::new();
-        BASE64_STANDARD.encode_string(serde_json::to_string(&battle_lineup_packet).unwrap(), &mut buf);
-        let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
-        sockets.broadcast(buf.as_mut_vec().as_slice());
+        BattleContext::handle_event(Event::SetBattleLineup(SetBattleLineupEvent { avatars })).unwrap();
     }
     RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour.call(instance, battle_lineup_data);
 }
 
-pub fn damage_chunk(
+fn on_damage(
     task_context: *const c_void,
     damage_by_attack_property: *const c_void,
     nopbaaaggla: *const NOPBAAAGGLA,
@@ -129,196 +78,103 @@ pub fn damage_chunk(
             TeamType::TeamLight => {
                 // Unsure of the relevance of the last 32 bits; not null
                 // Might contain the decimal part of DMG?
-                let damage = (((*nopbaaaggla).JFKEEOMKMLI.m_rawValue as u64 & 0xFFFFFFFF00000000)
-                    >> 32) as u32;
+                let damage = (((*nopbaaaggla ).JFKEEOMKMLI.m_rawValue as u64 & 0xFFFFFFFF00000000) >> 32) as u32;
                 let attack_owner = AbilityStatic_GetActualOwner(attacker);
-
+    
                 match (*attack_owner)._EntityType {
                     EntityType::Avatar => {
                         let avatar_id = UIGameEntityUtils_GetAvatarID(attack_owner);
-                        let s_module_manager =
-                            GlobalVars::get_global_var(GlobalVars::s_ModuleManager)
-                                as *const ModuleManager;
-                        let avatar_module = (*s_module_manager).AvatarModule;
-
-                        let avatar_data = AvatarModule_GetAvatar(avatar_module, avatar_id);
-                        let avatar_name = (*AvatarData_get_AvatarName(avatar_data))
-                            .to_string()
-                            .unwrap();
-
-                        let mut battle_lineup =
-                            BATTLE_LINEUP_TURN_DAMAGE.get().unwrap().write().unwrap();
-                        let index = battle_lineup.find_avatar_index_by_id(avatar_id);
-                        battle_lineup.lineup[index].damage_chunks.push(damage);
-
-                        let packet = DamageChunkPacket {
-                            id: 1,
+                        let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
+                        let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
+                    
+                        BattleContext::handle_event(Event::OnDamage(OnDamageEvent {
                             attacker: Avatar {
-                                avatar_id,
-                                avatar_name: avatar_name.clone(),
+                                id: avatar_id,
+                                name: avatar_name,
                             },
-                            damage_chunk: damage,
-                        };
-
-
-                        let mut buf: String = String::new();
-                        BASE64_STANDARD.encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
-                        let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
-                        sockets.broadcast(buf.as_mut_vec().as_slice());
-                
-                        println!(
-                            "[VERITAS] ({}: {}) dealt {} damage",
-                            avatar_id, avatar_name, damage
-                        );
+                            damage,
+                        })).unwrap();
                     }
                     EntityType::Servant => {
                         let entity_manager = GamePlayStatic_GetEntityManager();
-                        let avatar_entity =
-                            EntityManager__GetEntitySummoner(entity_manager, attack_owner);
-
+                        let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, attack_owner);
+    
                         let avatar_id = UIGameEntityUtils_GetAvatarID(avatar_entity);
-                        let s_module_manager =
-                            GlobalVars::get_global_var(GlobalVars::s_ModuleManager)
-                                as *const ModuleManager;
-                        let avatar_module = (*s_module_manager).AvatarModule;
-
-                        let avatar_data = AvatarModule_GetAvatar(avatar_module, avatar_id);
-                        let avatar_name = (*AvatarData_get_AvatarName(avatar_data))
-                            .to_string()
-                            .unwrap();
-
-                        let mut battle_lineup =
-                            BATTLE_LINEUP_TURN_DAMAGE.get().unwrap().write().unwrap();
-                        let index = battle_lineup.find_avatar_index_by_id(avatar_id);
-                        battle_lineup.lineup[index].damage_chunks.push(damage);
-
-                        let packet = DamageChunkPacket {
-                            id: 1,
+                        let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
+                        let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
+    
+                        BattleContext::handle_event(Event::OnDamage(OnDamageEvent {
                             attacker: Avatar {
-                                avatar_id,
-                                avatar_name: avatar_name.clone(),
+                                id: avatar_id,
+                                name: avatar_name,
                             },
-                            damage_chunk: damage,
-                        };
-
-                        let mut buf: String = String::new();
-                        BASE64_STANDARD
-                            .encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
-
-                        let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
-                        sockets.broadcast(buf.as_mut_vec().as_slice());
-
-                        println!(
-                            "[VERITAS] ({}: {})'s servant dealt {} damage",
-                            avatar_id, avatar_name, damage
-                        );
+                            damage,
+                        })).unwrap();
                     }
                     _ => (),
                 }
             }
             _ => {}
         }
-
-        return DMFMLMJKKHB_OMPLOLLELLK_Detour.call(
-            task_context,
-            damage_by_attack_property,
-            nopbaaaggla,
-            turn_based_ability_component_1,
-            turn_based_ability_component_2,
-            attacker,
-            defender,
-            attacker_task_single_target,
-            flag,
-            obkbghmgbne,
-        );
+        
     }
+    return DMFMLMJKKHB_OMPLOLLELLK_Detour.call(
+        task_context,
+        damage_by_attack_property,
+        nopbaaaggla,
+        turn_based_ability_component_1,
+        turn_based_ability_component_2,
+        attacker,
+        defender,
+        attacker_task_single_target,
+        flag,
+        obkbghmgbne,
+    );
 }
 
-pub fn ProcessOnLevelTurnActionEndEvent(instance: *const c_void, a1: i32) -> *const c_void {
-    unsafe {
-        // Can match player v enemy turn w/
-        // RPG.GameCore.TurnBasedGameMode.GetCurrentTurnTeam
-
-        let mut battle_lineup = BATTLE_LINEUP_TURN_DAMAGE.get().unwrap().write().unwrap();
-
-        let mut damages = Vec::new();
-        for item in &mut (*battle_lineup).lineup {
-            damages.push(Damage {
-                attacker: item.avatar.clone(),
-                damage_chunks: item.damage_chunks.clone(),
-                damage: item.damage_chunks.iter().sum(),
-            });
-            item.damage_chunks = Vec::new();
-        }
-
-        let turn_damage_packet = TurnDamagePacket { id: 2, damages };
-
-        let mut buf: String = String::new();
-        BASE64_STANDARD.encode_string(serde_json::to_string(&turn_damage_packet).unwrap(), &mut buf);
-        let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
-        sockets.broadcast(buf.as_mut_vec().as_slice());
-    }
-    return RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour
-        .call(instance, a1);
+fn ProcessOnLevelTurnActionEndEvent(instance: *const c_void, a1: i32) -> *const c_void {
+    // Can match player v enemy turn w/
+    // RPG.GameCore.TurnBasedGameMode.GetCurrentTurnTeam
+    BattleContext::handle_event(Event::TurnEnd).unwrap();
+    return RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour.call(instance, a1);
 }
 
-pub fn _MakeLimboEntityDie(instance: *const c_void, a1: *const HBIAGLPHICO) -> bool {
-    // Only passes the attacker ref once even if multiple kills in one attack
+fn _MakeLimboEntityDie(instance: *const c_void, a1: *const HBIAGLPHICO) -> bool {
+    // This isn't general kills
     unsafe {
         let attacker = (*a1).JKCOIOLCMEP;
         match (*attacker)._Team {
             TeamType::TeamLight => match (*attacker)._EntityType {
                 EntityType::Avatar => {
                     let avatar_id = UIGameEntityUtils_GetAvatarID((*a1).JKCOIOLCMEP);
-                    let s_module_manager = GlobalVars::get_global_var(GlobalVars::s_ModuleManager)
-                        as *const ModuleManager;
-                    let avatar_module = (*s_module_manager).AvatarModule;
-
-                    let avatar_data = AvatarModule_GetAvatar(avatar_module, avatar_id);
-                    let avatar_name = (*AvatarData_get_AvatarName(avatar_data))
-                        .to_string()
-                        .unwrap();
-
-                    let packet = AvatarKillPacket {
-                        id: 3,
+                    let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
+                    let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
+                    BattleContext::handle_event(Event::OnKill(OnKillEvent {
                         attacker: Avatar {
-                            avatar_id,
-                            avatar_name: avatar_name.clone(),
+                            id: avatar_id,
+                            name: avatar_name,
                         },
-                    };
-
-                    let mut buf: String = String::new();
-                    BASE64_STANDARD
-                        .encode_string(serde_json::to_string(&packet).unwrap(), &mut buf);
-
-                    let mut sockets = SOCKETS.get().unwrap().lock().unwrap();
-                    sockets.broadcast(buf.as_mut_vec().as_slice());
+                    })).unwrap();
                 }
                 _ => {}
             },
             _ => {}
-        }
+        }    
     }
     return RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour.call(instance, a1);
 }
 
-macro_rules! hook_function {
-    (
-        $detour:ident,
-        $target:expr,
-        $reroute:ident
-    ) => {
-        $detour.initialize($target, $reroute)?;
-        $detour.enable()?;
-    };
+fn game_mode_end(instance: *const c_void) {
+    BattleContext::handle_event(Event::BattleEnd).unwrap();
+    RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour.call(instance);
 }
 
-pub fn install_hooks() -> Result<(), Box<dyn error::Error>> {
+pub fn install_hooks() -> Result<()> {
     unsafe {
         hook_function!(
             DMFMLMJKKHB_OMPLOLLELLK_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x75d1360),
-            damage_chunk
+            on_damage
         );
         hook_function!(
             RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour,
@@ -340,7 +196,6 @@ pub fn install_hooks() -> Result<(), Box<dyn error::Error>> {
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x9400f10),
             ProcessOnLevelTurnActionEndEvent
         );
-
         Ok(())
     }
 }
