@@ -98,8 +98,13 @@ impl BattleContext {
                 };
                 packet = Packet::from_event_packet(packet_body)?;
             }
+            Event::TurnBegin => {
+                let action_value = get_elapsed_av();
+                battle_context.current_turn_info.action_value = action_value;
+                let packet_body = EventPacket::TurnBegin { action_value };
+                packet = Packet::from_event_packet(packet_body)?;
+            },
             Event::TurnEnd => {
-                battle_context.current_turn_info.action_value = get_elapsed_av();
                 let mut turn_info = battle_context.current_turn_info.clone();
 
                 // Calculate net damages

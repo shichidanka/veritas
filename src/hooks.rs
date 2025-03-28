@@ -34,16 +34,18 @@ static_detour! {
         *const c_void
     ) -> bool;
 
-    static RPG_GameCore_TurnBasedGameMode__GameModeBegin_Detour: fn(*const TurnBasedGameMode);
-    static RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour: fn(*const TurnBasedGameMode);
+    static RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour: fn(*const TurnBasedGameMode);
+    static RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour: fn(*const TurnBasedGameMode);
     static RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour: fn(*const c_void, *const BattleLineupData);
     static RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour: fn(*const c_void, *const HBIAGLPHICO) -> bool;
     static RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour: fn(*const c_void, i32) -> *const c_void;
+    static RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour: fn(*const TurnBasedGameMode);
+
 }
 
 fn game_mode_begin(instance: *const TurnBasedGameMode) {
     BattleContext::handle_event(Event::BattleBegin(BattleBeginEvent { turn_based_game_mode: instance })).unwrap();
-    RPG_GameCore_TurnBasedGameMode__GameModeBegin_Detour.call(instance)
+    RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour.call(instance)
 }
 
 fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const BattleLineupData) {
@@ -173,7 +175,13 @@ fn _MakeLimboEntityDie(instance: *const c_void, a1: *const HBIAGLPHICO) -> bool 
 
 fn game_mode_end(instance: *const TurnBasedGameMode) {
     BattleContext::handle_event(Event::BattleEnd).unwrap();
-    RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour.call(instance);
+    RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour.call(instance);
+}
+
+
+fn turn_begin(instance: *const TurnBasedGameMode) {
+    BattleContext::handle_event(Event::TurnBegin).unwrap();
+    RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour.call(instance);
 }
 
 
@@ -185,13 +193,13 @@ pub fn install_hooks() -> Result<()> {
             on_damage
         );
         hook_function!(
-            RPG_GameCore_TurnBasedGameMode__GameModeBegin_Detour,
+            RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943eab0),
             game_mode_begin
         );
 
         hook_function!(
-            RPG_GameCore_TurnBasedGameMode__GameModeEnd_Detour,
+            RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943ebd0),
             game_mode_end
         );
@@ -209,6 +217,11 @@ pub fn install_hooks() -> Result<()> {
             RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x9400f10),
             ProcessOnLevelTurnActionEndEvent
+        );
+        hook_function!(
+            RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour,
+            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x94392d0),
+            turn_begin
         );
         Ok(())
     }

@@ -75,6 +75,7 @@ event_packet!(
     BattleBegin {}
     SetBattleLineup { avatars: Vec<Avatar> }
     OnDamage { attacker: Avatar, damage: f32 }
+    TurnBegin { action_value: f32 }
     TurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f32>, total_damage: f32, action_value: f32 }
     OnKill { attacker: Avatar }
     BattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f32, action_value: f32 }

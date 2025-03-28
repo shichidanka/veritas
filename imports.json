@@ -13,7 +13,8 @@
         "RPG.GameCore.TurnBasedGameMode._GameModeEnd",
         "RPG.Client.BattleAssetPreload.SetBattleLineupData",
         "RPG.GameCore.TurnBasedGameMode._MakeLimboEntityDie",
-        "RPG.GameCore.TurnBasedAbilityComponent.ProcessOnLevelTurnActionEndEvent"
+        "RPG.GameCore.TurnBasedAbilityComponent.ProcessOnLevelTurnActionEndEvent",
+        "RPG.GameCore.TurnBasedGameMode.DoTurnPrepareStartWork"
     ],
     "types": [
         "RPG.GameCore.FixPoint",

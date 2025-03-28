@@ -6,6 +6,7 @@ pub enum Event {
     BattleBegin(BattleBeginEvent),
     SetBattleLineup(SetBattleLineupEvent),
     OnDamage(OnDamageEvent),
+    TurnBegin,
     TurnEnd,
     OnKill(OnKillEvent),
     BattleEnd,
