@@ -208,11 +208,12 @@ pub fn install_hooks() -> Result<()> {
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x762dba0),
             set_battle_lineup_data
         );
-        hook_function!(
-            RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943d6c0),
-            _MakeLimboEntityDie
-        );
+        // This is not good
+        // hook_function!(
+        //     RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour,
+        //     mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943d6c0),
+        //     _MakeLimboEntityDie
+        // );
         hook_function!(
             RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x9400f10),
