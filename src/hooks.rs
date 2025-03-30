@@ -7,7 +7,7 @@ use retour::static_detour;
 use crate::{battle::BattleContext, models::{events::{BattleBeginEvent, Event, OnDamageEvent, OnKillEvent, SetBattleLineupEvent}, misc::Avatar}, sr::{functions::rpg::{client::{AvatarData_get_AvatarName, UIGameEntityUtils_GetAvatarID}, gamecore::{AbilityStatic_GetActualOwner, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager}}, helpers::{self, fixpoint_to_raw}, types::{rpg::gamecore::{BattleLineupData, EntityType, GameEntity, TeamType, TurnBasedGameMode}, HBIAGLPHICO, NOPBAAAGGLA}}, GAMEASSEMBLY_HANDLE};
 use anyhow::Result;
 
-// NOTE: Wrap logic in unsafe block even when safe, else might encounter some UB
+// NOTE: Wrap logic in unsafe block even when safe, else might encounter some strange UB from FFI boundary
 
 macro_rules! hook_function {
     (
@@ -89,38 +89,58 @@ fn on_damage(
                 let damage = fixpoint_to_raw(&(*nopbaaaggla ).JFKEEOMKMLI);
                 let attack_owner = AbilityStatic_GetActualOwner(attacker);
     
-                match (*attack_owner)._EntityType {
-                    EntityType::Avatar => {
-                        let avatar_id = UIGameEntityUtils_GetAvatarID(attack_owner);
-                        let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
-                        let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
-                    
-                        BattleContext::handle_event(Event::OnDamage(OnDamageEvent {
-                            attacker: Avatar {
-                                id: avatar_id,
-                                name: avatar_name,
-                            },
-                            damage,
-                        })).unwrap();
-                    }
-                    EntityType::Servant => {
-                        // can actually just save ref of battle and access this member thru battleinstance worldinstance
-                        let entity_manager = GamePlayStatic_GetEntityManager();
-                        let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, attack_owner);
-    
-                        let avatar_id = UIGameEntityUtils_GetAvatarID(avatar_entity);
-                        let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
-                        let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
-    
-                        BattleContext::handle_event(Event::OnDamage(OnDamageEvent {
-                            attacker: Avatar {
-                                id: avatar_id,
-                                name: avatar_name,
-                            },
-                            damage,
-                        })).unwrap();
-                    }
-                    _ => (),
+                if attack_owner.is_null() {
+                    println!("The attack owner is null");
+                }
+                else {
+                    match (*attack_owner)._EntityType {
+                        EntityType::Avatar => {
+                            let avatar_id = UIGameEntityUtils_GetAvatarID(attack_owner);
+                            let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
+                            if avatar_data.is_null() {
+                                println!("The avatar_data (ID: {}) is null", avatar_id);
+                            }
+                            else {
+                                let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
+                                
+                                BattleContext::handle_event(Event::OnDamage(OnDamageEvent {
+                                    attacker: Avatar {
+                                        id: avatar_id,
+                                        name: avatar_name,
+                                    },
+                                    damage,
+                                })).unwrap();    
+                            }
+                        }
+                        EntityType::Servant => {
+                            // can actually just save ref of battle and access this member thru battleinstance worldinstance
+                            let entity_manager = GamePlayStatic_GetEntityManager();
+                            let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, attack_owner);
+        
+                            if avatar_entity.is_null() {
+                                println!("The avatar_entity of a servant is null");
+                            }
+                            else {
+                                let avatar_id = UIGameEntityUtils_GetAvatarID(avatar_entity);
+                                let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
+                                if avatar_data.is_null() {
+                                    println!("The servant's summoner's avatar_data (ID: {}) is null", avatar_id);
+                                }
+                                else {
+                                    let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
+            
+                                    BattleContext::handle_event(Event::OnDamage(OnDamageEvent {
+                                        attacker: Avatar {
+                                            id: avatar_id,
+                                            name: avatar_name,
+                                        },
+                                        damage,
+                                    })).unwrap();    
+                                }    
+                            }
+                        }
+                        _ => (),
+                    }    
                 }
             }
             _ => {}

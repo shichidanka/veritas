@@ -17,13 +17,13 @@ struct Payload<'a, T: Serialize> {
 }
 
 impl Packet {
-    pub fn new<T: Serialize>(body: T) -> Result<Self> {
-        let body = serde_json::to_vec(&body)?;
-        Ok(Packet {
-            size: body.len() as u32,
-            body,
-        })
-    }
+    // pub fn new<T: Serialize>(body: T) -> Result<Self> {
+    //     let body = serde_json::to_vec(&body)?;
+    //     Ok(Packet {
+    //         size: body.len() as u32,
+    //         body,
+    //     })
+    // }
 
     pub fn from_event_packet(event_packet: EventPacket) -> Result<Self> {
         let payload = Payload {
@@ -72,6 +72,9 @@ macro_rules! event_packet {
 }
 
 event_packet!(
+    Heartbeat {}
+
+    // Game
     BattleBegin {}
     SetBattleLineup { avatars: Vec<Avatar> }
     OnDamage { attacker: Avatar, damage: f32 }
