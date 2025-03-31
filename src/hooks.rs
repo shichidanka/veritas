@@ -44,8 +44,8 @@ static_detour! {
 }
 
 fn game_mode_begin(instance: *const TurnBasedGameMode) {
+    RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour.call(instance);
     BattleContext::handle_event(Event::BattleBegin(BattleBeginEvent { turn_based_game_mode: instance })).unwrap();
-    RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour.call(instance)
 }
 
 fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const BattleLineupData) {
@@ -164,8 +164,9 @@ fn on_damage(
 fn ProcessOnLevelTurnActionEndEvent(instance: *const c_void, a1: i32) -> *const c_void {
     // Can match player v enemy turn w/
     // RPG.GameCore.TurnBasedGameMode.GetCurrentTurnTeam
+    let res = RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour.call(instance, a1);
     BattleContext::handle_event(Event::TurnEnd).unwrap();
-    return RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour.call(instance, a1);
+    return res;
 }
 
 fn _MakeLimboEntityDie(instance: *const c_void, a1: *const HBIAGLPHICO) -> bool {
@@ -194,14 +195,15 @@ fn _MakeLimboEntityDie(instance: *const c_void, a1: *const HBIAGLPHICO) -> bool 
 }
 
 fn game_mode_end(instance: *const TurnBasedGameMode) {
-    BattleContext::handle_event(Event::BattleEnd).unwrap();
     RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour.call(instance);
+    BattleContext::handle_event(Event::BattleEnd).unwrap();
 }
 
 
 fn turn_begin(instance: *const TurnBasedGameMode) {
-    BattleContext::handle_event(Event::TurnBegin).unwrap();
+    // We want to get the AV first
     RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour.call(instance);
+    BattleContext::handle_event(Event::TurnBegin).unwrap();
 }
 
 
