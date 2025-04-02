@@ -1,3 +1,4 @@
+#![feature(panic_update_hook)]
 mod battle;
 mod entry;
 mod hooks;

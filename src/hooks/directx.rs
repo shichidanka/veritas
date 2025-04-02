@@ -3,7 +3,7 @@ use std::{ffi::c_void, mem::{self}, ptr::null_mut, sync::Once};
 use anyhow::Result;
 use egui_directx11::app::EguiDx11;
 use retour::static_detour;
-use windows::{core::{w, Interface, HRESULT}, Win32::{Foundation::{HMODULE, HWND, LPARAM, LRESULT, WPARAM}, Graphics::{Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0}, Direct3D11::{D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext, D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION}, Dxgi::{Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC}, IDXGISwapChain, IDXGISwapChain_Vtbl, DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT}}, UI::WindowsAndMessaging::{CallWindowProcW, CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW, SetWindowLongPtrA, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, GWLP_WNDPROC, WINDOW_EX_STYLE, WNDCLASSEXW, WNDPROC, WS_OVERLAPPEDWINDOW}}};
+use windows::{core::{w, Interface, HRESULT}, Win32::{Foundation::{HMODULE, HWND, LPARAM, LRESULT, WPARAM}, Graphics::{Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0}, Direct3D11::{D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext, D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION}, Dxgi::{Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC}, IDXGISwapChain, IDXGISwapChain_Vtbl, DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT}}, UI::WindowsAndMessaging::{CallWindowProcW, CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW, SetWindowLongPtrA, SetWindowLongPtrW, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, GWLP_WNDPROC, WINDOW_EX_STYLE, WNDCLASSEXW, WNDPROC, WS_OVERLAPPEDWINDOW}}};
 
 use crate::{hooks::directx, ui::app::{self, AppState}};
 
@@ -148,7 +148,7 @@ pub fn present(
         INIT.call_once(|| {
             let state = AppState::default();
             APP = Some(EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state));
-            OLD_WND_PROC = Some(mem::transmute(SetWindowLongPtrA(
+            OLD_WND_PROC = Some(mem::transmute(SetWindowLongPtrW(
                 APP.as_ref().unwrap().hwnd,
                 GWLP_WNDPROC,
                 hk_wnd_proc as usize as _,
@@ -172,6 +172,13 @@ unsafe extern "stdcall" fn hk_wnd_proc(
 
 pub fn install_hooks() -> Result<()> {
 
+    std::panic::update_hook(move |prev, info| {
+        unsafe {
+            Present_Detour.disable().unwrap();
+            prev(info);    
+        }
+    });
+        
     let vtable = get_vtable();
     unsafe {
         hook_function!(
