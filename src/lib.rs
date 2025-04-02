@@ -4,7 +4,6 @@ mod hooks;
 mod models;
 mod server;
 mod sr;
-mod directx;
 mod ui;
 
 use std::sync::LazyLock;

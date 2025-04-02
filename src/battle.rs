@@ -1,4 +1,4 @@
-use std::sync::{LazyLock, Mutex, MutexGuard};
+use std::{collections::HashMap, iter::zip, sync::{LazyLock, Mutex, MutexGuard}};
 
 use anyhow::{ Context, Ok, Result, };
 
@@ -31,17 +31,19 @@ impl Default for BattleState {
 
 #[derive(Default)]
 pub struct BattleContext {
-    state: BattleState,
-    lineup: Vec<Avatar>,
-    turn_history: Vec<TurnInfo>,
-    current_turn_info: TurnInfo,
-    turn_count: usize,
+    pub state: BattleState,
+    pub lineup: Vec<Avatar>,
+    pub turn_history: Vec<TurnInfo>,
+    pub current_turn_info: TurnInfo,
+    pub turn_count: usize,
+    pub total_damage: f64,
+    pub real_time_damages: Vec<f64>
 }
 
 static BATTLE_CONTEXT: LazyLock<Mutex<BattleContext>> = LazyLock::new(|| Mutex::new(BattleContext::default()));
 
 impl BattleContext {
-    fn get_instance() -> MutexGuard<'static, Self> {
+    pub fn get_instance() -> MutexGuard<'static, Self> {
         BATTLE_CONTEXT.lock().unwrap()
     }
 
@@ -56,7 +58,9 @@ impl BattleContext {
         battle_context.current_turn_info.avatars_damage_chunks = vec![Vec::new(); lineup.len()];
         battle_context.turn_history = Vec::new();
         battle_context.turn_count = 0;
-        battle_context.lineup = lineup;
+        battle_context.lineup = lineup.clone();
+        battle_context.total_damage = 0.;
+        battle_context.real_time_damages = vec![0f64; lineup.len()];
     }
 
     // Consumes the event
@@ -89,6 +93,9 @@ impl BattleContext {
                 let turn = &mut battle_context.current_turn_info;
                 // Record character damage chunk
                 turn.avatars_damage_chunks[lineup_index].push(e.damage);
+
+                battle_context.total_damage += e.damage as f64;
+                battle_context.real_time_damages[lineup_index] += e.damage as f64;
 
                 println!("[VERITAS] ({}: {}) dealt {} damage", e.attacker.id, e.attacker.name, e.damage);
 
@@ -139,16 +146,16 @@ impl BattleContext {
                 packet = Packet::from_event_packet(packet_body)?;
             }
             Event::BattleEnd => {
-                let total_damage = battle_context.turn_history
-                    .iter()
-                    .map(|x| x.total_damage)
-                    .sum();
+                // let total_damage = battle_context.turn_history
+                //     .iter()
+                //     .map(|x| x.total_damage)
+                //     .sum();
                 battle_context.state = BattleState::Ended;
                 let packet_body = EventPacket::BattleEnd {
                     avatars: battle_context.lineup.clone(),
                     turn_history: battle_context.turn_history.clone(),
                     turn_count: battle_context.turn_count,
-                    total_damage,
+                    total_damage: battle_context.total_damage as f32,
                     action_value: get_elapsed_av()
                 };
                 unsafe { TURN_BASED_GAME_MODE_REF = None };

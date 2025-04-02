@@ -14,7 +14,7 @@ serde_json = "1.0.140"
 anyhow = "1.0.97"
 log = "0.4"
 egui = "0.31.1"
-egui_demo_lib = "0.31.1"
+egui_plot = "0.31.0"
 egui-directx11 = { git = "https://github.com/hessiser/egui-directx.git" }
 
 [dependencies.windows]

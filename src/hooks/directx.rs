@@ -1,36 +1,23 @@
 
-use std::{ffi::c_void, mem::{self}, ptr::null_mut, sync::OnceLock};
+use std::{ffi::c_void, mem::{self}, ptr::null_mut, sync::Once};
 use anyhow::Result;
+use egui_directx11::app::EguiDx11;
 use retour::static_detour;
-use windows::{core::{w, Interface, HRESULT}, Win32::{Foundation::HMODULE, Graphics::{Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0}, Direct3D11::{D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext, D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION}, Dxgi::{Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC}, IDXGISwapChain, IDXGISwapChain_Vtbl, DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT}}, System::LibraryLoader::GetModuleHandleW, UI::WindowsAndMessaging::{CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, WINDOW_EX_STYLE, WNDCLASSEXW, WS_OVERLAPPEDWINDOW}}};
+use windows::{core::{w, Interface, HRESULT}, Win32::{Foundation::{HMODULE, HWND, LPARAM, LRESULT, WPARAM}, Graphics::{Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0}, Direct3D11::{D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext, D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION}, Dxgi::{Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC}, IDXGISwapChain, IDXGISwapChain_Vtbl, DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT}}, UI::WindowsAndMessaging::{CallWindowProcW, CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW, SetWindowLongPtrA, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, GWLP_WNDPROC, WINDOW_EX_STYLE, WNDCLASSEXW, WNDPROC, WS_OVERLAPPEDWINDOW}}};
 
-use crate::{hooks, ui::{self, present}};
+use crate::{hooks::directx, ui::app::{self, AppState}};
 
-// Src: Kiero
+// Src
+// Kiero
 // https://github.com/eugen15/directx-present-hook
-
-// Let's move this mod to hooks later
-macro_rules! hook_function {
-    (
-        $detour:ident,
-        $target:expr,
-        $reroute:ident
-    ) => {
-        $detour.initialize($target, $reroute).unwrap();
-        $detour.enable().unwrap();
-    };
-}
-// Let's structure this better later
-static DX11_VTABLE: OnceLock<[usize; 205]> = OnceLock::new();
-
 
 static_detour! {
     pub static Present_Detour: unsafe extern "stdcall" fn(*const IDXGISwapChain_Vtbl, u32, DXGI_PRESENT) -> HRESULT;
 }
-
 // This can be done in shorter calls
 // Should we tho?
-pub fn init_dx11() {
+pub fn get_vtable() -> [usize; 205] {
+    // Initializes a dummy swapchain to get the vtable
     unsafe {
         let window_class = WNDCLASSEXW {
             cbSize: mem::size_of::<WNDCLASSEXW>() as _,
@@ -141,20 +128,57 @@ pub fn init_dx11() {
             144
         );
 
-        DX11_VTABLE.set(vtable).unwrap();
-
         DestroyWindow(window).unwrap();
         UnregisterClassW(window_class.lpszClassName, Some(window_class.hInstance)).unwrap();
+
+        vtable
     }
 }
 
-pub fn hook_present<F: Fn(*const IDXGISwapChain_Vtbl, u32, DXGI_PRESENT) -> HRESULT + Send + 'static>(target_fn: F) -> Result<()> {
+
+static mut APP: Option<EguiDx11<AppState>> = None;
+static mut OLD_WND_PROC: Option<WNDPROC> = None;
+
+pub fn present(
+    swap_chain_vtbl: *const IDXGISwapChain_Vtbl,
+    sync_interval: u32,
+    flags: DXGI_PRESENT,
+) -> HRESULT {
     unsafe {
-        let o_present = (*DX11_VTABLE.get().unwrap())[8];
+        static INIT: Once = Once::new();
+        INIT.call_once(|| {
+            let state = AppState::default();
+            APP = Some(EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state));
+            OLD_WND_PROC = Some(mem::transmute(SetWindowLongPtrA(
+                APP.as_ref().unwrap().hwnd,
+                GWLP_WNDPROC,
+                hk_wnd_proc as usize as _,
+            )));
+        });
+
+        APP.as_mut().unwrap().present(mem::transmute(&(swap_chain_vtbl)));
+        directx::Present_Detour.call(swap_chain_vtbl, sync_interval, flags)
+    }
+}
+
+unsafe extern "stdcall" fn hk_wnd_proc(
+    hwnd: HWND,
+    msg: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    APP.as_mut().unwrap().wnd_proc(msg, wparam, lparam);
+    CallWindowProcW(OLD_WND_PROC.unwrap(), hwnd, msg, wparam, lparam)
+}
+
+pub fn install_hooks() -> Result<()> {
+
+    let vtable = get_vtable();
+    unsafe {
         hook_function!(
             Present_Detour,
-            mem::transmute(o_present),
-            target_fn
+            mem::transmute(vtable[8]),
+            present
         );
     }
     Ok(())
