@@ -7,8 +7,7 @@ use windows::{core::{w, Interface, HRESULT}, Win32::{Foundation::{HMODULE, HWND,
 
 use crate::{hooks::directx, ui::app::{self, AppState}};
 
-// Src
-// Kiero
+// rdbo Kiero
 // https://github.com/eugen15/directx-present-hook
 
 static_detour! {

@@ -1,6 +1,5 @@
 # veritas
- Damage logger designed by a mundane-chalk-throwing pillar man
-# References
- @djkaty
- @lanylow
- @perfare
+Damage logger designed by a mundane-chalk-throwing pillar man
+# Maintainers
+- Hessiser: Backend/UI
+- NightKoneko: UI
