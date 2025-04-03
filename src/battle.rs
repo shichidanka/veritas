@@ -1,4 +1,4 @@
-use std::{collections::HashMap, iter::zip, sync::{LazyLock, Mutex, MutexGuard}};
+use std::sync::{LazyLock, Mutex, MutexGuard};
 
 use anyhow::{ Context, Ok, Result, };
 
@@ -37,6 +37,7 @@ pub struct BattleContext {
     pub current_turn_info: TurnInfo,
     pub turn_count: usize,
     pub total_damage: f64,
+    // Index w/ lineup index
     pub real_time_damages: Vec<f64>
 }
 

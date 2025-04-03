@@ -1,4 +1,4 @@
-use crate::{hooks, ui};
+use crate::hooks;
 use ctor::ctor;
 use std::thread;
 use std::time::Duration;

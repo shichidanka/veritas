@@ -1,15 +1,45 @@
 use std::sync::Once;
 
-use egui::{Color32, Context};
+use egui::{CentralPanel, Color32, Context, Frame, Label, Vec2, Window};
 
 use crate::ui::widgets;
 
 #[derive(Default)]
 pub struct AppState {
-    
+    pub keybind: Option<egui::Key>,
+    pub show_menu: bool,
+    pub window_size: Vec2
 }
 
+impl AppState {
+    pub fn set_keybind(&mut self, key: egui::Key) {
+        self.keybind = Some(key);
+    }
+}
+
+
 pub fn ui(ctx: &Context, app_state: &mut AppState) {
+    if app_state.show_menu {
+        CentralPanel::default()
+        .frame(Frame {
+            fill: Color32::GRAY.gamma_multiply(0.5),
+            ..Default::default()
+        })
+        .show(ctx, |ui| {
+            Window::new("overlay_menu")
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .resizable(false)
+                .show(ctx, |ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.add(Label::new("This is a fullscreen overlay"));
+                        if ui.button("Close Overlay").clicked() {
+                            app_state.show_menu = !app_state.show_menu;
+                        }
+                    });
+                });
+        });
+    }
+
     unsafe {
         static ONCE: Once = Once::new();
 
