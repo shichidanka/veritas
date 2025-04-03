@@ -154,7 +154,7 @@ dependencies = [
 [[package]]
 name = "egui-directx11"
 version = "0.1.0"
-source = "git+https://github.com/hessiser/egui-directx.git#365dea0b9eb904c71f95031b744d41ba0e7bf166"
+source = "git+https://github.com/hessiser/egui-directx.git#7ace8de86657d6fd3edbb8a08eac25156f0d7327"
 dependencies = [
  "clipboard",
  "egui",
