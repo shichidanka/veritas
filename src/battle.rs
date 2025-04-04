@@ -72,6 +72,8 @@ impl BattleContext {
             Event::BattleBegin(e) => {
                 unsafe { TURN_BASED_GAME_MODE_REF = Some(e.turn_based_game_mode) };
 
+                log::info!("Battle has started");
+
                 let packet_body = EventPacket::BattleBegin {  };
                 packet = Packet::from_event_packet(packet_body)?;
             },
@@ -80,7 +82,7 @@ impl BattleContext {
                 Self::initialize_battle_context(&mut battle_context, e.avatars);
 
                 for avatar in &battle_context.lineup {
-                    println!("[VERITAS] ({}: {}) was loaded in lineup", avatar.id, avatar.name);
+                    log::info!("({}: {}) was loaded in lineup", avatar.id, avatar.name);
                 }
 
                 let packet_body = EventPacket::SetBattleLineup {
@@ -98,7 +100,7 @@ impl BattleContext {
                 battle_context.total_damage += e.damage as f64;
                 battle_context.real_time_damages[lineup_index] += e.damage as f64;
 
-                println!("[VERITAS] ({}: {}) dealt {} damage", e.attacker.id, e.attacker.name, e.damage);
+                log::info!("({}: {}) dealt {:.2} damage", e.attacker.id, e.attacker.name, e.damage);
 
                 let packet_body = EventPacket::OnDamage {
                     attacker: e.attacker,
@@ -109,6 +111,7 @@ impl BattleContext {
             Event::TurnBegin => {
                 let action_value = get_elapsed_av();
                 battle_context.current_turn_info.action_value = action_value;
+                log::info!("AV: {:.2}", action_value);
                 let packet_body = EventPacket::TurnBegin { action_value };
                 packet = Packet::from_event_packet(packet_body)?;
             },
@@ -124,12 +127,20 @@ impl BattleContext {
                 turn_info.avatars_damage = avatars_damage;
                 battle_context.turn_history.push(turn_info.clone());
 
+
+                for (i, avatar) in battle_context.lineup.iter().enumerate() {
+                    log::info!("Turn Summary: {} has dealt {:.2} damage", avatar, turn_info.avatars_damage[i])
+                }
+
+                log::info!("Turn Summary: Total damage of {:.2}", turn_info.total_damage);
+
                 let packet_body = EventPacket::TurnEnd {
                     avatars: battle_context.lineup.clone(),
                     avatars_damage: turn_info.avatars_damage,
                     total_damage: turn_info.total_damage,
                     action_value: turn_info.action_value
                 };
+
                 packet = Packet::from_event_packet(packet_body)?;
                 // Restart turn info
                 battle_context.current_turn_info = TurnInfo::default();
@@ -138,7 +149,7 @@ impl BattleContext {
                 battle_context.turn_count += 1;
             }
             Event::OnKill(e) => {
-                println!("[VERITAS] ({}: {}) has killed", e.attacker.id, e.attacker.name);
+                log::info!("({}: {}) has killed", e.attacker.id, e.attacker.name);
 
                 let packet_body = EventPacket::OnKill {
                     attacker: e.attacker,

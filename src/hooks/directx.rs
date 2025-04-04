@@ -25,7 +25,7 @@ static_detour! {
 }
 // This can be done in shorter calls
 // Should we tho?
-pub fn get_vtable() -> [usize; 205] {
+pub fn get_vtable() -> Box<[usize; 205]> {
     // Initializes a dummy swapchain to get the vtable
     unsafe {
         let window_class = WNDCLASSEXW {
@@ -108,7 +108,7 @@ pub fn get_vtable() -> [usize; 205] {
             Some(&mut context)
         ).unwrap();
 
-        let mut vtable = [0usize; 205];
+        let mut vtable = Box::new([0usize; 205]);
 
         let swap_chain_ptr = &swap_chain.unwrap();
         let swap_chain_vtable = Interface::vtable(swap_chain_ptr);
@@ -158,8 +158,8 @@ pub fn present(
         INIT.call_once(|| {
             let state = AppState::default();
             let mut app = EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state);
+            egui_logger::builder().init().unwrap();
 
-            app.ui_state.window_size = Vec2::from(app.get_screen_size());
             // Example
             app.ui_state.set_keybind(egui::Key::P);
 
@@ -185,9 +185,18 @@ pub fn resize_buffers(
     swap_chain_flags: u32
 ) -> HRESULT {
     unsafe {
-        let app = APP.get_mut().unwrap();
-        app.ui_state.window_size = Vec2::from(app.get_screen_size());
-        app.resize_buffers(mem::transmute(&(swap_chain_vtbl)), || {
+        if let Some(app) = APP.get_mut() {
+            app.resize_buffers(mem::transmute(&(swap_chain_vtbl)), || {
+                Resize_Buffers_Detour.call(
+                    swap_chain_vtbl,
+                    buffer_count,
+                    width,
+                    height,
+                    new_format,
+                    swap_chain_flags
+                )
+            })
+        } else {
             Resize_Buffers_Detour.call(
                 swap_chain_vtbl,
                 buffer_count,
@@ -196,7 +205,7 @@ pub fn resize_buffers(
                 new_format,
                 swap_chain_flags
             )
-        })
+        }
     }
 }
 

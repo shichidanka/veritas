@@ -73,7 +73,7 @@ fn on_damage(
                 let attack_owner = AbilityStatic_GetActualOwner(attacker);
     
                 if attack_owner.is_null() {
-                    println!("The attack owner is null");
+                    log::warn!("The attack owner is null");
                 }
                 else {
                     match (*attack_owner)._EntityType {
@@ -81,7 +81,7 @@ fn on_damage(
                             let avatar_id = UIGameEntityUtils_GetAvatarID(attack_owner);
                             let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
                             if avatar_data.is_null() {
-                                println!("The avatar_data (ID: {}) is null", avatar_id);
+                                log::warn!("The avatar_data (ID: {}) is null", avatar_id);
                             }
                             else {
                                 let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();
@@ -101,13 +101,13 @@ fn on_damage(
                             let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, attack_owner);
         
                             if avatar_entity.is_null() {
-                                println!("The avatar_entity of a servant is null");
+                                log::warn!("The avatar_entity of a servant is null");
                             }
                             else {
                                 let avatar_id = UIGameEntityUtils_GetAvatarID(avatar_entity);
                                 let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
                                 if avatar_data.is_null() {
-                                    println!("The servant's summoner's avatar_data (ID: {}) is null", avatar_id);
+                                    log::warn!("The servant's summoner's avatar_data (ID: {}) is null", avatar_id);
                                 }
                                 else {
                                     let avatar_name = (*AvatarData_get_AvatarName(avatar_data)).to_string().unwrap();

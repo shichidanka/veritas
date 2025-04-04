@@ -1,6 +1,7 @@
 use std::sync::Once;
 
 use egui::{CentralPanel, Color32, Context, Frame, Label, Vec2, Window};
+use windows::Win32::{System::Console::GetConsoleWindow, UI::WindowsAndMessaging::{ShowWindow, SW_HIDE, SW_RESTORE, SW_SHOW}};
 
 use crate::ui::widgets;
 
@@ -8,7 +9,7 @@ use crate::ui::widgets;
 pub struct AppState {
     pub keybind: Option<egui::Key>,
     pub show_menu: bool,
-    pub window_size: Vec2
+    pub show_console: bool
 }
 
 impl AppState {
@@ -22,17 +23,22 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
     if app_state.show_menu {
         CentralPanel::default()
         .frame(Frame {
-            fill: Color32::GRAY.gamma_multiply(0.5),
+            fill: Color32::GRAY.gamma_multiply(0.25),
             ..Default::default()
         })
-        .show(ctx, |ui| {
-            Window::new("overlay_menu")
+        .show(ctx, |ui: &mut egui::Ui| {
+            Window::new("Menu")
                 .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                 .resizable(false)
                 .show(ctx, |ui| {
                     ui.vertical_centered(|ui| {
-                        ui.add(Label::new("This is a fullscreen overlay"));
-                        if ui.button("Close Overlay").clicked() {
+                        ui.toggle_value(&mut app_state.show_console, "Console");
+                        if app_state.show_console {
+                            egui::Window::new("Log").show(ctx, |ui| {
+                                egui_logger::logger_ui().show(ui);
+                            });    
+                        }
+                        if ui.button("Close").clicked() {
                             app_state.show_menu = !app_state.show_menu;
                         }
                     });

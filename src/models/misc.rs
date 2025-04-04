@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::{
     Deserialize,
     Serialize,
@@ -7,6 +9,12 @@ use serde::{
 pub struct Avatar {
     pub id: u32,
     pub name: String,
+}
+
+impl fmt::Display for Avatar {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}: {})", self.id, self.name)
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
