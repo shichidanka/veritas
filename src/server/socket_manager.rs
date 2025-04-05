@@ -29,9 +29,8 @@ impl SocketManager {
 
     pub fn broadcast_packet(&mut self, packet: Packet) {
         for socket in &mut self.clients {
-            match socket.write(&packet.to_bytes()) {
-                Result::Ok(_) => {}
-                Err(_) => {}
+            if let Err(e) = socket.write(&packet.to_bytes()) {
+                log::warn!("Socket removal reason: {e}")
             };
         }
         self.garbage_collect();

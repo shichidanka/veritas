@@ -9,26 +9,40 @@
     ],
     "hooked_functions": [
         "DMFMLMJKKHB.OMPLOLLELLK",
+        "RPG.GameCore.SkillCharacterComponent",
+        "RPG.GameCore.AbilityStatic.ComboProcessAfterSkillUse",
+        "RPG.Client.BattleAssetPreload.SetBattleLineupData",
         "RPG.GameCore.TurnBasedGameMode._GameModeBegin",
         "RPG.GameCore.TurnBasedGameMode._GameModeEnd",
-        "RPG.Client.BattleAssetPreload.SetBattleLineupData",
-        "RPG.GameCore.TurnBasedGameMode._MakeLimboEntityDie",
+        "RPG.GameCore.TurnBasedGameMode.DoTurnPrepareStartWork",
         "RPG.GameCore.TurnBasedAbilityComponent.ProcessOnLevelTurnActionEndEvent",
-        "RPG.GameCore.TurnBasedGameMode.DoTurnPrepareStartWork"
+        "RPG.GameCore.TurnBasedGameMode._MakeLimboEntityDie"
     ],
     "types": [
-        "RPG.GameCore.FixPoint",
-        "RPG.GameCore.LineUpCharacter",
+        "RPG.GameCore.AvatarSkillRowData",
+        "RPG.GameCore.AttackType",
+        "RPG.GameCore.BattleEventDataComponent",
+        "RPG.GameCore.BattleEventSkillRowData",
         "RPG.GameCore.BattleLineupData",
-        "RPG.GameCore.GameEntity",
-        "RPG.Client.AvatarData",
-        "RPG.Client.ModuleManager",
-        "RPG.GameCore.EntityType",
-        "RPG.GameCore.TeamType",
-        "NOPBAAAGGLA",
-        "HBIAGLPHICO",
-        "RPG.Client.AvatarServantData",
+        "RPG.GameCore.CharacterDataComponent",
         "RPG.GameCore.EntityManager",
-        "RPG.GameCore.TurnBasedGameMode"
+        "RPG.GameCore.EntityType",
+        "RPG.GameCore.FixPoint",
+        "RPG.GameCore.GameComponentBase",
+        "RPG.GameCore.GameEntity",
+        "RPG.GameCore.LineUpCharacter",
+        "RPG.GameCore.ServantSkillRowData",
+        "RPG.GameCore.SkillCharacterComponent",
+        "RPG.GameCore.SkillData",
+        "RPG.GameCore.TeamType",
+        "RPG.GameCore.TurnBasedGameMode",
+
+        "RPG.Client.AvatarData",
+        "RPG.Client.AvatarServantData",
+        "RPG.Client.ModuleManager",
+        "RPG.Client.TextID",
+
+        "HBIAGLPHICO",
+        "NOPBAAAGGLA"
     ]
 }

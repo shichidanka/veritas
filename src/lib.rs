@@ -1,4 +1,8 @@
-#![feature(panic_update_hook)]
+macro_rules! lazy_initialize_address {
+    ($addr:expr) => {
+        LazyLock::new(|| unsafe { std::mem::transmute($addr) })
+    };
+}
 mod battle;
 mod entry;
 mod hooks;

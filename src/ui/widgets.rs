@@ -1,4 +1,4 @@
-use egui::{ahash::HashMap, Stroke, Ui};
+use egui::{Stroke, Ui};
 use egui_plot::{Legend, Plot, PlotPoints, Polygon};
 
 

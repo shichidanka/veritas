@@ -33,17 +33,18 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
                 .show(ctx, |ui| {
                     ui.vertical_centered(|ui| {
                         ui.toggle_value(&mut app_state.show_console, "Console");
-                        if app_state.show_console {
-                            egui::Window::new("Log").show(ctx, |ui| {
-                                egui_logger::logger_ui().show(ui);
-                            });    
-                        }
                         if ui.button("Close").clicked() {
                             app_state.show_menu = !app_state.show_menu;
                         }
                     });
                 });
         });
+    }
+
+    if app_state.show_console {
+        egui::Window::new("Log").show(ctx, |ui| {
+            egui_logger::logger_ui().show(ui);
+        });    
     }
 
     unsafe {

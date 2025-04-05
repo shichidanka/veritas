@@ -8,6 +8,7 @@ use std::time::Duration;
 fn entry() {
     thread::spawn(|| unsafe {
         // windows::Win32::System::Console::AllocConsole();
+        egui_logger::builder().init().unwrap();
 
         while GetModuleHandleW(windows::core::w!("GameAssembly")).is_err() ||
             GetModuleHandleW(windows::core::w!("UnityPlayer")).is_err() {

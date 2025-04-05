@@ -7,3 +7,4 @@ pub mod globals;
 pub mod helpers;
 pub mod il2cpp_types;
 pub mod types;
+pub mod offsets;

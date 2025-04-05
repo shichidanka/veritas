@@ -3,6 +3,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(static_mut_refs)]
+
 macro_rules! hook_function {
     (
         $detour:ident,

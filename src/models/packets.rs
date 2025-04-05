@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use super::misc::{Avatar, TurnInfo};
+use super::misc::{Avatar, Skill, TurnInfo};
 
 #[derive(Default, Serialize, Deserialize, Debug)]
 pub struct Packet {
@@ -51,7 +51,7 @@ macro_rules! event_packet {
     ($(
         $variant_name:ident { $ ($arg_name:ident : $arg_type:ty),* }
     )*) => {
-        #[derive(Serialize)]
+        #[derive(Serialize, Clone)]
         #[serde(untagged)]
         pub enum EventPacket {
             $(
@@ -73,13 +73,15 @@ macro_rules! event_packet {
 
 event_packet!(
     Heartbeat {}
-
+    Error { msg: String }
     // Game
     BattleBegin {}
     SetBattleLineup { avatars: Vec<Avatar> }
-    OnDamage { attacker: Avatar, damage: f32 }
-    TurnBegin { action_value: f32 }
-    TurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f32>, total_damage: f32, action_value: f32 }
+    OnDamage { attacker: Avatar, damage: f64 }
+    TurnBegin { action_value: f64 }
+    TurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f64>, total_damage: f64, action_value: f64 }
     OnKill { attacker: Avatar }
-    BattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f32, action_value: f32 }
+    OnUseSkill { avatar: Avatar, skill: Skill }
+
+    BattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, action_value: f64 }
 );

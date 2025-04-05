@@ -1,10 +1,44 @@
-
-use std::{cell::OnceCell, ffi::c_void, mem::{self}, ptr::null_mut, sync::Once};
 use anyhow::Result;
-use egui::Vec2;
 use egui_directx11::{app::EguiDx11, input_manager::InputResult};
 use retour::static_detour;
-use windows::{core::{w, Interface, HRESULT}, Win32::{Foundation::{HMODULE, HWND, LPARAM, LRESULT, WPARAM}, Graphics::{Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0}, Direct3D11::{D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext, D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION}, Dxgi::{Common::{DXGI_FORMAT, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC}, IDXGISwapChain, IDXGISwapChain_Vtbl, DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT}}, UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::{CallWindowProcW, CreateWindowExW, DefWindowProcW, DestroyWindow, PeekMessageW, RegisterClassExW, SetWindowLongPtrW, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, GWLP_WNDPROC, MSG, PM_REMOVE, WINDOW_EX_STYLE, WM_KEYDOWN, WM_KEYUP, WNDCLASSEXW, WNDPROC, WS_OVERLAPPEDWINDOW}}}};
+use std::{
+    cell::OnceCell,
+    ffi::c_void,
+    mem::{self},
+    ptr::null_mut,
+    sync::Once,
+};
+use windows::{
+    core::{w, Interface, HRESULT},
+    Win32::{
+        Foundation::{HMODULE, HWND, LPARAM, LRESULT, WPARAM},
+        Graphics::{
+            Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0},
+            Direct3D11::{
+                D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext,
+                D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION,
+            },
+            Dxgi::{
+                Common::{
+                    DXGI_FORMAT, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC,
+                    DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
+                    DXGI_RATIONAL, DXGI_SAMPLE_DESC,
+                },
+                IDXGISwapChain, IDXGISwapChain_Vtbl, DXGI_PRESENT, DXGI_SWAP_CHAIN_DESC,
+                DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD,
+                DXGI_USAGE_RENDER_TARGET_OUTPUT,
+            },
+        },
+        UI::{
+            Input::KeyboardAndMouse::VK_MENU,
+            WindowsAndMessaging::{
+                CallWindowProcW, CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW,
+                SetWindowLongPtrW, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, GWLP_WNDPROC,
+                WINDOW_EX_STYLE, WM_KEYDOWN, WNDCLASSEXW, WNDPROC, WS_OVERLAPPEDWINDOW,
+            },
+        },
+    },
+};
 
 use crate::ui::app::{self, AppState};
 
@@ -21,7 +55,7 @@ static_detour! {
         DXGI_FORMAT,
         u32
     ) -> HRESULT;
-    
+
 }
 // This can be done in shorter calls
 // Should we tho?
@@ -31,11 +65,7 @@ pub fn get_vtable() -> Box<[usize; 205]> {
         let window_class = WNDCLASSEXW {
             cbSize: mem::size_of::<WNDCLASSEXW>() as _,
             style: CS_HREDRAW | CS_VREDRAW,
-            lpfnWndProc: Some(
-                mem::transmute(
-                    DefWindowProcW as *const c_void
-                )
-            ),
+            lpfnWndProc: Some(mem::transmute(DefWindowProcW as *const c_void)),
             lpszClassName: w!("veritas"),
             ..Default::default()
         };
@@ -54,9 +84,10 @@ pub fn get_vtable() -> Box<[usize; 205]> {
             None,
             None,
             Some(window_class.hInstance),
-            None
-        ).unwrap();
-    
+            None,
+        )
+        .unwrap();
+
         let mut feature_levels = [D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0];
 
         let refresh_rate = DXGI_RATIONAL {
@@ -89,10 +120,9 @@ pub fn get_vtable() -> Box<[usize; 205]> {
             Flags: DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH.0 as u32,
         };
 
-        let mut swap_chain: Option<IDXGISwapChain>= None;
+        let mut swap_chain: Option<IDXGISwapChain> = None;
         let mut device: Option<ID3D11Device> = None;
         let mut context: Option<ID3D11DeviceContext> = None;
-
 
         D3D11CreateDeviceAndSwapChain(
             None,
@@ -105,36 +135,33 @@ pub fn get_vtable() -> Box<[usize; 205]> {
             Some(&mut swap_chain),
             Some(&mut device),
             Some(feature_levels.as_mut_ptr()),
-            Some(&mut context)
-        ).unwrap();
+            Some(&mut context),
+        )
+        .unwrap();
 
         let mut vtable = Box::new([0usize; 205]);
 
         let swap_chain_ptr = &swap_chain.unwrap();
         let swap_chain_vtable = Interface::vtable(swap_chain_ptr);
-        
+
         let device_ptr = &device.unwrap();
         let device_vtable = Interface::vtable(device_ptr);
 
         let context_ptr = &context.unwrap();
         let context_vtable = Interface::vtable(context_ptr);
 
-        std::ptr::copy_nonoverlapping(
-            mem::transmute(swap_chain_vtable),
-            vtable.as_mut_ptr(),
-            18
-        );
+        std::ptr::copy_nonoverlapping(mem::transmute(swap_chain_vtable), vtable.as_mut_ptr(), 18);
 
         std::ptr::copy_nonoverlapping(
             mem::transmute(&device_vtable),
             vtable[18..].as_mut_ptr(),
-            43
+            43,
         );
 
         std::ptr::copy_nonoverlapping(
             mem::transmute(context_vtable),
             vtable[18 + 43..].as_mut_ptr(),
-            144
+            144,
         );
 
         DestroyWindow(window).unwrap();
@@ -143,7 +170,6 @@ pub fn get_vtable() -> Box<[usize; 205]> {
         vtable
     }
 }
-
 
 static mut APP: OnceCell<EguiDx11<AppState>> = OnceCell::new();
 static mut OLD_WND_PROC: OnceCell<WNDPROC> = OnceCell::new();
@@ -157,21 +183,25 @@ pub fn present(
         static INIT: Once = Once::new();
         INIT.call_once(|| {
             let state = AppState::default();
-            let mut app = EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state);
-            egui_logger::builder().init().unwrap();
+            let mut app =
+                EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state);
 
             // Example
             app.ui_state.set_keybind(egui::Key::P);
 
-            OLD_WND_PROC.set(mem::transmute(SetWindowLongPtrW(
-                app.hwnd,
-                GWLP_WNDPROC,
-                hk_wnd_proc as usize as _,
-            ))).unwrap();
+            OLD_WND_PROC
+                .set(mem::transmute(SetWindowLongPtrW(
+                    app.hwnd,
+                    GWLP_WNDPROC,
+                    hk_wnd_proc as usize as _,
+                )))
+                .unwrap();
             let _ = APP.set(app);
         });
 
-        APP.get_mut().unwrap().present(mem::transmute(&(swap_chain_vtbl)));
+        APP.get_mut()
+            .unwrap()
+            .present(mem::transmute(&(swap_chain_vtbl)));
         Present_Detour.call(swap_chain_vtbl, sync_interval, flags)
     }
 }
@@ -182,7 +212,7 @@ pub fn resize_buffers(
     width: u32,
     height: u32,
     new_format: DXGI_FORMAT,
-    swap_chain_flags: u32
+    swap_chain_flags: u32,
 ) -> HRESULT {
     unsafe {
         if let Some(app) = APP.get_mut() {
@@ -193,7 +223,7 @@ pub fn resize_buffers(
                     width,
                     height,
                     new_format,
-                    swap_chain_flags
+                    swap_chain_flags,
                 )
             })
         } else {
@@ -203,7 +233,7 @@ pub fn resize_buffers(
                 width,
                 height,
                 new_format,
-                swap_chain_flags
+                swap_chain_flags,
             )
         }
     }
@@ -229,7 +259,7 @@ unsafe extern "stdcall" fn hk_wnd_proc(
                             physical_key,
                             pressed,
                             repeat,
-                            modifiers 
+                            modifiers,
                         } => {
                             // Add modifiers as well
                             if *key == keybind && *pressed {
@@ -241,43 +271,29 @@ unsafe extern "stdcall" fn hk_wnd_proc(
                                     hwnd,
                                     WM_KEYDOWN,
                                     WPARAM(VK_MENU.0 as _),
-                                    LPARAM(0)
+                                    LPARAM(0),
                                 );
                             }
-                        },
+                        }
                         _ => {}
                     }
                 }
-            },
+            }
             _ => {}
-        };    
+        };
     }
 
     return if app.ui_state.show_menu {
         LRESULT(1 as isize)
     } else {
         CallWindowProcW(*OLD_WND_PROC.get().unwrap(), hwnd, msg, wparam, lparam)
-    }
-
+    };
 }
 
 pub fn install_hooks() -> Result<()> {
-    // Move this to entry
-    std::panic::update_hook(move |prev, info| {
-        unsafe {
-            Present_Detour.disable().unwrap();
-            Resize_Buffers_Detour.disable().unwrap();
-            prev(info);    
-        }
-    });
-        
     let vtable = get_vtable();
     unsafe {
-        hook_function!(
-            Present_Detour,
-            mem::transmute(vtable[8]),
-            present
-        );
+        hook_function!(Present_Detour, mem::transmute(vtable[8]), present);
     }
     unsafe {
         hook_function!(

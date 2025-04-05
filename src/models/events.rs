@@ -1,6 +1,6 @@
 use crate::sr::types::rpg::gamecore::TurnBasedGameMode;
 
-use super::misc::Avatar;
+use super::misc::{Avatar, Skill};
 
 pub enum Event {
     BattleBegin(BattleBeginEvent),
@@ -9,11 +9,17 @@ pub enum Event {
     TurnBegin,
     TurnEnd,
     OnKill(OnKillEvent),
+    OnUseSkill(OnUseSkillEvent),
     BattleEnd,
 }
 
 pub struct BattleBeginEvent {
     pub turn_based_game_mode: *const TurnBasedGameMode,
+}
+
+pub struct OnUseSkillEvent {
+    pub avatar: Avatar,
+    pub skill: Skill
 }
 
 pub struct SetBattleLineupEvent {
@@ -22,7 +28,7 @@ pub struct SetBattleLineupEvent {
 
 pub struct OnDamageEvent {
     pub attacker: Avatar,
-    pub damage: f32,
+    pub damage: f64,
 }
 
 pub struct OnKillEvent {

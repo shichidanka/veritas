@@ -1,16 +1,16 @@
 use std::sync::{LazyLock, Mutex, MutexGuard};
 
-use anyhow::{ Context, Ok, Result, };
+use anyhow::{ Context, Result, };
 
-use crate::{models::{events::Event, misc::{Avatar, TurnInfo}, packets::{EventPacket, Packet}}, server, sr::{helpers::fixpoint_to_raw, types::rpg::gamecore::TurnBasedGameMode}};
+use crate::{models::{events::{BattleBeginEvent, Event, OnDamageEvent, OnKillEvent, OnUseSkillEvent, SetBattleLineupEvent}, misc::{Avatar, TurnInfo}, packets::{EventPacket, Packet}}, server, sr::{helpers::fixpoint_to_raw, types::rpg::gamecore::TurnBasedGameMode}};
 
 static mut TURN_BASED_GAME_MODE_REF: Option<*const TurnBasedGameMode> = None;
 
-fn get_elapsed_av() -> f32 {
+fn get_elapsed_av() -> f64 {
     unsafe {
         match TURN_BASED_GAME_MODE_REF {
             Some(x) => {
-                fixpoint_to_raw(&(*x).ElapsedActionDelay__BackingField) * 10f32
+                fixpoint_to_raw(&(*x).ElapsedActionDelay__BackingField) * 10f64
             },
             None => panic!("There was no reference to RPG.GameCore.TurnBasedGameMode"),
         }
@@ -55,7 +55,7 @@ impl BattleContext {
 
     fn initialize_battle_context(battle_context: &mut MutexGuard<'static, Self>, lineup: Vec<Avatar>) {
         battle_context.current_turn_info = TurnInfo::default();
-        battle_context.current_turn_info.avatars_damage = vec![0f32; lineup.len()];
+        battle_context.current_turn_info.avatars_damage = vec![0f64; lineup.len()];
         battle_context.current_turn_info.avatars_damage_chunks = vec![Vec::new(); lineup.len()];
         battle_context.turn_history = Vec::new();
         battle_context.turn_count = 0;
@@ -64,118 +64,151 @@ impl BattleContext {
         battle_context.real_time_damages = vec![0f64; lineup.len()];
     }
 
-    // Consumes the event
-    pub fn handle_event(event: Event) -> Result<()> {
-        let mut battle_context = Self::get_instance();
-        let packet: Packet;
-        match event {
-            Event::BattleBegin(e) => {
-                unsafe { TURN_BASED_GAME_MODE_REF = Some(e.turn_based_game_mode) };
+    fn handle_battle_begin_event(e: BattleBeginEvent, mut _battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        unsafe { TURN_BASED_GAME_MODE_REF = Some(e.turn_based_game_mode) };
 
-                log::info!("Battle has started");
+        log::info!("Battle has started");
 
-                let packet_body = EventPacket::BattleBegin {  };
-                packet = Packet::from_event_packet(packet_body)?;
-            },
-            Event::SetBattleLineup(e) => {
-                battle_context.state = BattleState::Started;
-                Self::initialize_battle_context(&mut battle_context, e.avatars);
+        let packet_body = EventPacket::BattleBegin {  };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
 
-                for avatar in &battle_context.lineup {
-                    log::info!("({}: {}) was loaded in lineup", avatar.id, avatar.name);
-                }
+    fn handle_set_batle_lineup_event(e: SetBattleLineupEvent, mut battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        battle_context.state = BattleState::Started;
+        Self::initialize_battle_context(&mut battle_context, e.avatars);
 
-                let packet_body = EventPacket::SetBattleLineup {
-                    avatars: battle_context.lineup.clone()
-                };
-                packet = Packet::from_event_packet(packet_body)?;
-            }
-            Event::OnDamage(e) => {
-                let lineup_index = Self::find_lineup_index_by_avatar_id(&battle_context, e.attacker.id)
-                    .with_context(|| format!("Could not find avatar ({}: {}) in lineup", e.attacker.id, e.attacker.name))?;
-                let turn = &mut battle_context.current_turn_info;
-                // Record character damage chunk
-                turn.avatars_damage_chunks[lineup_index].push(e.damage);
-
-                battle_context.total_damage += e.damage as f64;
-                battle_context.real_time_damages[lineup_index] += e.damage as f64;
-
-                log::info!("({}: {}) dealt {:.2} damage", e.attacker.id, e.attacker.name, e.damage);
-
-                let packet_body = EventPacket::OnDamage {
-                    attacker: e.attacker,
-                    damage: e.damage,
-                };
-                packet = Packet::from_event_packet(packet_body)?;
-            }
-            Event::TurnBegin => {
-                let action_value = get_elapsed_av();
-                battle_context.current_turn_info.action_value = action_value;
-                log::info!("AV: {:.2}", action_value);
-                let packet_body = EventPacket::TurnBegin { action_value };
-                packet = Packet::from_event_packet(packet_body)?;
-            },
-            Event::TurnEnd => {
-                let mut turn_info = battle_context.current_turn_info.clone();
-
-                // Calculate net damages
-                let avatars_damage = turn_info.avatars_damage_chunks
-                    .iter()
-                    .map(|avatar_dmg_string| avatar_dmg_string.iter().sum())
-                    .collect::<Vec<f32>>();
-                turn_info.total_damage = avatars_damage.iter().sum();
-                turn_info.avatars_damage = avatars_damage;
-                battle_context.turn_history.push(turn_info.clone());
-
-
-                for (i, avatar) in battle_context.lineup.iter().enumerate() {
-                    log::info!("Turn Summary: {} has dealt {:.2} damage", avatar, turn_info.avatars_damage[i])
-                }
-
-                log::info!("Turn Summary: Total damage of {:.2}", turn_info.total_damage);
-
-                let packet_body = EventPacket::TurnEnd {
-                    avatars: battle_context.lineup.clone(),
-                    avatars_damage: turn_info.avatars_damage,
-                    total_damage: turn_info.total_damage,
-                    action_value: turn_info.action_value
-                };
-
-                packet = Packet::from_event_packet(packet_body)?;
-                // Restart turn info
-                battle_context.current_turn_info = TurnInfo::default();
-                battle_context.current_turn_info.avatars_damage = vec![0f32; battle_context.lineup.len()];
-                battle_context.current_turn_info.avatars_damage_chunks = vec![Vec::new(); battle_context.lineup.len()];
-                battle_context.turn_count += 1;
-            }
-            Event::OnKill(e) => {
-                log::info!("({}: {}) has killed", e.attacker.id, e.attacker.name);
-
-                let packet_body = EventPacket::OnKill {
-                    attacker: e.attacker,
-                };
-
-                packet = Packet::from_event_packet(packet_body)?;
-            }
-            Event::BattleEnd => {
-                // let total_damage = battle_context.turn_history
-                //     .iter()
-                //     .map(|x| x.total_damage)
-                //     .sum();
-                battle_context.state = BattleState::Ended;
-                let packet_body = EventPacket::BattleEnd {
-                    avatars: battle_context.lineup.clone(),
-                    turn_history: battle_context.turn_history.clone(),
-                    turn_count: battle_context.turn_count,
-                    total_damage: battle_context.total_damage as f32,
-                    action_value: get_elapsed_av()
-                };
-                unsafe { TURN_BASED_GAME_MODE_REF = None };
-                packet = Packet::from_event_packet(packet_body)?;
-            }
+        for avatar in &battle_context.lineup {
+            log::info!("{} was loaded in lineup", avatar);
         }
-        drop(battle_context);
-        server::broadcast(packet);
-        Ok(())
+
+        let packet_body = EventPacket::SetBattleLineup {
+            avatars: battle_context.lineup.clone()
+        };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    fn handle_on_damage_event(e: OnDamageEvent, mut battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        let lineup_index = Self::find_lineup_index_by_avatar_id(&battle_context, e.attacker.id)
+            .with_context(|| format!("Could not find avatar {} in lineup", e.attacker))?;
+        let turn = &mut battle_context.current_turn_info;
+        // Record character damage chunk
+        turn.avatars_damage_chunks[lineup_index].push(e.damage);
+
+        battle_context.total_damage += e.damage as f64;
+        battle_context.real_time_damages[lineup_index] += e.damage as f64;
+
+        let packet_body = EventPacket::OnDamage {
+            attacker: e.attacker,
+            damage: e.damage,
+        };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    fn handle_turn_begin_event(mut battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        let action_value = get_elapsed_av();
+        battle_context.current_turn_info.action_value = action_value;
+        log::info!("AV: {:.2}", action_value);
+        let packet_body = EventPacket::TurnBegin { action_value };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    fn handle_turn_end_event(mut battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        let mut turn_info = battle_context.current_turn_info.clone();
+
+        // Calculate net damages
+        let avatars_damage = turn_info.avatars_damage_chunks
+            .iter()
+            .map(|avatar_dmg_string| if avatar_dmg_string.is_empty() { 0.0 } else { avatar_dmg_string.iter().sum() })
+            .collect::<Vec<f64>>();
+        turn_info.total_damage = if avatars_damage.is_empty() { 0.0 } else { avatars_damage.iter().sum() };
+        turn_info.avatars_damage = avatars_damage;
+        battle_context.turn_history.push(turn_info.clone());
+
+
+        for (i, avatar) in battle_context.lineup.iter().enumerate() {
+            log::info!("Turn Summary: {} has dealt {:.2} damage", avatar, turn_info.avatars_damage[i])
+        }
+
+        log::info!("Turn Summary: Total damage of {:.2}", turn_info.total_damage);
+
+        let packet_body = EventPacket::TurnEnd {
+            avatars: battle_context.lineup.clone(),
+            avatars_damage: turn_info.avatars_damage,
+            total_damage: turn_info.total_damage,
+            action_value: turn_info.action_value
+        };
+
+        // Restart turn info
+        battle_context.current_turn_info = TurnInfo::default();
+        battle_context.current_turn_info.avatars_damage = vec![0f64; battle_context.lineup.len()];
+        battle_context.current_turn_info.avatars_damage_chunks = vec![Vec::new(); battle_context.lineup.len()];
+        battle_context.turn_count += 1;
+        
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    fn handle_on_kill_event(e: OnKillEvent, mut _battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        log::info!("{} has killed", e.attacker);
+
+        let packet_body = EventPacket::OnKill {
+            attacker: e.attacker,
+        };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    fn handle_battle_end_event(mut battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        battle_context.state = BattleState::Ended;
+        let packet_body = EventPacket::BattleEnd {
+            avatars: battle_context.lineup.clone(),
+            turn_history: battle_context.turn_history.clone(),
+            turn_count: battle_context.turn_count,
+            total_damage: battle_context.total_damage as f64,
+            action_value: get_elapsed_av()
+        };
+        unsafe { TURN_BASED_GAME_MODE_REF = None };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    fn handle_on_use_skill_event(e: OnUseSkillEvent, mut _battle_context: MutexGuard<'static, BattleContext>) -> Result<Packet> {
+        log::info!("{} has used {}", e.avatar, e.skill);
+
+        let packet_body = EventPacket::OnUseSkill {
+            avatar: e.avatar,
+            skill: e.skill
+        };
+        Packet::from_event_packet(packet_body.clone()).with_context(|| format!("Failed to create {}", packet_body.name()) )
+    }
+
+    // Should wrap in option
+    pub fn handle_event(event: Result<Event>) {
+        let battle_context = Self::get_instance();
+        let packet = match event {
+            Result::Ok(event) => {
+                match event {
+                    Event::BattleBegin(e) => Self::handle_battle_begin_event(e, battle_context),
+                    Event::SetBattleLineup(e) => Self::handle_set_batle_lineup_event(e, battle_context),
+                    Event::OnDamage(e) => Self::handle_on_damage_event(e, battle_context),
+                    Event::TurnBegin => Self::handle_turn_begin_event(battle_context),
+                    Event::TurnEnd => Self::handle_turn_end_event(battle_context),
+                    // Not used atm
+                    Event::OnKill(e) => Self::handle_on_kill_event(e, battle_context),
+                    Event::BattleEnd => Self::handle_battle_end_event(battle_context),
+                    Event::OnUseSkill(e) => Self::handle_on_use_skill_event(e, battle_context)
+                }
+            },
+            Err(e) => {
+                log::error!("Event Error: {}", e);
+                Packet::from_event_packet(EventPacket::Error {
+                    msg: e.to_string(),
+                })
+            },
+        };
+
+        match packet {
+            Result::Ok(packet) => {
+                server::broadcast(packet);
+            },
+            Err(e) => log::error!("Packet Error: {}", e),
+        };
     }
 }

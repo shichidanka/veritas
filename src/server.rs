@@ -27,12 +27,6 @@ pub fn start_server() -> Result<()> {
     Ok(())
 }
 
-// fn commands {
-//     let handle = GetConsoleWindow();
-//     ShowWindow(hwnd, SW_HIDE)
-//     ShowWindow(hwnd, SW_SHOW)
-// }
-
 fn handle_client(stream: TcpStream) {
     let mut socket_manager = SocketManager::get_instance();
     socket_manager.push(stream);
