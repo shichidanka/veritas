@@ -1,38 +1,33 @@
 use crate::{
     battle::BattleContext,
     models::{
-        events::{
-            BattleBeginEvent, Event, OnDamageEvent, OnUseSkillEvent, SetBattleLineupEvent
-        },
+        events::{BattleBeginEvent, Event, OnDamageEvent, OnUseSkillEvent, SetBattleLineupEvent},
         misc::Avatar,
     },
     sr::{
-        functions::{
-            rpg::
-                gamecore::{
-                    AbilityStatic_GetActualOwner, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager,
-                    SkillCharacterComponent_GetSkillData,
-                }
-            ,
-            GameEntity_Map,
-        },
-        helpers::{
-            self, fixpoint_to_raw, get_avatar_from_entity, get_avatar_from_servant_entity, get_avatar_skill_from_skilldata, get_battle_event_skill_from_skilldata, get_servant_skill_from_skilldata
-        },
-        offsets::SKILLCHARACTERCOMPONENT_TYPE_PTR,
-        types::{
-            rpg::
-                gamecore::{
-                    BattleEventDataComponent, BattleLineupData, EntityType, GameEntity, SkillCharacterComponent, SkillData, TeamType, TurnBasedGameMode,
-                }
-            ,
-            HBIAGLPHICO, NOPBAAAGGLA,
-        },
+        functions::
+            rpg::gamecore::{
+                AbilityStatic_GetActualOwner, CharacterConfig_GetSkillIndexByTriggerKey,
+                EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager,
+                SkillCharacterComponent_GetSkillData,
+                TurnBasedAbilityComponent_GetAbilityMappedSkill,
+            }
+        , helpers::{
+            self, fixpoint_to_raw, get_avatar_from_entity, get_avatar_from_servant_entity,
+            get_avatar_skill_from_skilldata, get_battle_event_skill_from_skilldata,
+            get_servant_skill_from_skilldata,
+        }, il2cpp_types::Il2CppString, types::{
+            rpg::gamecore::{
+                BattleEventDataComponent, BattleLineupData, EntityType, GameEntity,
+                SkillCharacterComponent, SkillData, TeamType, TurnBasedGameMode,
+            },
+            HBIAGLPHICO, MMNDIEBMDNL, NOPBAAAGGLA,
+        }
     },
     GAMEASSEMBLY_HANDLE,
 };
-use anyhow::{anyhow, Error};
 use anyhow::Result;
+use anyhow::{anyhow, Error};
 use function_name::named;
 use retour::static_detour;
 use std::{
@@ -53,6 +48,7 @@ static_detour! {
         bool,
         *const c_void
     ) -> bool;
+    static MMNDIEBMDNL_FECMPGBOBOI_Detour: fn(*const MMNDIEBMDNL);
     static RPG_GameCore_SkillCharacterComponent_UseSkill_Detour: fn(*const SkillCharacterComponent, i32, *const c_void, bool, i32);
     static RPG_GameCore_AbilityStatic_ComboProcessAfterSkillUse_Detour: fn(*const GameEntity, *const SkillData);
     static RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour: fn(*const c_void, *const BattleLineupData);
@@ -170,7 +166,9 @@ fn use_skill(
                         EntityType::Avatar => {
                             let e = match get_avatar_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(skill_owner) {
-                                    Ok(avatar) => Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill })),
+                                    Ok(avatar) => {
+                                        Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
+                                    }
                                     Err(e) => {
                                         log::error!("Avatar Event Error: {}", e);
                                         Err(anyhow!(
@@ -194,7 +192,9 @@ fn use_skill(
                         EntityType::Servant => {
                             let e = match get_servant_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_servant_entity(skill_owner) {
-                                    Ok(avatar) => Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill })),
+                                    Ok(avatar) => {
+                                        Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
+                                    }
                                     Err(e) => {
                                         log::error!("Servant Event Error: {}", e);
                                         Err(anyhow!(
@@ -216,27 +216,25 @@ fn use_skill(
                             event = Some(e);
                         }
                         EntityType::BattleEvent => {
-                            let battle_event_data_comp = (*instance)._CharacterDataRef
-                                as *const BattleEventDataComponent;
+                            let battle_event_data_comp =
+                                (*instance)._CharacterDataRef as *const BattleEventDataComponent;
                             let avatar_entity: *const GameEntity =
                                 (*battle_event_data_comp).SourceCaster__BackingField;
 
                             let e = match get_battle_event_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(avatar_entity) {
-                                        Ok(avatar) => {
-                                            Ok(Event::OnUseSkill(
-                                                OnUseSkillEvent { avatar, skill },
-                                            ))
-                                        }
-                                        Err(e) => {
-                                            log::error!("Summon Event Error: {}", e);
-                                            Err(anyhow!(
-                                                "{} Summon Event Error: {}",
-                                                function_name!(),
-                                                e
-                                            ))
-                                        }
+                                    Ok(avatar) => {
+                                        Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
+                                    Err(e) => {
+                                        log::error!("Summon Event Error: {}", e);
+                                        Err(anyhow!(
+                                            "{} Summon Event Error: {}",
+                                            function_name!(),
+                                            e
+                                        ))
+                                    }
+                                },
                                 Err(e) => {
                                     log::error!("Summon Skill Event Error: {}", e);
                                     Err(anyhow!(
@@ -261,7 +259,7 @@ fn use_skill(
             BattleContext::handle_event(event);
         }
     }
-        
+
     RPG_GameCore_SkillCharacterComponent_UseSkill_Detour.call(
         instance,
         skill_index,
@@ -271,62 +269,87 @@ fn use_skill(
     );
 }
 
-// Called when a passive skill is used (e.g. FuA). Combos with a skill
+// Insert skills are skills that aren't manually triggered
 #[named]
-fn combo_process_after_skill_use(entity: *const GameEntity, skill_data: *const SkillData) {
+fn try_insert_ability(instance: *const MMNDIEBMDNL) {
     log::debug!(function_name!());
-    unsafe {
-        let skill_owner = AbilityStatic_GetActualOwner(entity);
 
-        let skill_character_component = GameEntity_Map(
-            skill_owner,
-            *SKILLCHARACTERCOMPONENT_TYPE_PTR as *const c_void,
-        ) as *const SkillCharacterComponent;
-        // SkillCharacterComponent_GetCurrentSkillData(skill_character_component);
+    MMNDIEBMDNL_FECMPGBOBOI_Detour.call(instance);
+    unsafe {
+        // Needs to be manually updated
+        let turn_based_ability_component = (*instance).FIMNOPAAFEP;
+        let skill_character_component = (*instance).HECCDOHIAFD;
+        //
+        let entity = (*skill_character_component)._parent_class._OwnerRef;
+        let skill_owner = AbilityStatic_GetActualOwner(entity);
 
         let mut event: Option<Result<Event>> = None;
         match (*skill_owner)._Team {
             TeamType::TeamLight => {
+                let ability_name = *((instance as usize + 0x30) as *const *const Il2CppString);
+
+                let skill_name = TurnBasedAbilityComponent_GetAbilityMappedSkill(
+                    turn_based_ability_component,
+                    ability_name,
+                );
+
+                let character_data_ref = (*turn_based_ability_component)._CharacterDataRef;
+                let character_config = (*character_data_ref).JsonConfig__BackingField;
+                let skill_index =
+                    CharacterConfig_GetSkillIndexByTriggerKey(character_config, skill_name);
+                let skill_data = SkillCharacterComponent_GetSkillData(
+                    skill_character_component,
+                    skill_index,
+                    -1,
+                );
+
                 if !skill_data.is_null() {
                     match (*skill_owner)._EntityType {
                         EntityType::Avatar => {
-                            let e: std::result::Result<Event, anyhow::Error> = match get_avatar_skill_from_skilldata(skill_data) {
-                                Ok(skill) => {
-                                    match get_avatar_from_entity(skill_owner) {
-                                        Ok(avatar) => Ok(Event::OnUseSkill(
-                                            OnUseSkillEvent {
-                                                avatar,
-                                                skill
-                                            },
-                                        )),
-                                        Err(e) => {
-                                            log::error!("Avatar Event Error: {}", e);
-                                            Err(anyhow!(
-                                                "{} Avatar Event Error: {}",
-                                                function_name!(),
-                                                e
-                                            ))
+                            let e: std::result::Result<Event, anyhow::Error> =
+                                match get_avatar_skill_from_skilldata(skill_data) {
+                                    Ok(skill) => {
+                                        match get_avatar_from_entity(skill_owner) {
+                                            Ok(avatar) => {
+                                                Ok(Event::OnUseSkill(OnUseSkillEvent {
+                                                    avatar,
+                                                    skill,
+                                                }))
+                                            }
+                                            Err(e) => {
+                                                log::error!("Avatar Event Error: {}", e);
+                                                Err(anyhow!(
+                                                    "{} Avatar Event Error: {}",
+                                                    function_name!(),
+                                                    e
+                                                ))
+                                            }
                                         }
                                     }
-                                }
-                                Err(e) => {
-                                    log::error!("Avatar Combo Skill Event Error: {}", e);
-                                    Err(anyhow!(
-                                        "{} Avatar Combo Skill Event Error: {}",
-                                        function_name!(),
-                                        e
-                                    ))
-                                }
-                            };
+                                    Err(e) => {
+                                        log::error!(
+                                            "Avatar Combo Skill Event Error: {}",
+                                            e
+                                        );
+                                        Err(anyhow!(
+                                            "{} Avatar Combo Skill Event Error: {}",
+                                            function_name!(),
+                                            e
+                                        ))
+                                    }
+                                };
                             event = Some(e);
                         }
                         EntityType::Servant => {
                             let e = match get_servant_skill_from_skilldata(skill_data) {
                                 Ok(skill) => {
                                     match get_avatar_from_servant_entity(skill_owner) {
-                                        Ok(avatar) => Ok(Event::OnUseSkill(
-                                            OnUseSkillEvent { avatar, skill },
-                                        )),
+                                        Ok(avatar) => {
+                                            Ok(Event::OnUseSkill(OnUseSkillEvent {
+                                                avatar,
+                                                skill,
+                                            }))
+                                        }
                                         Err(e) => {
                                             log::error!("Servant Event Error: {}", e);
                                             Err(anyhow!(
@@ -355,22 +378,22 @@ fn combo_process_after_skill_use(entity: *const GameEntity, skill_data: *const S
                             let avatar_entity: *const GameEntity =
                                 (*battle_event_data_comp).SourceCaster__BackingField;
 
-                            let e = match get_battle_event_skill_from_skilldata(skill_data) {
-                                Ok(skill) => {
-                                    match get_avatar_from_entity(avatar_entity) {
-                                        Ok(avatar) => Ok(Event::OnUseSkill(
-                                            OnUseSkillEvent { avatar, skill },
-                                        )),
-                                        Err(e) => {
-                                            log::error!("Summon Event Error: {}", e);
-                                            Err(anyhow!(
-                                                "{} Summon Event Error: {}",
-                                                function_name!(),
-                                                e
-                                            ))
-                                        }
+                            let e = match get_battle_event_skill_from_skilldata(skill_data)
+                            {
+                                Ok(skill) => match get_avatar_from_entity(avatar_entity) {
+                                    Ok(avatar) => Ok(Event::OnUseSkill(OnUseSkillEvent {
+                                        avatar,
+                                        skill,
+                                    })),
+                                    Err(e) => {
+                                        log::error!("Summon Event Error: {}", e);
+                                        Err(anyhow!(
+                                            "{} Summon Event Error: {}",
+                                            function_name!(),
+                                            e
+                                        ))
                                     }
-                                }
+                                },
                                 Err(e) => {
                                     log::error!("Summon Skill Event Error: {}", e);
                                     Err(anyhow!(
@@ -395,7 +418,6 @@ fn combo_process_after_skill_use(entity: *const GameEntity, skill_data: *const S
             BattleContext::handle_event(event);
         }
     }
-    RPG_GameCore_AbilityStatic_ComboProcessAfterSkillUse_Detour.call(entity, skill_data);
 }
 
 #[named]
@@ -413,14 +435,16 @@ fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const Ba
                 Err(e) => {
                     log::error!("BattleLineup Error: {}", e);
                     errors.push(e);
-                },
+                }
             }
         }
         let event = if !errors.is_empty() {
-            let errors = errors.iter().map(|e| format!("{}\n", e.to_string())).collect::<String>();
+            let errors = errors
+                .iter()
+                .map(|e| format!("{}\n", e.to_string()))
+                .collect::<String>();
             Err(anyhow!(errors))
-        }
-        else {
+        } else {
             Ok(Event::SetBattleLineup(SetBattleLineupEvent { avatars }))
         };
         BattleContext::handle_event(event);
@@ -509,11 +533,10 @@ pub fn install_hooks() -> Result<()> {
             use_skill
         );
         hook_function!(
-            RPG_GameCore_AbilityStatic_ComboProcessAfterSkillUse_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x91aa980),
-            combo_process_after_skill_use
+            MMNDIEBMDNL_FECMPGBOBOI_Detour,
+            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x7781fd0),
+            try_insert_ability
         );
-
         hook_function!(
             RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x762dba0),
@@ -524,7 +547,6 @@ pub fn install_hooks() -> Result<()> {
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943eab0),
             game_mode_begin
         );
-
         hook_function!(
             RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943ebd0),
@@ -540,6 +562,7 @@ pub fn install_hooks() -> Result<()> {
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x9400f10),
             turn_end
         );
+
         // This is not good
         // hook_function!(
         //     RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour,
@@ -549,3 +572,4 @@ pub fn install_hooks() -> Result<()> {
         Ok(())
     }
 }
+

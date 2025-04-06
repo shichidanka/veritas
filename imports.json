@@ -3,9 +3,20 @@
         "RPG.Client.UIGameEntityUtils.GetAvatarID",
         "RPG.Client.AvatarModule.GetAvatar",
         "RPG.Client.AvatarData.get_AvatarName",
+        "RPG.Client.TextmapStatic.GetText",
+
         "RPG.GameCore.AbilityStatic.GetActualOwner",
         "RPG.GameCore.EntityManager._GetEntitySummoner",
-        "RPG.GameCore.GamePlayStatic.GetEntityManager"
+        "RPG.GameCore.GamePlayStatic.GetEntityManager",
+        "RPG.GameCore.AvatarSkillRowData.get_SkillName",
+        "RPG.GameCore.AvatarSkillRowData.get_AttackType",
+        "RPG.GameCore.BattleEventSkillRowData.get_SkillName",
+        "RPG.GameCore.BattleEventSkillRowData.get_AttackType",
+        "RPG.GameCore.ServantSkillRowData.get_SkillName",
+        "RPG.GameCore.ServantSkillRowData.get_AttackType",
+        "RPG.GameCore.SkillCharacterComponent.GetSkillData",
+        "RPG.GameCore.TurnBasedAbilityComponent.GetAbilityMappedSkill",
+        "RPG.GameCore.CharacterConfig.GetSkillIndexByTriggerKey"
     ],
     "hooked_functions": [
         "DMFMLMJKKHB.OMPLOLLELLK",
@@ -19,11 +30,13 @@
         "RPG.GameCore.TurnBasedGameMode._MakeLimboEntityDie"
     ],
     "types": [
-        "RPG.GameCore.AvatarSkillRowData",
+        "RPG.GameCore.AbilityConfig",
         "RPG.GameCore.AttackType",
+        "RPG.GameCore.AvatarSkillRowData",
         "RPG.GameCore.BattleEventDataComponent",
         "RPG.GameCore.BattleEventSkillRowData",
         "RPG.GameCore.BattleLineupData",
+        "RPG.GameCore.CharacterConfig",
         "RPG.GameCore.CharacterDataComponent",
         "RPG.GameCore.EntityManager",
         "RPG.GameCore.EntityType",
@@ -35,6 +48,7 @@
         "RPG.GameCore.SkillCharacterComponent",
         "RPG.GameCore.SkillData",
         "RPG.GameCore.TeamType",
+        "RPG.GameCore.TurnBasedAbilityComponent",
         "RPG.GameCore.TurnBasedGameMode",
 
         "RPG.Client.AvatarData",
@@ -42,7 +56,9 @@
         "RPG.Client.ModuleManager",
         "RPG.Client.TextID",
 
+        "GIKIAHKEKLG",
         "HBIAGLPHICO",
+        "MMNDIEBMDNL",
         "NOPBAAAGGLA"
     ]
 }

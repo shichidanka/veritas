@@ -7,7 +7,7 @@ use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_Ge
 
 #[named]
 fn get_avatar_data_from_id(avatar_id: u32) -> *const AvatarData {
-    println!(function_name!());
+    log::debug!(function_name!());
     let s_module_manager = GlobalVars::get_global_var(GlobalVars::s_ModuleManager) as *const ModuleManager;
     let avatar_module = unsafe { (*s_module_manager).AvatarModule };
     AvatarModule_GetAvatar(avatar_module, avatar_id)
@@ -15,7 +15,7 @@ fn get_avatar_data_from_id(avatar_id: u32) -> *const AvatarData {
 
 #[named]
 pub unsafe fn get_avatar_from_id(avatar_id: u32) -> Result<Avatar> {
-    println!(function_name!());
+    log::debug!(function_name!());
     let avatar_data = get_avatar_data_from_id(avatar_id);
     if !avatar_data.is_null() {
         let avatar_name = AvatarData_get_AvatarName(avatar_data);
@@ -41,7 +41,7 @@ pub unsafe fn get_avatar_from_id(avatar_id: u32) -> Result<Avatar> {
 
 #[named]
 pub unsafe fn get_avatar_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
-    println!(function_name!());
+    log::debug!(function_name!());
     get_skill_from_skilldata(
         skill_data,
         mem::transmute(*AvatarSkillRowData_get_SkillName),
@@ -51,7 +51,7 @@ pub unsafe fn get_avatar_skill_from_skilldata(skill_data: *const SkillData) -> R
 
 #[named]
 pub unsafe fn get_servant_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
-    println!(function_name!());
+    log::debug!(function_name!());
     get_skill_from_skilldata(
         skill_data,
         mem::transmute(*ServantSkillRowData_get_SkillName),
@@ -61,7 +61,7 @@ pub unsafe fn get_servant_skill_from_skilldata(skill_data: *const SkillData) -> 
 
 #[named]
 pub unsafe fn get_battle_event_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
-    println!(function_name!());
+    log::debug!(function_name!());
     get_skill_from_skilldata(
         skill_data,
         mem::transmute(*BattleEventSkillRowData_get_SkillName),
@@ -76,7 +76,7 @@ pub unsafe fn get_skill_from_skilldata(
     get_skill_type_callback: fn(*const c_void) -> AttackType,
 ) -> Result<Skill> {
     unsafe {
-        println!(function_name!());
+        log::debug!(function_name!());
         if !skill_data.is_null() {
             let row_data = (*skill_data).RowData as *const c_void;
             if !row_data.is_null() {
@@ -112,7 +112,7 @@ pub unsafe fn get_skill_from_skilldata(
 
 #[named]
 pub unsafe fn get_avatar_from_entity(entity: *const GameEntity) -> Result<Avatar> {
-    println!(function_name!());
+    log::debug!(function_name!());
     if !entity.is_null() {
         let id = UIGameEntityUtils_GetAvatarID(entity);
         let avatar_data = get_avatar_data_from_id(id);
@@ -142,7 +142,7 @@ pub unsafe fn get_avatar_from_entity(entity: *const GameEntity) -> Result<Avatar
 
 #[named]
 pub unsafe fn get_avatar_from_servant_entity(entity: *const GameEntity) -> Result<Avatar> {
-    println!(function_name!());
+    log::debug!(function_name!());
     if !entity.is_null() {
         let entity_manager = GamePlayStatic_GetEntityManager();
         let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, entity);
@@ -156,7 +156,7 @@ pub unsafe fn get_avatar_from_servant_entity(entity: *const GameEntity) -> Resul
 
 #[named]
 pub fn fixpoint_to_raw(fixpoint: &FixPoint) -> f64 {
-    println!(function_name!());
+    log::debug!(function_name!());
     static float_conversion_const: LazyLock<f64> = LazyLock::new(|| (1f64/(2f64.powf(32f64))));
     let hi = ((fixpoint.m_rawValue as u64 & 0xFFFFFFFF00000000) >> 32) as u32;
     let lo = (fixpoint.m_rawValue as u64 & 0x00000000FFFFFFFF) as u32;
@@ -165,7 +165,7 @@ pub fn fixpoint_to_raw(fixpoint: &FixPoint) -> f64 {
 
 #[named]
 pub fn get_skill_type_str(attack_type: AttackType) -> &'static str {
-    println!(function_name!());
+    log::debug!(function_name!());
     match attack_type {
         AttackType::Unknown => "Talent",
         AttackType::Normal => "Basic",

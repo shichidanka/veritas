@@ -1,9 +1,3 @@
-use std::{ffi::c_void, sync::LazyLock};
-
-use crate::GAMEASSEMBLY_HANDLE;
-
-use super::{offsets::GAMEENTITY_MAP_FN_PTR_VA, types::rpg::gamecore::GameEntity};
-
 pub mod rpg {
     pub mod client {
         use std::{ffi::c_void, sync::LazyLock};
@@ -22,7 +16,8 @@ pub mod rpg {
     pub mod gamecore {
         use std::{ffi::c_void, sync::LazyLock};
         
-        use crate::sr::types::rpg::gamecore::{AttackType, BattleEventSkillRowData, ServantSkillRowData, SkillCharacterComponent, SkillData};
+        use crate::sr::il2cpp_types::Il2CppString;
+        use crate::sr::types::rpg::gamecore::{AttackType, BattleEventSkillRowData, ServantSkillRowData, SkillCharacterComponent, SkillData, TurnBasedAbilityComponent};
         use crate::{sr::types::rpg::{client::TextID, gamecore::{AvatarSkillRowData, EntityManager, GameEntity}}, GAMEASSEMBLY_HANDLE};
 
         pub static AbilityStatic_GetActualOwner: LazyLock<fn(*const GameEntity) -> *const GameEntity> =
@@ -37,10 +32,11 @@ pub mod rpg {
         pub static BattleEventSkillRowData_get_AttackType: LazyLock<fn(*const BattleEventSkillRowData) -> AttackType> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x8275cf0);
         pub static ServantSkillRowData_get_SkillName: LazyLock<fn(*mut TextID, *const ServantSkillRowData) -> *const TextID> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x80f0de0);
         pub static ServantSkillRowData_get_AttackType: LazyLock<fn(*const ServantSkillRowData) -> AttackType> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x80f0d30);
-        pub static SkillCharacterComponent_GetCurrentSkillData: LazyLock<fn(*const c_void) -> *const SkillData> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x8f23e60);
+        // pub static SkillCharacterComponent_GetCurrentSkillData: LazyLock<fn(*const c_void) -> *const SkillData> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x8f23e60);
         pub static SkillCharacterComponent_GetSkillData: LazyLock<fn(*const SkillCharacterComponent, i32, i32) -> *const SkillData> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x8f20df0);
+        pub static TurnBasedAbilityComponent_GetAbilityMappedSkill: LazyLock<fn(*const TurnBasedAbilityComponent, *const Il2CppString) -> *const Il2CppString> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x93f7390);
+        pub static CharacterConfig_GetSkillIndexByTriggerKey: LazyLock<fn(*const c_void, *const Il2CppString) -> i32> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + 0x54ea720);
     }
 }
 
-pub static GameEntity_Map: LazyLock<fn(*const GameEntity, *const c_void) -> *const c_void> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + GAMEENTITY_MAP_FN_PTR_VA);
-
+// pub static GameEntity_Map: LazyLock<fn(*const GameEntity, *const c_void) -> *const c_void> = lazy_initialize_address!(*GAMEASSEMBLY_HANDLE + GAMEENTITY_MAP_FN_PTR_VA);

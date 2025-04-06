@@ -1,6 +1,9 @@
 use std::ffi::c_void;
 
-use rpg::gamecore::{AttackType, FixPoint, GameEntity};
+use rpg::gamecore::{
+    AbilityConfig, AttackType, FixPoint, GameEntity, SkillCharacterComponent,
+    TurnBasedAbilityComponent,
+};
 
 use super::il2cpp_types::{Il2CppArray, Il2CppObject};
 
@@ -148,6 +151,28 @@ pub struct NOPBAAAGGLA {
 }
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
+pub struct GIKIAHKEKLG {
+    pub il2cpp_object: Il2CppObject,
+    pub LPPJKCBJBBE: *const c_void,                        // 0x10
+    pub SkillPointEntity__BackingField: *const GameEntity, // 0x18
+    pub COLOGBLMPEL: *const Il2CppArray<Il2CppObject>,     // 0x20
+    pub KBONKADHBLN: *const c_void,                        // 0x28
+    pub NBEJHIECMHE: *const AbilityConfig,                 // 0x30
+    pub NLHONIIPPCC: *const c_void,                        // 0x38
+    pub LCLLAHIEFAI: *const c_void,                        // 0x40
+    pub DynamicValues__BackingField: *const c_void,        // 0x48
+    pub AFAIFKANGCK: *const c_void,                        // 0x50
+    pub BLDLKAABMKH: *const c_void,                        // 0x58
+    pub PHFNGEBBNHO: *const GameEntity,                    // 0x60
+    pub UseOption__BackingField: [u8; 0x4],                // 0x68
+    pub IsInTrigger__BackingField: bool,                   // 0x6c
+    pub TargetListIndex__BackingField: i32,                // 0x70
+    pub BPCMODEHJEK: [u8; 0x4],                            // 0x74
+    pub AbilityGlobalUseId__BackingField: u32,             // 0x78
+    pub Tag__BackingField: *const c_void,                  // 0x7c
+}
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
 pub struct HBIAGLPHICO {
     pub il2cpp_object: Il2CppObject,
     pub JKCOIOLCMEP: *const GameEntity, // 0x10
@@ -155,14 +180,138 @@ pub struct HBIAGLPHICO {
     pub KNDJNKNHFFG: *const GameEntity, // 0x20
     pub KJDOLBOBKJF: *const c_void,     // 0x28
 }
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct MMNDIEBMDNL {
+    pub il2cpp_object: Il2CppObject,
+    pub FIMNOPAAFEP: *const TurnBasedAbilityComponent, // 0x10
+    pub GNBEIGMFGIP: *const c_void,                    // 0x18
+    pub HECCDOHIAFD: *const SkillCharacterComponent,   // 0x20
+    pub HMCDHMFHABF: [u8; 0x58],                       // 0x28
+    pub MKMMNLODHDD: *const GIKIAHKEKLG,               // 0x80
+    pub NMJEMHAMIHD: i32,                              // 0x88
+    pub DADCNHAIOMI: [u8; 0x4],                        // 0x8c
+    pub OOIFIGDBNBO: *const c_void,                    // 0x90
+}
 pub mod rpg {
     pub mod gamecore {
         use std::ffi::c_void;
 
         use crate::sr::{
-            il2cpp_types::{Il2CppArray, Il2CppObject},
+            il2cpp_types::{Il2CppArray, Il2CppObject, Il2CppString},
             types::HBIAGLPHICO,
         };
+
+        #[repr(C)]
+        #[derive(Debug, Clone, Copy)]
+        pub struct TurnBasedAbilityComponent {
+            pub il2cpp_object: Il2CppObject,
+            pub _parent_class: [u8; 0x8], // 0x10
+            pub _BuffLockStepSources: *const Il2CppArray<Il2CppObject>, // 0x18
+            pub RegardAsSkillTypeMap: *const Il2CppArray<Il2CppObject>, // 0x20
+            pub _SyncPropertySource: *const TurnBasedAbilityComponent, // 0x28
+            pub _JsonConfigRef: *const c_void, // 0x30
+            pub _DebuffLockStepSources: *const Il2CppArray<Il2CppObject>, // 0x38
+            pub DamageSplitData: *const Il2CppArray<Il2CppObject>, // 0x40
+            pub AbilityComponentRef__BackingField: *const c_void, // 0x48
+            pub DisableActionStateByTask__BackingField: *const c_void, // 0x50
+            pub _ModifierRecordList: *const c_void, // 0x58
+            pub _SyncPropertyMask: *const c_void, // 0x60
+            pub _LockShieldCounter: *const c_void, // 0x68
+            pub CharmDamageAttackProperty: *const c_void, // 0x70
+            pub LastStanceBreakEntity__BackingField: *const GameEntity, // 0x78
+            pub LockActionDelayChange: *const c_void, // 0x80
+            pub _DamageAttacker: *const GameEntity, // 0x88
+            pub RegardAsAttackTypeMap: *const Il2CppArray<Il2CppObject>, // 0x90
+            pub _LockHPList: *const Il2CppArray<Il2CppObject>, // 0x98
+            pub CustomDataRef__BackingField: *const c_void, // 0xa0
+            pub _KillerEntity: *const GameEntity, // 0xa8
+            pub _DepartedParams: *const Il2CppArray<Il2CppObject>, // 0xb0
+            pub ModifierOverrideMapping: *const c_void, // 0xb8
+            pub CharmDamageTarget: *const GameEntity, // 0xc0
+            pub ResistModifierBehaviorFlags__BackingField: *const Il2CppArray<Il2CppObject>, // 0xc8
+            pub KillerSkill__BackingField: *const c_void, // 0xd0
+            pub CharmSkillName: *const c_void, // 0xd8
+            pub _DotModifierEventProcessors: *const Il2CppArray<Il2CppObject>, // 0xe0
+            pub _ModifierEventSourceMuteCounter: *const c_void, // 0xe8
+            pub _EnableNegativeHPSourceList: *const Il2CppArray<Il2CppObject>, // 0xf0
+            pub DamageDefender: *const GameEntity, // 0xf8
+            pub _ModifierDelayParamList: *const c_void, // 0x100
+            pub _StancePreshowConfigs: *const Il2CppArray<Il2CppObject>, // 0x108
+            pub _DamageStoreList: *const Il2CppArray<Il2CppObject>, // 0x110
+            pub _RedStanceInfoList: *const Il2CppArray<Il2CppObject>, // 0x118
+            pub _AbilityToSkillMapping: *const c_void, // 0x120
+            pub _DmgChunk: *const c_void, // 0x128
+            pub _AbilityPropertiesInitSnapshot: *const Il2CppArray<FixPoint>, // 0x130
+            pub _ExtraStanceInfo: *const c_void, // 0x138
+            pub _ExtraMaxLayerConfig: *const Il2CppArray<Il2CppObject>, // 0x140
+            pub _StatusChanceResistanceDict: *const c_void, // 0x148
+            pub Weakness: *const c_void,  // 0x150
+            pub ProjectileTargetAttachPoint: *const c_void, // 0x158
+            pub _ModifierEventProcessors: *const Il2CppArray<Il2CppObject>, // 0x160
+            pub _DamagedAllEntityIDListInAttack: *const c_void, // 0x168
+            pub _AbilityProperties: *const Il2CppArray<Il2CppObject>, // 0x170
+            pub _DamagedEntityListInAttack: *const Il2CppArray<GameEntity>, // 0x178
+            pub _OnHitEffectMultipleOverride: *const Il2CppArray<Il2CppObject>, // 0x180
+            pub OverflowStanceDamageAttacker__BackingField: *const GameEntity, // 0x188
+            pub _DefaultStanceInfo: *const c_void, // 0x190
+            pub _RedStanceInfo: *const c_void, // 0x198
+            pub OnAbilityPropertyChanged: *const Il2CppArray<Il2CppObject>, // 0x1a0
+            pub _TransformRef: *const c_void, // 0x1a8
+            pub _CharacterDataRef: *const CharacterDataComponent, // 0x1b0
+            pub _DelayModifyActionDelayQueue: *const c_void, // 0x1b8
+            pub AdditionalAbilityParamList: *const Il2CppArray<Il2CppObject>, // 0x1c0
+            pub _OnHitEffectOverride: *const Il2CppArray<Il2CppObject>, // 0x1c8
+            pub _StatusProbabilityDict: *const c_void, // 0x1d0
+            pub _SelfExtrAbilityList: *const Il2CppArray<Il2CppString>, // 0x1d8
+            pub _BreakExtendEventUnsettled: bool, // 0x1e0
+            pub IsSharedDamageDataTarget: bool, // 0x1e1
+            pub LockSelfActionDelay: bool, // 0x1e2
+            pub LastStanceDamageType__BackingField: [u8; 0x4], // 0x1e4
+            pub TotalHitNum: FixPoint,    // 0x1e8
+            pub CharmDisableSPAdd: bool,  // 0x1f0
+            pub IsTriggeringStanceCountDown__BackingField: bool, // 0x1f1
+            pub ForceKillFlag__BackingField: bool, // 0x1f2
+            pub UseSpecialSP__BackingField: bool, // 0x1f3
+            pub InsertAbilityCount: i32,  // 0x1f4
+            pub ActionDelayDistance__BackingField: FixPoint, // 0x1f8
+            pub DeathSource__BackingField: [u8; 0x4], // 0x200
+            pub _ModifierUIOperationIncr: i32, // 0x204
+            pub _DebuffLockStep: i32,     // 0x208
+            pub _ResetStanceVersion: u32, // 0x20c
+            pub _CurrentAttackPhase: [u8; 0x4], // 0x210
+            pub TriggerBreakExtendLogic: bool, // 0x214
+            pub _IsBehaviorFlagVisualDirty: bool, // 0x215
+            pub PropertyChangeFlag__BackingField: bool, // 0x216
+            pub IsInAttack: bool,         // 0x217
+            pub BattleTag__BackingField: [u8; 0x4], // 0x218
+            pub _BuffLockStep: i32,       // 0x21c
+            pub ActionDelayChanged__BackingField: [u8; 0x2], // 0x220
+            pub MuteAllTriggerDeath__BackingField: bool, // 0x222
+            pub OverflowStanceDamage__BackingField: FixPoint, // 0x228
+            pub TotalDamageCurrentAttack: FixPoint, // 0x230
+            pub CharmDamageCount: i32,    // 0x238
+            pub _ModifierDelayAddCount: i32, // 0x23c
+            pub StanceType: [u8; 0x4],    // 0x240
+            pub MuteTriggerDeath__BackingField: bool, // 0x244
+            pub IsTriggeredBlockDamage: bool, // 0x245
+            pub IsSnapshot__BackingField: bool, // 0x246
+            pub CharmDisableBPAdd: bool,  // 0x247
+            pub _DeathVersion: u32,       // 0x248
+            pub ForbidVisualFlagValue__BackingField: i32, // 0x24c
+            pub VisualFlagValue__BackingField: i32, // 0x250
+            pub HasRevived: bool,         // 0x254
+            pub bIsInCharmAction: bool,   // 0x255
+            pub _IsProcessingModifierDelayParam: bool, // 0x256
+            pub BlockModifySp__BackingField: bool, // 0x257
+            pub _HighestPriorityOnHitEffect: i32, // 0x258
+            pub StanceState__BackingField: [u8; 0x4], // 0x25c
+            pub SpeedVisualFlagValue__BackingField: i32, // 0x260
+            pub ProjectileHitCount: i32,  // 0x264
+            pub InheritSPRatio: FixPoint, // 0x268
+            pub LastBreakStanceDamageType__BackingField: [u8; 0x4], // 0x270
+            pub CurrentAttackType__BackingField: AttackType, // 0x274
+        }
 
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
@@ -349,6 +498,19 @@ pub mod rpg {
         #[derive(Debug, Clone, Copy)]
         pub struct FixPoint {
             pub m_rawValue: i64, // 0x0
+        }
+        #[repr(C)]
+        #[derive(Debug, Clone, Copy)]
+        pub struct AbilityConfig {
+            pub il2cpp_object: Il2CppObject,
+            pub Name: *const Il2CppString,                  // 0x10
+            pub TargetInfo: *const c_void,                  // 0x18
+            pub OnAdd: *const Il2CppArray<Il2CppObject>,    // 0x20
+            pub OnRemove: *const Il2CppArray<Il2CppObject>, // 0x28
+            pub OnStart: *const Il2CppArray<Il2CppObject>,  // 0x30
+            pub DynamicValues: *const c_void,               // 0x38
+            pub TaskListTemplate: *const Il2CppArray<Il2CppObject>, // 0x40
+            pub _TaskListTemplatesMap: *const c_void,       // 0x48
         }
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
@@ -600,36 +762,36 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct CharacterDataComponent {
-            pub _parent_class: [u8; 0x8], // 0x10
-            pub _DummpyEntityList: *const Il2CppArray<Il2CppObject>, // 0x18
-            pub _RowData: *const c_void,  // 0x20
-            pub _DynamicScaleAdaptEffectPathRule: *const c_void, // 0x28
-            pub JsonConfig__BackingField: *const c_void, // 0x30
-            pub HideDisplayInfoSkillNames: *const c_void, // 0x38
-            pub _CharacterUICustomValueDict: *const c_void, // 0x40
-            pub _DynamicScaleAdaptTypes: *const Il2CppArray<Il2CppObject>, // 0x48
+            pub _parent_class: [u8; 0x16],                                    // 0x10
+            pub _DummpyEntityList: *const Il2CppArray<Il2CppObject>,         // 0x18
+            pub _RowData: *const c_void,                                     // 0x20
+            pub _DynamicScaleAdaptEffectPathRule: *const c_void,             // 0x28
+            pub JsonConfig__BackingField: *const c_void,                     // 0x30
+            pub HideDisplayInfoSkillNames: *const c_void,                    // 0x38
+            pub _CharacterUICustomValueDict: *const c_void,                  // 0x40
+            pub _DynamicScaleAdaptTypes: *const Il2CppArray<Il2CppObject>,   // 0x48
             pub _DynamicScaleAdaptConfigs: *const Il2CppArray<Il2CppObject>, // 0x50
-            pub Summoner: *const GameEntity, // 0x58
-            pub SpawnTurnCount: u32,      // 0x60
-            pub CreateReason: [u8; 0x4],  // 0x64
-            pub DisableRootYawMapping__BackingField: bool, // 0x68
-            pub _SaveModelWhenDeadOverride: [u8; 0x2], // 0x69
-            pub DisableHeadLookAtActionEntityOverride: [u8; 0x2], // 0x6b
-            pub IsVisibleInViewMode__BackingField: bool, // 0x6d
-            pub TriggerLimbo: bool,       // 0x6e
-            pub IsBodyPart: bool,         // 0x6f
-            pub CharacterID__BackingField: u32, // 0x70
-            pub LastActTurnCount__BackingField: u32, // 0x74
-            pub LocalOffsetAsMoveTarget__BackingField: [u8; 0xc], // 0x78
-            pub EnhancedState: [u8; 0x4], // 0x84
-            pub GridFightTag__BackingField: i32, // 0x88
-            pub LineupIndex: i32,         // 0x8c
+            pub Summoner: *const GameEntity,                                 // 0x58
+            pub SpawnTurnCount: u32,                                         // 0x60
+            pub CreateReason: [u8; 0x4],                                     // 0x64
+            pub DisableRootYawMapping__BackingField: bool,                   // 0x68
+            pub _SaveModelWhenDeadOverride: [u8; 0x2],                       // 0x69
+            pub DisableHeadLookAtActionEntityOverride: [u8; 0x2],            // 0x6b
+            pub IsVisibleInViewMode__BackingField: bool,                     // 0x6d
+            pub TriggerLimbo: bool,                                          // 0x6e
+            pub IsBodyPart: bool,                                            // 0x6f
+            pub CharacterID__BackingField: u32,                              // 0x70
+            pub LastActTurnCount__BackingField: u32,                         // 0x74
+            pub LocalOffsetAsMoveTarget__BackingField: [u8; 0xc],            // 0x78
+            pub EnhancedState: [u8; 0x4],                                    // 0x84
+            pub GridFightTag__BackingField: i32,                             // 0x88
+            pub LineupIndex: i32,                                            // 0x8c
         }
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct SkillCharacterComponent {
-            pub _parent_class: GameComponentBase,      // 0x10
-            pub _JsonConfigRef: *const c_void, // 0x18
+            pub _parent_class: GameComponentBase, // 0x10
+            pub _JsonConfigRef: *const c_void,    // 0x18
             pub _SkillTargetRedirectEntries: *const Il2CppArray<Il2CppObject>, // 0x20
             pub _CharacterDataRef: *const CharacterDataComponent, // 0x28
             pub _SkillDataList: *const Il2CppArray<SkillData>, // 0x30
@@ -637,38 +799,38 @@ pub mod rpg {
             pub _SkillSlots: *const Il2CppArray<Il2CppObject>, // 0x40
             pub CurrentSkillTargetList__BackingField: *const Il2CppArray<GameEntity>, // 0x48
             pub OnSkillSetup: *const Il2CppArray<Il2CppObject>, // 0x50
-            pub _recordAbilityInfo: [u8; 0x30], // 0x58
+            pub _recordAbilityInfo: [u8; 0x30],   // 0x58
             pub SkillPointEntity__BackingField: *const GameEntity, // 0x88
             pub TaskContext__BackingField: *const c_void, // 0x90
-            pub _TBAbilityRef: *const c_void,  // 0x98
+            pub _TBAbilityRef: *const c_void,     // 0x98
             pub AutoUseUltraParams: *const c_void, // 0xa0
             pub SkillActualAttacker__BackingField: *const GameEntity, // 0xa8
             pub CurrentAimAtSubTargetList: *const Il2CppArray<GameEntity>, // 0xb0
-            pub _SkillTypeDisableCountArr: i32, // 0xb8
+            pub _SkillTypeDisableCountArr: i32,   // 0xb8
             pub CurrentAimAtTargetList: *const Il2CppArray<GameEntity>, // 0xc0
             pub _SkillTypeDisableSlots: *const c_void, // 0xc8
             pub CurrentSkillTargetDamageHP: *const c_void, // 0xd0
             pub CurrentSkillSubTargetList__BackingField: *const Il2CppArray<GameEntity>, // 0xd8
             pub CurrentAimAtMainTargetList: *const Il2CppArray<GameEntity>, // 0xe0
             pub CurrentSkillHasTriggerEffect: bool, // 0xe8
-            pub IsNoBpCost__BackingField: bool, // 0xe9
-            pub _CurrentSkillIndex: i32,       // 0xec
+            pub IsNoBpCost__BackingField: bool,   // 0xe9
+            pub _CurrentSkillIndex: i32,          // 0xec
             pub _SelfSkillPerformState: [u8; 0x4], // 0xf0
-            pub _RecordSkillExtraUseParam: i32, // 0xf4
-            pub _isPassive: bool,              // 0xf8
-            pub CharmAction: bool,             // 0xf9
-            pub _hasRecordSkill: bool,         // 0xfa
-            pub CurrentSkillBreakStance: bool, // 0xfb
-            pub CurrentSkillKilledCount: i32,  // 0xfc
-            pub _TargetPerformTimeCounter: f32, // 0x100
-            pub _hasOpInSkill: bool,           // 0x104
-            pub CurrentSkillKillAllOrBoss: bool, // 0x105
+            pub _RecordSkillExtraUseParam: i32,   // 0xf4
+            pub _isPassive: bool,                 // 0xf8
+            pub CharmAction: bool,                // 0xf9
+            pub _hasRecordSkill: bool,            // 0xfa
+            pub CurrentSkillBreakStance: bool,    // 0xfb
+            pub CurrentSkillKilledCount: i32,     // 0xfc
+            pub _TargetPerformTimeCounter: f32,   // 0x100
+            pub _hasOpInSkill: bool,              // 0x104
+            pub CurrentSkillKillAllOrBoss: bool,  // 0x105
             pub _AutoStandbyOnCurSkillFinish: bool, // 0x106
-            pub SelfWaitActiveSkillIndex: i32, // 0x108
-            pub _actionSkillIndex: i32,        // 0x10c
-            pub _RedirectTargetIDIncr: i32,    // 0x110
-            pub _CurrentSkillExtraUseParam: i32, // 0x114
-            pub _OpIndexInSkill: i32,          // 0x118
+            pub SelfWaitActiveSkillIndex: i32,    // 0x108
+            pub _actionSkillIndex: i32,           // 0x10c
+            pub _RedirectTargetIDIncr: i32,       // 0x110
+            pub _CurrentSkillExtraUseParam: i32,  // 0x114
+            pub _OpIndexInSkill: i32,             // 0x118
         }
     }
     pub mod client {
