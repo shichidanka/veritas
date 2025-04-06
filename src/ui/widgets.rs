@@ -1,4 +1,4 @@
-use egui::{Stroke, Ui};
+use egui::{ahash::HashMap, Stroke, Ui};
 use egui_plot::{Legend, Plot, PlotPoints, Polygon, BarChart, Bar};
 
 use crate::{battle::BattleContext, models::misc::Avatar};
