@@ -1,6 +1,6 @@
 macro_rules! lazy_initialize_address {
     ($addr:expr) => {
-        LazyLock::new(|| unsafe { std::mem::transmute($addr) })
+        LazyLock::new(|| unsafe { std::mem::transmute($addr + *$crate::GAMEASSEMBLY_HANDLE) })
     };
 }
 mod battle;

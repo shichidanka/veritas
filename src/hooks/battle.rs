@@ -1,28 +1,30 @@
 use crate::{
     battle::BattleContext,
     models::{
-        events::{BattleBeginEvent, Event, OnDamageEvent, OnUseSkillEvent, SetBattleLineupEvent},
+        events::{
+            BattleEndEvent, Event, OnDamageEvent, OnUseSkillEvent, SetBattleLineupEvent,
+            TurnBeginEvent,
+        },
         misc::Avatar,
     },
     sr::{
-        functions::
-            rpg::gamecore::{
-                AbilityStatic_GetActualOwner, CharacterConfig_GetSkillIndexByTriggerKey,
-                EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager,
-                SkillCharacterComponent_GetSkillData,
-                TurnBasedAbilityComponent_GetAbilityMappedSkill,
-            }
-        , helpers::{
+        functions::rpg::gamecore::{
+            AbilityStatic_GetActualOwner, CharacterConfig_GetSkillIndexByTriggerKey,
+            SkillCharacterComponent_GetSkillData, TurnBasedAbilityComponent_GetAbilityMappedSkill,
+        },
+        helpers::{
             self, fixpoint_to_raw, get_avatar_from_entity, get_avatar_from_servant_entity,
             get_avatar_skill_from_skilldata, get_battle_event_skill_from_skilldata,
             get_servant_skill_from_skilldata,
-        }, il2cpp_types::Il2CppString, types::{
+        },
+        il2cpp_types::Il2CppString,
+        types::{
             rpg::gamecore::{
                 BattleEventDataComponent, BattleLineupData, EntityType, GameEntity,
                 SkillCharacterComponent, SkillData, TeamType, TurnBasedGameMode,
             },
             HBIAGLPHICO, MMNDIEBMDNL, NOPBAAAGGLA,
-        }
+        },
     },
     GAMEASSEMBLY_HANDLE,
 };
@@ -57,6 +59,17 @@ static_detour! {
     static RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour: fn(*const TurnBasedGameMode);
     static RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour: fn(*const c_void, i32) -> *const c_void;
     static RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour: fn(*const c_void, *const HBIAGLPHICO) -> bool;
+}
+
+static mut TURN_BASED_GAME_MODE_REF: Option<*const TurnBasedGameMode> = None;
+
+fn get_elapsed_av() -> f64 {
+    unsafe {
+        match TURN_BASED_GAME_MODE_REF {
+            Some(x) => fixpoint_to_raw(&(*x).ElapsedActionDelay__BackingField) * 10f64,
+            None => panic!("There was no reference to RPG.GameCore.TurnBasedGameMode"),
+        }
+    }
 }
 
 // Called on any instance of damage
@@ -96,12 +109,8 @@ fn on_damage(
                         event = Some(e);
                     }
                     EntityType::Servant => {
-                        // can actually just save ref of battle and access this member thru battleinstance worldinstance
-                        let entity_manager = GamePlayStatic_GetEntityManager();
-                        let avatar_entity =
-                            EntityManager__GetEntitySummoner(entity_manager, attack_owner);
 
-                        let e = match helpers::get_avatar_from_entity(avatar_entity) {
+                        let e = match helpers::get_avatar_from_servant_entity(attack_owner) {
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
@@ -139,7 +148,7 @@ fn on_damage(
     );
 }
 
-// Called when a manual skill is used. Does not account for passive skills (e.g. FuA)
+// Called when a manual skill is used. Does not account for insert skills (out of turn automatic skills)
 #[named]
 fn use_skill(
     instance: *const SkillCharacterComponent,
@@ -269,7 +278,7 @@ fn use_skill(
     );
 }
 
-// Insert skills are skills that aren't manually triggered
+// Insert skills are out of turn automatic skills
 #[named]
 fn try_insert_ability(instance: *const MMNDIEBMDNL) {
     log::debug!(function_name!());
@@ -308,29 +317,21 @@ fn try_insert_ability(instance: *const MMNDIEBMDNL) {
                         EntityType::Avatar => {
                             let e: std::result::Result<Event, anyhow::Error> =
                                 match get_avatar_skill_from_skilldata(skill_data) {
-                                    Ok(skill) => {
-                                        match get_avatar_from_entity(skill_owner) {
-                                            Ok(avatar) => {
-                                                Ok(Event::OnUseSkill(OnUseSkillEvent {
-                                                    avatar,
-                                                    skill,
-                                                }))
-                                            }
-                                            Err(e) => {
-                                                log::error!("Avatar Event Error: {}", e);
-                                                Err(anyhow!(
-                                                    "{} Avatar Event Error: {}",
-                                                    function_name!(),
-                                                    e
-                                                ))
-                                            }
+                                    Ok(skill) => match get_avatar_from_entity(skill_owner) {
+                                        Ok(avatar) => {
+                                            Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                         }
-                                    }
+                                        Err(e) => {
+                                            log::error!("Avatar Event Error: {}", e);
+                                            Err(anyhow!(
+                                                "{} Avatar Event Error: {}",
+                                                function_name!(),
+                                                e
+                                            ))
+                                        }
+                                    },
                                     Err(e) => {
-                                        log::error!(
-                                            "Avatar Combo Skill Event Error: {}",
-                                            e
-                                        );
+                                        log::error!("Avatar Combo Skill Event Error: {}", e);
                                         Err(anyhow!(
                                             "{} Avatar Combo Skill Event Error: {}",
                                             function_name!(),
@@ -342,24 +343,19 @@ fn try_insert_ability(instance: *const MMNDIEBMDNL) {
                         }
                         EntityType::Servant => {
                             let e = match get_servant_skill_from_skilldata(skill_data) {
-                                Ok(skill) => {
-                                    match get_avatar_from_servant_entity(skill_owner) {
-                                        Ok(avatar) => {
-                                            Ok(Event::OnUseSkill(OnUseSkillEvent {
-                                                avatar,
-                                                skill,
-                                            }))
-                                        }
-                                        Err(e) => {
-                                            log::error!("Servant Event Error: {}", e);
-                                            Err(anyhow!(
-                                                "{} Servant Event Error: {}",
-                                                function_name!(),
-                                                e
-                                            ))
-                                        }
+                                Ok(skill) => match get_avatar_from_servant_entity(skill_owner) {
+                                    Ok(avatar) => {
+                                        Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
-                                }
+                                    Err(e) => {
+                                        log::error!("Servant Event Error: {}", e);
+                                        Err(anyhow!(
+                                            "{} Servant Event Error: {}",
+                                            function_name!(),
+                                            e
+                                        ))
+                                    }
+                                },
                                 Err(e) => {
                                     log::error!("Servant Skill Event Error: {}", e);
                                     Err(anyhow!(
@@ -378,13 +374,11 @@ fn try_insert_ability(instance: *const MMNDIEBMDNL) {
                             let avatar_entity: *const GameEntity =
                                 (*battle_event_data_comp).SourceCaster__BackingField;
 
-                            let e = match get_battle_event_skill_from_skilldata(skill_data)
-                            {
+                            let e = match get_battle_event_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(avatar_entity) {
-                                    Ok(avatar) => Ok(Event::OnUseSkill(OnUseSkillEvent {
-                                        avatar,
-                                        skill,
-                                    })),
+                                    Ok(avatar) => {
+                                        Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
+                                    }
                                     Err(e) => {
                                         log::error!("Summon Event Error: {}", e);
                                         Err(anyhow!(
@@ -455,25 +449,33 @@ fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const Ba
 #[named]
 fn game_mode_begin(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
-    RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour.call(instance);
-    BattleContext::handle_event(Ok(Event::BattleBegin(BattleBeginEvent {
-        turn_based_game_mode: instance,
-    })));
+    unsafe {
+        RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour.call(instance);
+        TURN_BASED_GAME_MODE_REF = Some(instance);
+        BattleContext::handle_event(Ok(Event::BattleBegin));
+    }
 }
 
 #[named]
 fn game_mode_end(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
-    RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour.call(instance);
-    BattleContext::handle_event(Ok(Event::BattleEnd));
+    unsafe {
+        RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour.call(instance);
+        BattleContext::handle_event(Ok(Event::BattleEnd(BattleEndEvent {
+            action_value: get_elapsed_av(),
+        })));
+        TURN_BASED_GAME_MODE_REF = None;
+    }
 }
 
 #[named]
 fn turn_begin(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
-    // Want to get the update AV first
+    // Update AV first
     RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour.call(instance);
-    BattleContext::handle_event(Ok(Event::TurnBegin));
+    BattleContext::handle_event(Ok(Event::TurnBegin(TurnBeginEvent {
+        action_value: get_elapsed_av(),
+    })));
 }
 
 #[named]
@@ -572,4 +574,3 @@ pub fn install_hooks() -> Result<()> {
         Ok(())
     }
 }
-

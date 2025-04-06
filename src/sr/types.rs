@@ -1,11 +1,7 @@
 use std::ffi::c_void;
-
-use rpg::gamecore::{
-    AbilityConfig, AttackType, FixPoint, GameEntity, SkillCharacterComponent,
-    TurnBasedAbilityComponent,
-};
-
-use super::il2cpp_types::{Il2CppArray, Il2CppObject};
+use crate::sr::il2cpp_types::*;
+use crate::sr::gamecore::*;
+use crate::sr::client::*;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -196,11 +192,7 @@ pub struct MMNDIEBMDNL {
 pub mod rpg {
     pub mod gamecore {
         use std::ffi::c_void;
-
-        use crate::sr::{
-            il2cpp_types::{Il2CppArray, Il2CppObject, Il2CppString},
-            types::HBIAGLPHICO,
-        };
+        use crate::sr::types::*;
 
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
@@ -762,7 +754,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct CharacterDataComponent {
-            pub _parent_class: [u8; 0x16],                                    // 0x10
+            pub _parent_class: [u8; 0x16],                                   // 0x10
             pub _DummpyEntityList: *const Il2CppArray<Il2CppObject>,         // 0x18
             pub _RowData: *const c_void,                                     // 0x20
             pub _DynamicScaleAdaptEffectPathRule: *const c_void,             // 0x28
@@ -835,9 +827,8 @@ pub mod rpg {
     }
     pub mod client {
         use std::ffi::c_void;
-
-        use crate::sr::il2cpp_types::{Il2CppArray, Il2CppObject};
-
+        use crate::sr::types::*;
+        
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct ModuleManager {

@@ -256,10 +256,10 @@ unsafe extern "stdcall" fn hk_wnd_proc(
                     match e {
                         egui::Event::Key {
                             key,
-                            physical_key,
+                            physical_key: _,
                             pressed,
-                            repeat,
-                            modifiers,
+                            repeat: _,
+                            modifiers: _,
                         } => {
                             // Add modifiers as well
                             if *key == keybind && *pressed {

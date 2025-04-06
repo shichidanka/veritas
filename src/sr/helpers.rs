@@ -1,9 +1,25 @@
 use std::{ffi::c_void, mem, sync::LazyLock};
 
-use crate::models::misc::{Avatar, Skill};
+use crate::{models::misc::{Avatar, Skill}, sr::{il2cpp_types::{Il2CppArray, Il2CppObject}, statics::GLOBAL_VARS_PTR_OFFSET}};
 use anyhow::{anyhow, Ok, Result};
 use function_name::named;
-use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar, TextmapStatic_GetText, UIGameEntityUtils_GetAvatarID}, gamecore::{AvatarSkillRowData_get_AttackType, AvatarSkillRowData_get_SkillName, BattleEventSkillRowData_get_AttackType, BattleEventSkillRowData_get_SkillName, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager, ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName}}, globals::GlobalVars, offsets::TEXTID_TYPE_PTR, types::rpg::{client::{AvatarData, ModuleManager, TextID}, gamecore::{AttackType, FixPoint, GameEntity, SkillData}}};
+use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar, TextmapStatic_GetText, UIGameEntityUtils_GetAvatarID}, gamecore::{AvatarSkillRowData_get_AttackType, AvatarSkillRowData_get_SkillName, BattleEventSkillRowData_get_AttackType, BattleEventSkillRowData_get_SkillName, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager, ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName}}, statics::{S_MODULEMANAGER_FIELD_OFFSET, TEXTID_TYPE_PTR_OFFSET}, types::rpg::{client::{AvatarData, ModuleManager, TextID}, gamecore::{AttackType, FixPoint, GameEntity, SkillData}}};
+
+
+pub enum GlobalVars {
+    s_ModuleManager = S_MODULEMANAGER_FIELD_OFFSET,
+}
+
+impl GlobalVars {
+    #[named]
+    pub fn get_global_var(global_var: Self) -> *const c_void {
+        log::debug!(function_name!());
+        unsafe {
+            let global_vars_ptr = *(*GLOBAL_VARS_PTR_OFFSET as *const *const c_void);
+            *(global_vars_ptr.byte_offset(global_var as _) as *const *const c_void)
+        }
+    }
+}
 
 #[named]
 fn get_avatar_data_from_id(avatar_id: u32) -> *const AvatarData {
@@ -82,7 +98,8 @@ pub unsafe fn get_skill_from_skilldata(
             if !row_data.is_null() {
                 let mut text_id: TextID = mem::zeroed::<TextID>();
                 get_skill_name_callback(&mut text_id, row_data);
-                let skill_name = TextmapStatic_GetText(&text_id, *TEXTID_TYPE_PTR as *const c_void as _);
+                let textid_type_ptr = *(*TEXTID_TYPE_PTR_OFFSET as *const *const Il2CppArray<Il2CppObject>);
+                let skill_name = TextmapStatic_GetText(&text_id, textid_type_ptr);
     
                 let skill_type = get_skill_type_callback(row_data);
     
@@ -144,6 +161,7 @@ pub unsafe fn get_avatar_from_entity(entity: *const GameEntity) -> Result<Avatar
 pub unsafe fn get_avatar_from_servant_entity(entity: *const GameEntity) -> Result<Avatar> {
     log::debug!(function_name!());
     if !entity.is_null() {
+        // can actually just save ref of battle and access this member thru battleinstance worldinstance
         let entity_manager = GamePlayStatic_GetEntityManager();
         let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, entity);
         get_avatar_from_entity(avatar_entity)
