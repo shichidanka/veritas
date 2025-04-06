@@ -4,7 +4,7 @@
 #![allow(non_camel_case_types)]
 #![allow(static_mut_refs)]
 
-macro_rules! hook_function {
+macro_rules! subscribe_function {
     (
         $detour:ident,
         $target:expr,

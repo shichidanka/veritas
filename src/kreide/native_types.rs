@@ -2,20 +2,20 @@ use std::{slice, string::FromUtf16Error};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct Il2CppObject {
-    pub klass: *const std::ffi::c_void,   // *const Il2CppClass
+pub struct NativeObject {
+    pub klass: *const std::ffi::c_void,
     pub monitor: *const std::ffi::c_void, // *const MonitorData
 }
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct Il2CppString {
-    pub obj: Il2CppObject,
+pub struct NativeString {
+    pub obj: NativeObject,
     pub m_stringLength: u32,
     pub m_firstChar: u16,
 }
 
-impl Il2CppString {
+impl NativeString {
     pub fn to_string(&self) -> Result<String, FromUtf16Error> {
         unsafe {
             let ptr = &self.m_firstChar;
@@ -27,15 +27,15 @@ impl Il2CppString {
 
 #[repr(C, align(8))]
 #[derive(Debug, Clone, Copy)]
-pub struct Il2CppArray<T> {
-    pub obj: Il2CppObject,
-    pub bounds: *const std::ffi::c_void, // *const Il2CppArrayBounds
+pub struct NativeArray<T> {
+    pub obj: NativeObject,
+    pub bounds: *const std::ffi::c_void,
     pub max_length: u32,
     // This is the first item of some pointer
     vector: *const T,
 }
 
-impl<T> Il2CppArray<T> {
+impl<T> NativeArray<T> {
     pub fn to_slice(&self) -> &[*const T] {
         unsafe {
             let ptr = &self.vector;

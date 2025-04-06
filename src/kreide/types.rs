@@ -1,22 +1,22 @@
 use std::ffi::c_void;
-use crate::sr::il2cpp_types::*;
-use crate::sr::gamecore::*;
-use crate::sr::client::*;
+use crate::kreide::native_types::*;
+use crate::kreide::gamecore::*;
+use crate::kreide::client::*;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct NOPBAAAGGLA {
-    pub il2cpp_object: Il2CppObject,
-    pub MDEHKOOKJCK: *const Il2CppArray<Il2CppObject>, // 0x10
+    pub native_object: NativeObject,
+    pub MDEHKOOKJCK: *const NativeArray<NativeObject>, // 0x10
     pub HKFGOHGKOGK: *const c_void,                    // 0x18
     pub PBHCGDFPEED: *const c_void,                    // 0x20
-    pub FKKDFMPMJHG: *const Il2CppArray<Il2CppObject>, // 0x28
+    pub FKKDFMPMJHG: *const NativeArray<NativeObject>, // 0x28
     pub LGGEDDMACDF: *const c_void,                    // 0x30
     pub AAHMMHBHMFN: [u8; 0x90],                       // 0x38
     pub JKCOIOLCMEP: *const c_void,                    // 0xc8
     pub KNDJNKNHFFG: *const c_void,                    // 0xd0
     pub BEAJGANIDLJ: *const c_void,                    // 0xd8
-    pub JODAJBNCCNP: *const Il2CppArray<Il2CppObject>, // 0xe0
+    pub JODAJBNCCNP: *const NativeArray<NativeObject>, // 0xe0
     pub CMNBOEIDAOD: FixPoint,                         // 0xe8
     pub NHHNLMOBEGH: FixPoint,                         // 0xf0
     pub DKOIGIHEBCD: FixPoint,                         // 0xf8
@@ -148,10 +148,10 @@ pub struct NOPBAAAGGLA {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct GIKIAHKEKLG {
-    pub il2cpp_object: Il2CppObject,
+    pub native_object: NativeObject,
     pub LPPJKCBJBBE: *const c_void,                        // 0x10
     pub SkillPointEntity__BackingField: *const GameEntity, // 0x18
-    pub COLOGBLMPEL: *const Il2CppArray<Il2CppObject>,     // 0x20
+    pub COLOGBLMPEL: *const NativeArray<NativeObject>,     // 0x20
     pub KBONKADHBLN: *const c_void,                        // 0x28
     pub NBEJHIECMHE: *const AbilityConfig,                 // 0x30
     pub NLHONIIPPCC: *const c_void,                        // 0x38
@@ -170,7 +170,7 @@ pub struct GIKIAHKEKLG {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct HBIAGLPHICO {
-    pub il2cpp_object: Il2CppObject,
+    pub native_object: NativeObject,
     pub JKCOIOLCMEP: *const GameEntity, // 0x10
     pub LNIIFEIJANE: *const c_void,     // 0x18
     pub KNDJNKNHFFG: *const GameEntity, // 0x20
@@ -179,7 +179,7 @@ pub struct HBIAGLPHICO {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct MMNDIEBMDNL {
-    pub il2cpp_object: Il2CppObject,
+    pub native_object: NativeObject,
     pub FIMNOPAAFEP: *const TurnBasedAbilityComponent, // 0x10
     pub GNBEIGMFGIP: *const c_void,                    // 0x18
     pub HECCDOHIAFD: *const SkillCharacterComponent,   // 0x20
@@ -192,19 +192,19 @@ pub struct MMNDIEBMDNL {
 pub mod rpg {
     pub mod gamecore {
         use std::ffi::c_void;
-        use crate::sr::types::*;
+        use crate::kreide::types::*;
 
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct TurnBasedAbilityComponent {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _parent_class: [u8; 0x8], // 0x10
-            pub _BuffLockStepSources: *const Il2CppArray<Il2CppObject>, // 0x18
-            pub RegardAsSkillTypeMap: *const Il2CppArray<Il2CppObject>, // 0x20
+            pub _BuffLockStepSources: *const NativeArray<NativeObject>, // 0x18
+            pub RegardAsSkillTypeMap: *const NativeArray<NativeObject>, // 0x20
             pub _SyncPropertySource: *const TurnBasedAbilityComponent, // 0x28
             pub _JsonConfigRef: *const c_void, // 0x30
-            pub _DebuffLockStepSources: *const Il2CppArray<Il2CppObject>, // 0x38
-            pub DamageSplitData: *const Il2CppArray<Il2CppObject>, // 0x40
+            pub _DebuffLockStepSources: *const NativeArray<NativeObject>, // 0x38
+            pub DamageSplitData: *const NativeArray<NativeObject>, // 0x40
             pub AbilityComponentRef__BackingField: *const c_void, // 0x48
             pub DisableActionStateByTask__BackingField: *const c_void, // 0x50
             pub _ModifierRecordList: *const c_void, // 0x58
@@ -214,48 +214,48 @@ pub mod rpg {
             pub LastStanceBreakEntity__BackingField: *const GameEntity, // 0x78
             pub LockActionDelayChange: *const c_void, // 0x80
             pub _DamageAttacker: *const GameEntity, // 0x88
-            pub RegardAsAttackTypeMap: *const Il2CppArray<Il2CppObject>, // 0x90
-            pub _LockHPList: *const Il2CppArray<Il2CppObject>, // 0x98
+            pub RegardAsAttackTypeMap: *const NativeArray<NativeObject>, // 0x90
+            pub _LockHPList: *const NativeArray<NativeObject>, // 0x98
             pub CustomDataRef__BackingField: *const c_void, // 0xa0
             pub _KillerEntity: *const GameEntity, // 0xa8
-            pub _DepartedParams: *const Il2CppArray<Il2CppObject>, // 0xb0
+            pub _DepartedParams: *const NativeArray<NativeObject>, // 0xb0
             pub ModifierOverrideMapping: *const c_void, // 0xb8
             pub CharmDamageTarget: *const GameEntity, // 0xc0
-            pub ResistModifierBehaviorFlags__BackingField: *const Il2CppArray<Il2CppObject>, // 0xc8
+            pub ResistModifierBehaviorFlags__BackingField: *const NativeArray<NativeObject>, // 0xc8
             pub KillerSkill__BackingField: *const c_void, // 0xd0
             pub CharmSkillName: *const c_void, // 0xd8
-            pub _DotModifierEventProcessors: *const Il2CppArray<Il2CppObject>, // 0xe0
+            pub _DotModifierEventProcessors: *const NativeArray<NativeObject>, // 0xe0
             pub _ModifierEventSourceMuteCounter: *const c_void, // 0xe8
-            pub _EnableNegativeHPSourceList: *const Il2CppArray<Il2CppObject>, // 0xf0
+            pub _EnableNegativeHPSourceList: *const NativeArray<NativeObject>, // 0xf0
             pub DamageDefender: *const GameEntity, // 0xf8
             pub _ModifierDelayParamList: *const c_void, // 0x100
-            pub _StancePreshowConfigs: *const Il2CppArray<Il2CppObject>, // 0x108
-            pub _DamageStoreList: *const Il2CppArray<Il2CppObject>, // 0x110
-            pub _RedStanceInfoList: *const Il2CppArray<Il2CppObject>, // 0x118
+            pub _StancePreshowConfigs: *const NativeArray<NativeObject>, // 0x108
+            pub _DamageStoreList: *const NativeArray<NativeObject>, // 0x110
+            pub _RedStanceInfoList: *const NativeArray<NativeObject>, // 0x118
             pub _AbilityToSkillMapping: *const c_void, // 0x120
             pub _DmgChunk: *const c_void, // 0x128
-            pub _AbilityPropertiesInitSnapshot: *const Il2CppArray<FixPoint>, // 0x130
+            pub _AbilityPropertiesInitSnapshot: *const NativeArray<FixPoint>, // 0x130
             pub _ExtraStanceInfo: *const c_void, // 0x138
-            pub _ExtraMaxLayerConfig: *const Il2CppArray<Il2CppObject>, // 0x140
+            pub _ExtraMaxLayerConfig: *const NativeArray<NativeObject>, // 0x140
             pub _StatusChanceResistanceDict: *const c_void, // 0x148
             pub Weakness: *const c_void,  // 0x150
             pub ProjectileTargetAttachPoint: *const c_void, // 0x158
-            pub _ModifierEventProcessors: *const Il2CppArray<Il2CppObject>, // 0x160
+            pub _ModifierEventProcessors: *const NativeArray<NativeObject>, // 0x160
             pub _DamagedAllEntityIDListInAttack: *const c_void, // 0x168
-            pub _AbilityProperties: *const Il2CppArray<Il2CppObject>, // 0x170
-            pub _DamagedEntityListInAttack: *const Il2CppArray<GameEntity>, // 0x178
-            pub _OnHitEffectMultipleOverride: *const Il2CppArray<Il2CppObject>, // 0x180
+            pub _AbilityProperties: *const NativeArray<NativeObject>, // 0x170
+            pub _DamagedEntityListInAttack: *const NativeArray<GameEntity>, // 0x178
+            pub _OnHitEffectMultipleOverride: *const NativeArray<NativeObject>, // 0x180
             pub OverflowStanceDamageAttacker__BackingField: *const GameEntity, // 0x188
             pub _DefaultStanceInfo: *const c_void, // 0x190
             pub _RedStanceInfo: *const c_void, // 0x198
-            pub OnAbilityPropertyChanged: *const Il2CppArray<Il2CppObject>, // 0x1a0
+            pub OnAbilityPropertyChanged: *const NativeArray<NativeObject>, // 0x1a0
             pub _TransformRef: *const c_void, // 0x1a8
             pub _CharacterDataRef: *const CharacterDataComponent, // 0x1b0
             pub _DelayModifyActionDelayQueue: *const c_void, // 0x1b8
-            pub AdditionalAbilityParamList: *const Il2CppArray<Il2CppObject>, // 0x1c0
-            pub _OnHitEffectOverride: *const Il2CppArray<Il2CppObject>, // 0x1c8
+            pub AdditionalAbilityParamList: *const NativeArray<NativeObject>, // 0x1c0
+            pub _OnHitEffectOverride: *const NativeArray<NativeObject>, // 0x1c8
             pub _StatusProbabilityDict: *const c_void, // 0x1d0
-            pub _SelfExtrAbilityList: *const Il2CppArray<Il2CppString>, // 0x1d8
+            pub _SelfExtrAbilityList: *const NativeArray<NativeString>, // 0x1d8
             pub _BreakExtendEventUnsettled: bool, // 0x1e0
             pub IsSharedDamageDataTarget: bool, // 0x1e1
             pub LockSelfActionDelay: bool, // 0x1e2
@@ -308,12 +308,12 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct EntityManager {
-            pub il2cpp_object: Il2CppObject,
-            pub _PauseEntityTimeSlowIndexDic: *const Il2CppArray<Il2CppObject>, // 0x10
+            pub native_object: NativeObject,
+            pub _PauseEntityTimeSlowIndexDic: *const NativeArray<NativeObject>, // 0x10
             pub _SnapshotEntityMap: *const c_void,                              // 0x18
             pub LevelEntity__BackingField: *const GameEntity,                   // 0x20
-            pub _EntityUniqueNameDict: *const Il2CppArray<Il2CppObject>,        // 0x28
-            pub _AllTeamEntityList: *const Il2CppArray<GameEntity>,             // 0x30
+            pub _EntityUniqueNameDict: *const NativeArray<NativeObject>,        // 0x28
+            pub _AllTeamEntityList: *const NativeArray<GameEntity>,             // 0x30
             pub EntityGORoot__BackingField: *const c_void,                      // 0x38
             pub DataViewUILeaveSummonerOfUncreatedServant__BackingField: *const GameEntity, // 0x40
             pub GroupGORoot__BackingField: *const c_void,                       // 0x48
@@ -323,7 +323,7 @@ pub mod rpg {
             pub DataViewUISelectFadeOutSummonerEntity__BackingField: *const GameEntity, // 0x68
             pub DataViewUISelectSummonerOfUncreatedServant__BackingField: *const GameEntity, // 0x70
             pub DataViewUISelectFadeInEntity__BackingField: *const GameEntity,  // 0x78
-            pub _AllTeamEntity: *const Il2CppArray<GameEntity>,                 // 0x80
+            pub _AllTeamEntity: *const NativeArray<GameEntity>,                 // 0x80
             pub _UniqueNamedEntityDictionary: *const c_void,                    // 0x88
             pub _ServerEntityIDToEntityDict: *const c_void,                     // 0x90
             pub _GroupEntityIDToEntityDict: *const c_void,                      // 0x98
@@ -337,7 +337,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct AvatarSkillRowData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _Row: *const c_void,       // 0x10
             pub _OverrideData: [u8; 0x88], // 0x18
             pub _Config: *const c_void,    // 0xa0
@@ -345,7 +345,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct BattleEventSkillRowData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _Config: *const c_void,    // 0x10
             pub _OverrideData: [u8; 0x88], // 0x18
             pub _Row: *const c_void,       // 0xa0
@@ -353,12 +353,12 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct LineUpCharacter {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub BattleRelicItemModule: *const c_void, // 0x10
-            pub BattleEquipmentList: *const Il2CppArray<Il2CppObject>, // 0x18
-            pub SkillTreePointList: *const Il2CppArray<Il2CppObject>, // 0x20
+            pub BattleEquipmentList: *const NativeArray<NativeObject>, // 0x18
+            pub SkillTreePointList: *const NativeArray<NativeObject>, // 0x20
             pub SpiritPassiveList: u32,               // 0x28
-            pub ChangedSkillTreePointList: *const Il2CppArray<Il2CppObject>, // 0x30
+            pub ChangedSkillTreePointList: *const NativeArray<NativeObject>, // 0x30
             pub BattleGridAvatarData: *const c_void,  // 0x38
             pub SpecialAvatarID: u32,                 // 0x40
             pub CharacterRowIndex: u32,               // 0x44
@@ -379,7 +379,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct GameEntity {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _TickComponentList: *const c_void,       // 0x10
             pub _ComponentArrayRef: *const c_void,       // 0x18
             pub _UnityGO: *const c_void,                 // 0x20
@@ -393,7 +393,7 @@ pub mod rpg {
             pub _TickLodProxy: *const c_void,            // 0x68
             pub OnTeamChange: *const c_void,             // 0x70
             pub _OwnerWorldRef: *const c_void,           // 0x78
-            pub _ComponentArray: *const Il2CppArray<GameComponentBase>, // 0x80
+            pub _ComponentArray: *const NativeArray<GameComponentBase>, // 0x80
             pub WorldTimeScaleAdpator: *const c_void,    // 0x88
             pub OnStageStateChange: *const c_void,       // 0x90
             pub _DestroyWaitList: *const c_void,         // 0x98
@@ -475,7 +475,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct ServantSkillRowData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _Config: *const c_void,       // 0x10
             pub _Row: *const c_void,          // 0x18
             pub _OverrideData: *const c_void, // 0x20
@@ -483,7 +483,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct GameComponentBase {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _OwnerRef: *const GameEntity, // 0x10
         }
         #[repr(C)]
@@ -494,28 +494,28 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct AbilityConfig {
-            pub il2cpp_object: Il2CppObject,
-            pub Name: *const Il2CppString,                  // 0x10
+            pub native_object: NativeObject,
+            pub Name: *const NativeString,                  // 0x10
             pub TargetInfo: *const c_void,                  // 0x18
-            pub OnAdd: *const Il2CppArray<Il2CppObject>,    // 0x20
-            pub OnRemove: *const Il2CppArray<Il2CppObject>, // 0x28
-            pub OnStart: *const Il2CppArray<Il2CppObject>,  // 0x30
+            pub OnAdd: *const NativeArray<NativeObject>,    // 0x20
+            pub OnRemove: *const NativeArray<NativeObject>, // 0x28
+            pub OnStart: *const NativeArray<NativeObject>,  // 0x30
             pub DynamicValues: *const c_void,               // 0x38
-            pub TaskListTemplate: *const Il2CppArray<Il2CppObject>, // 0x40
+            pub TaskListTemplate: *const NativeArray<NativeObject>, // 0x40
             pub _TaskListTemplatesMap: *const c_void,       // 0x48
         }
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct BattleLineupData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub Context: *const c_void,                   // 0x10
             pub DeferCreateTrialPlayerDic: *const c_void, // 0x18
             pub BattleExtraPropertyAdditionDict__BackingField: *const c_void, // 0x20
-            pub LightTeam: *const Il2CppArray<LineUpCharacter>, // 0x28
-            pub MazeBuffAdded: *const Il2CppArray<Il2CppObject>, // 0x30
+            pub LightTeam: *const NativeArray<LineUpCharacter>, // 0x28
+            pub MazeBuffAdded: *const NativeArray<NativeObject>, // 0x30
             pub _TemplateVariables: *const c_void,        // 0x38
             pub AdditionalTemplateVariables: *const c_void, // 0x40
-            pub ExtraTeam: *const Il2CppArray<LineUpCharacter>, // 0x48
+            pub ExtraTeam: *const NativeArray<LineUpCharacter>, // 0x48
             pub SpecialAvatarLevelAreaConfigs: *const c_void, // 0x50
             pub _LevelPath: *const c_void,                // 0x58
             pub TeamBuffIDList: u32,                      // 0x60
@@ -524,7 +524,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct BattleEventDataComponent {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _parent_class: [u8; 0x80],                      // 0x10
             pub _BattleEventRowData: *const c_void,             // 0x90
             pub _TBAbilityRef: *const c_void,                   // 0x98
@@ -539,41 +539,41 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct TurnBasedGameMode {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _CurrentSkillCharacter: *const SkillCharacterComponent, // 0x10
             pub _performParam: *const c_void,                           // 0x18
             pub StageBattleEventMgr__BackingField: *const c_void,       // 0x20
             pub _ActionDelayChangeStamp: [u8; 0x18],                    // 0x28
-            pub _allowQuitStates: *const Il2CppArray<Il2CppObject>,     // 0x40
+            pub _allowQuitStates: *const NativeArray<NativeObject>,     // 0x40
             pub BattleChangeAvatarManager__BackingField: *const c_void, // 0x48
-            pub _SkillAddBuffPerformList: *const Il2CppArray<Il2CppObject>, // 0x50
+            pub _SkillAddBuffPerformList: *const NativeArray<NativeObject>, // 0x50
             pub _EventProcessor: *const c_void,                         // 0x58
             pub LastKillSkill__BackingField: *const c_void,             // 0x60
-            pub _EntityCustomUnselectableDatas: *const Il2CppArray<Il2CppObject>, // 0x68
+            pub _EntityCustomUnselectableDatas: *const NativeArray<NativeObject>, // 0x68
             pub _ModifierPerformCamerContext: *const c_void,            // 0x70
-            pub _UnselectableEntities: *const Il2CppArray<GameEntity>,  // 0x78
-            pub _AllTeamCharacters: *const Il2CppArray<GameEntity>,     // 0x80
+            pub _UnselectableEntities: *const NativeArray<GameEntity>,  // 0x78
+            pub _AllTeamCharacters: *const NativeArray<GameEntity>,     // 0x80
             pub _CachedDynamicSkillTargetSelection: *const GameEntity,  // 0x88
             pub _LimboRevivableEntities: *const c_void,                 // 0x90
             pub _EvolveBuildGearMgr: *const c_void,                     // 0x98
-            pub _OverrieWaveMonsterPerformDatas: *const Il2CppArray<Il2CppObject>, // 0xa0
+            pub _OverrieWaveMonsterPerformDatas: *const NativeArray<NativeObject>, // 0xa0
             pub _LevelLockedFeatureSet: *const c_void,                  // 0xa8
             pub TurnActionDelayCostChangeSource__BackingField: *const GameEntity, // 0xb0
             pub OwnerBattleInstanceRef__BackingField: *const c_void,    // 0xb8
-            pub _LimboEntities: *const Il2CppArray<HBIAGLPHICO>,        // 0xc0
+            pub _LimboEntities: *const NativeArray<HBIAGLPHICO>,        // 0xc0
             pub _TurnStateFSM: *const c_void,                           // 0xc8
-            pub _AllOffTeamCharacters: *const Il2CppArray<GameEntity>,  // 0xd0
-            pub _LimboEntitiesWaitAbilityFinish: *const Il2CppArray<HBIAGLPHICO>, // 0xd8
+            pub _AllOffTeamCharacters: *const NativeArray<GameEntity>,  // 0xd0
+            pub _LimboEntitiesWaitAbilityFinish: *const NativeArray<HBIAGLPHICO>, // 0xd8
             pub _ActionDelayLinkMgr: *const c_void,                     // 0xe0
-            pub _WaitingAbilityList: *const Il2CppArray<Il2CppObject>,  // 0xe8
+            pub _WaitingAbilityList: *const NativeArray<NativeObject>,  // 0xe8
             pub TimeGameStart: *const c_void,                           // 0xf0
             pub BattleCounter: *const c_void,                           // 0xf8
             pub SkillUsageLog__BackingField: *const c_void,             // 0x100
             pub _VersusBarMgr: *const c_void,                           // 0x108
-            pub LastSummonMonsterList: *const Il2CppArray<GameEntity>,  // 0x110
-            pub PerformDelayExecuteList: *const Il2CppArray<Il2CppObject>, // 0x118
-            pub _SomatoModifierPerforms: *const Il2CppArray<Il2CppObject>, // 0x120
-            pub _ActionEntityList: *const Il2CppArray<GameEntity>,      // 0x128
+            pub LastSummonMonsterList: *const NativeArray<GameEntity>,  // 0x110
+            pub PerformDelayExecuteList: *const NativeArray<NativeObject>, // 0x118
+            pub _SomatoModifierPerforms: *const NativeArray<NativeObject>, // 0x120
+            pub _ActionEntityList: *const NativeArray<GameEntity>,      // 0x128
             pub AssistantAvatarEntity__BackingField: *const GameEntity, // 0x130
             pub GridFightMananger__BackingField: *const c_void,         // 0x138
             pub LastKillCaster__BackingField: *const GameEntity,        // 0x140
@@ -585,9 +585,9 @@ pub mod rpg {
             pub _LastBreakMonster: *const GameEntity,                   // 0x170
             pub _CurrentTurnActionEntity: *const GameEntity,            // 0x178
             pub CurrentWaveMainMonsterIDPool__BackingField: u32,        // 0x180
-            pub _ActionEntityListSnapshot: *const Il2CppArray<GameEntity>, // 0x188
+            pub _ActionEntityListSnapshot: *const NativeArray<GameEntity>, // 0x188
             pub _AidDetail: *const c_void,                              // 0x190
-            pub _CurrentActionDelayModifyGroup: *const Il2CppArray<GameEntity>, // 0x198
+            pub _CurrentActionDelayModifyGroup: *const NativeArray<GameEntity>, // 0x198
             pub LastZombie__BackingField: *const GameEntity,            // 0x1a0
             pub PrepareAbility__BackingField: *const c_void,            // 0x1a8
             pub _AvatarChangeParam: *const c_void,                      // 0x1b0
@@ -595,19 +595,19 @@ pub mod rpg {
             pub LastTurnSnapshot: *const c_void,                        // 0x1c0
             pub _RogueInBattleData: *const c_void,                      // 0x1c8
             pub _ReplayData: *const c_void,                             // 0x1d0
-            pub _InsertAbilityList: *const Il2CppArray<Il2CppObject>,   // 0x1d8
+            pub _InsertAbilityList: *const NativeArray<NativeObject>,   // 0x1d8
             pub _CurrentTurnTargetEntity: *const GameEntity,            // 0x1e0
             pub DamageQueue__BackingField: *const c_void,               // 0x1e8
             pub MonsterWaveTextInfo: *const c_void,                     // 0x1f0
             pub CurrentMVPEntity__BackingField: *const GameEntity,      // 0x1f8
             pub ActionBarMgr__BackingField: *const c_void,              // 0x200
-            pub _LinkTeammateList: *const Il2CppArray<GameEntity>,      // 0x208
-            pub LastKillTargetList__BackingField: *const Il2CppArray<GameEntity>, // 0x210
+            pub _LinkTeammateList: *const NativeArray<GameEntity>,      // 0x208
+            pub LastKillTargetList__BackingField: *const NativeArray<GameEntity>, // 0x210
             pub CurrentTurnOwnerEntity__BackingField: *const GameEntity, // 0x218
-            pub _LimboEntitiesSkipSettlement: *const Il2CppArray<HBIAGLPHICO>, // 0x220
+            pub _LimboEntitiesSkipSettlement: *const NativeArray<HBIAGLPHICO>, // 0x220
             pub _ActionDelayOrderTrigger: *const c_void,                // 0x228
-            pub _InsertUltraSkillParamsQueue: *const Il2CppArray<Il2CppObject>, // 0x230
-            pub _PhaseModifierList: *const Il2CppArray<Il2CppObject>,   // 0x238
+            pub _InsertUltraSkillParamsQueue: *const NativeArray<NativeObject>, // 0x230
+            pub _PhaseModifierList: *const NativeArray<NativeObject>,   // 0x238
             pub _CommonSkillPoolNames: *const c_void,                   // 0x240
             pub _RelationGroupMgr: *const c_void,                       // 0x248
             pub _AttackingEntityList: *const c_void,                    // 0x250
@@ -690,21 +690,21 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct SkillData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub UsableCondTask: *const c_void,            // 0x10
             pub DefaultTargetInfo: *const c_void,         // 0x18
             pub OverrideCameraConfigAdded: *const c_void, // 0x20
-            pub CustomReadyConfigConditions: *const Il2CppArray<Il2CppObject>, // 0x28
+            pub CustomReadyConfigConditions: *const NativeArray<NativeObject>, // 0x28
             pub OverrideAnimState: *const c_void,         // 0x30
-            pub AllChildSkillDatas: *const Il2CppArray<SkillData>, // 0x38
+            pub AllChildSkillDatas: *const NativeArray<SkillData>, // 0x38
             pub OverrideTargetInfo: *const c_void,        // 0x40
             pub _Slot: *const c_void,                     // 0x48
             pub SkillCom: *const SkillCharacterComponent, // 0x50
             pub ParentSkillData: *const SkillData,        // 0x58
             pub InsertCondTask: *const c_void,            // 0x60
-            pub PreshowConditions: *const Il2CppArray<Il2CppObject>, // 0x68
+            pub PreshowConditions: *const NativeArray<NativeObject>, // 0x68
             pub OverrideCameraConfig: *const c_void,      // 0x70
-            pub _SkillProperties: *const Il2CppArray<Il2CppObject>, // 0x78
+            pub _SkillProperties: *const NativeArray<NativeObject>, // 0x78
             pub SkillTriggerKey: *const c_void,           // 0x80
             pub Config: *const c_void,                    // 0x88
             pub RowData: *const c_void,                   // 0x90
@@ -755,14 +755,14 @@ pub mod rpg {
         #[derive(Debug, Clone, Copy)]
         pub struct CharacterDataComponent {
             pub _parent_class: [u8; 0x16],                                   // 0x10
-            pub _DummpyEntityList: *const Il2CppArray<Il2CppObject>,         // 0x18
+            pub _DummpyEntityList: *const NativeArray<NativeObject>,         // 0x18
             pub _RowData: *const c_void,                                     // 0x20
             pub _DynamicScaleAdaptEffectPathRule: *const c_void,             // 0x28
             pub JsonConfig__BackingField: *const c_void,                     // 0x30
             pub HideDisplayInfoSkillNames: *const c_void,                    // 0x38
             pub _CharacterUICustomValueDict: *const c_void,                  // 0x40
-            pub _DynamicScaleAdaptTypes: *const Il2CppArray<Il2CppObject>,   // 0x48
-            pub _DynamicScaleAdaptConfigs: *const Il2CppArray<Il2CppObject>, // 0x50
+            pub _DynamicScaleAdaptTypes: *const NativeArray<NativeObject>,   // 0x48
+            pub _DynamicScaleAdaptConfigs: *const NativeArray<NativeObject>, // 0x50
             pub Summoner: *const GameEntity,                                 // 0x58
             pub SpawnTurnCount: u32,                                         // 0x60
             pub CreateReason: [u8; 0x4],                                     // 0x64
@@ -784,26 +784,26 @@ pub mod rpg {
         pub struct SkillCharacterComponent {
             pub _parent_class: GameComponentBase, // 0x10
             pub _JsonConfigRef: *const c_void,    // 0x18
-            pub _SkillTargetRedirectEntries: *const Il2CppArray<Il2CppObject>, // 0x20
+            pub _SkillTargetRedirectEntries: *const NativeArray<NativeObject>, // 0x20
             pub _CharacterDataRef: *const CharacterDataComponent, // 0x28
-            pub _SkillDataList: *const Il2CppArray<SkillData>, // 0x30
+            pub _SkillDataList: *const NativeArray<SkillData>, // 0x30
             pub CurrentSkillTargetCharacterId: *const c_void, // 0x38
-            pub _SkillSlots: *const Il2CppArray<Il2CppObject>, // 0x40
-            pub CurrentSkillTargetList__BackingField: *const Il2CppArray<GameEntity>, // 0x48
-            pub OnSkillSetup: *const Il2CppArray<Il2CppObject>, // 0x50
+            pub _SkillSlots: *const NativeArray<NativeObject>, // 0x40
+            pub CurrentSkillTargetList__BackingField: *const NativeArray<GameEntity>, // 0x48
+            pub OnSkillSetup: *const NativeArray<NativeObject>, // 0x50
             pub _recordAbilityInfo: [u8; 0x30],   // 0x58
             pub SkillPointEntity__BackingField: *const GameEntity, // 0x88
             pub TaskContext__BackingField: *const c_void, // 0x90
             pub _TBAbilityRef: *const c_void,     // 0x98
             pub AutoUseUltraParams: *const c_void, // 0xa0
             pub SkillActualAttacker__BackingField: *const GameEntity, // 0xa8
-            pub CurrentAimAtSubTargetList: *const Il2CppArray<GameEntity>, // 0xb0
+            pub CurrentAimAtSubTargetList: *const NativeArray<GameEntity>, // 0xb0
             pub _SkillTypeDisableCountArr: i32,   // 0xb8
-            pub CurrentAimAtTargetList: *const Il2CppArray<GameEntity>, // 0xc0
+            pub CurrentAimAtTargetList: *const NativeArray<GameEntity>, // 0xc0
             pub _SkillTypeDisableSlots: *const c_void, // 0xc8
             pub CurrentSkillTargetDamageHP: *const c_void, // 0xd0
-            pub CurrentSkillSubTargetList__BackingField: *const Il2CppArray<GameEntity>, // 0xd8
-            pub CurrentAimAtMainTargetList: *const Il2CppArray<GameEntity>, // 0xe0
+            pub CurrentSkillSubTargetList__BackingField: *const NativeArray<GameEntity>, // 0xd8
+            pub CurrentAimAtMainTargetList: *const NativeArray<GameEntity>, // 0xe0
             pub CurrentSkillHasTriggerEffect: bool, // 0xe8
             pub IsNoBpCost__BackingField: bool,   // 0xe9
             pub _CurrentSkillIndex: i32,          // 0xec
@@ -827,12 +827,12 @@ pub mod rpg {
     }
     pub mod client {
         use std::ffi::c_void;
-        use crate::sr::types::*;
+        use crate::kreide::types::*;
         
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct ModuleManager {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub ChimeraModule: *const c_void,                 // 0x10
             pub SystemOpenModule: *const c_void,              // 0x18
             pub TransferModule: *const c_void,                // 0x20
@@ -869,12 +869,12 @@ pub mod rpg {
             pub HandbookModule: *const c_void,                // 0x118
             pub SilverWolfModule: *const c_void,              // 0x120
             pub NovelModule: *const c_void,                   // 0x128
-            pub modules: *const Il2CppArray<Il2CppObject>,    // 0x130
+            pub modules: *const NativeArray<NativeObject>,    // 0x130
             pub LoginModule: *const c_void,                   // 0x138
             pub PamModule: *const c_void,                     // 0x140
             pub MultipleDropModule: *const c_void,            // 0x148
             pub ActivityBenefitModule: *const c_void,         // 0x150
-            pub _ModuleInitRequestList: *const Il2CppArray<Il2CppObject>, // 0x158
+            pub _ModuleInitRequestList: *const NativeArray<NativeObject>, // 0x158
             pub ServerPrefsModule: *const c_void,             // 0x160
             pub MapConnectivityModule: *const c_void,         // 0x168
             pub ArchiveModule: *const c_void,                 // 0x170
@@ -990,7 +990,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct AvatarData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub PromotedBeforeData__BackingField: *const c_void, // 0x10
             pub GrowUpBeforeData__BackingField: *const c_void,   // 0x18
             pub UltraSkillConfig__BackingField: *const c_void,   // 0x20
@@ -1028,7 +1028,7 @@ pub mod rpg {
         #[repr(C)]
         #[derive(Debug, Clone, Copy)]
         pub struct AvatarServantData {
-            pub il2cpp_object: Il2CppObject,
+            pub native_object: NativeObject,
             pub _SkillDataMap: *const c_void,   // 0x10
             pub _ServantRowData: *const c_void, // 0x18
             pub _Row: *const c_void,            // 0x20

@@ -290,13 +290,13 @@ unsafe extern "stdcall" fn hk_wnd_proc(
     };
 }
 
-pub fn install_hooks() -> Result<()> {
+pub fn subscribe() -> Result<()> {
     let vtable = get_vtable();
     unsafe {
-        hook_function!(Present_Detour, mem::transmute(vtable[8]), present);
+        subscribe_function!(Present_Detour, mem::transmute(vtable[8]), present);
     }
     unsafe {
-        hook_function!(
+        subscribe_function!(
             Resize_Buffers_Detour,
             mem::transmute(vtable[13]),
             resize_buffers

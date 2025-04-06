@@ -7,7 +7,7 @@ use crate::{
         },
         misc::Avatar,
     },
-    sr::{
+    kreide::{
         functions::rpg::gamecore::{
             AbilityStatic_GetActualOwner, CharacterConfig_GetSkillIndexByTriggerKey,
             SkillCharacterComponent_GetSkillData, TurnBasedAbilityComponent_GetAbilityMappedSkill,
@@ -17,13 +17,13 @@ use crate::{
             get_avatar_skill_from_skilldata, get_battle_event_skill_from_skilldata,
             get_servant_skill_from_skilldata,
         },
-        il2cpp_types::Il2CppString,
+        native_types::NativeString,
         types::{
             rpg::gamecore::{
                 BattleEventDataComponent, BattleLineupData, EntityType, GameEntity,
                 SkillCharacterComponent, SkillData, TeamType, TurnBasedGameMode,
             },
-            HBIAGLPHICO, MMNDIEBMDNL, NOPBAAAGGLA,
+            MMNDIEBMDNL, NOPBAAAGGLA,
         },
     },
     GAMEASSEMBLY_HANDLE,
@@ -58,7 +58,7 @@ static_detour! {
     static RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour: fn(*const TurnBasedGameMode);
     static RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour: fn(*const TurnBasedGameMode);
     static RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour: fn(*const c_void, i32) -> *const c_void;
-    static RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour: fn(*const c_void, *const HBIAGLPHICO) -> bool;
+    // static RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour: fn(*const c_void, *const HBIAGLPHICO) -> bool;
 }
 
 static mut TURN_BASED_GAME_MODE_REF: Option<*const TurnBasedGameMode> = None;
@@ -295,7 +295,7 @@ fn try_insert_ability(instance: *const MMNDIEBMDNL) {
         let mut event: Option<Result<Event>> = None;
         match (*skill_owner)._Team {
             TeamType::TeamLight => {
-                let ability_name = *((instance as usize + 0x30) as *const *const Il2CppString);
+                let ability_name = *((instance as usize + 0x30) as *const *const NativeString);
 
                 let skill_name = TurnBasedAbilityComponent_GetAbilityMappedSkill(
                     turn_based_ability_component,
@@ -489,88 +489,48 @@ fn turn_end(instance: *const c_void, a1: i32) -> *const c_void {
     return res;
 }
 
-// #[named]
-// fn _MakeLimboEntityDie(instance: *const c_void, a1: *const HBIAGLPHICO) -> bool {
-//     log::debug!(function_name!());
-//     // This isn't general kills
-//     unsafe {
-//         let attacker = (*a1).JKCOIOLCMEP;
-//         match (*attacker)._Team {
-//             TeamType::TeamLight => match (*attacker)._EntityType {
-//                 EntityType::Avatar => {
-//                     match get_avatar_from_entity(attacker) {
-//                         Ok(avatar) => {}
-//                         Err(_) => todo!(),
-//                     }
-//                     let avatar_id = UIGameEntityUtils_GetAvatarID((*a1).JKCOIOLCMEP);
-//                     let avatar_data = helpers::get_avatar_data_by_id(avatar_id);
-//                     let avatar_name = (*AvatarData_get_AvatarName(avatar_data))
-//                         .to_string()
-//                         .unwrap();
-//                     BattleContext::handle_event(Event::OnKill(OnKillEvent {
-//                         attacker: Avatar {
-//                             id: avatar_id,
-//                             name: avatar_name,
-//                         },
-//                     }));
-//                 }
-//                 _ => {}
-//             },
-//             _ => {}
-//         }
-//     }
-//     return RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour.call(instance, a1);
-// }
-
-pub fn install_hooks() -> Result<()> {
+pub fn subscribe() -> Result<()> {
     unsafe {
-        hook_function!(
+        subscribe_function!(
             DMFMLMJKKHB_OMPLOLLELLK_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x75d1360),
             on_damage
         );
-        hook_function!(
+        subscribe_function!(
             RPG_GameCore_SkillCharacterComponent_UseSkill_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x8f21e80),
             use_skill
         );
-        hook_function!(
+        subscribe_function!(
             MMNDIEBMDNL_FECMPGBOBOI_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x7781fd0),
             try_insert_ability
         );
-        hook_function!(
+        subscribe_function!(
             RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x762dba0),
             set_battle_lineup_data
         );
-        hook_function!(
+        subscribe_function!(
             RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943eab0),
             game_mode_begin
         );
-        hook_function!(
+        subscribe_function!(
             RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943ebd0),
             game_mode_end
         );
-        hook_function!(
+        subscribe_function!(
             RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x94392d0),
             turn_begin
         );
-        hook_function!(
+        subscribe_function!(
             RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour,
             mem::transmute(*GAMEASSEMBLY_HANDLE + 0x9400f10),
             turn_end
         );
-
-        // This is not good
-        // hook_function!(
-        //     RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour,
-        //     mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943d6c0),
-        //     _MakeLimboEntityDie
-        // );
         Ok(())
     }
 }

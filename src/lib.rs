@@ -5,10 +5,10 @@ macro_rules! lazy_initialize_address {
 }
 mod battle;
 mod entry;
-mod hooks;
+mod subscribers;
 mod models;
 mod server;
-mod sr;
+mod kreide;
 mod ui;
 
 use std::sync::LazyLock;

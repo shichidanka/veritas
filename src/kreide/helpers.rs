@@ -1,6 +1,6 @@
 use std::{ffi::c_void, mem, sync::LazyLock};
 
-use crate::{models::misc::{Avatar, Skill}, sr::{il2cpp_types::{Il2CppArray, Il2CppObject}, statics::GLOBAL_VARS_PTR_OFFSET}};
+use crate::{models::misc::{Avatar, Skill}, kreide::{native_types::{NativeArray, NativeObject}, statics::GLOBAL_VARS_PTR_OFFSET}};
 use anyhow::{anyhow, Ok, Result};
 use function_name::named;
 use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar, TextmapStatic_GetText, UIGameEntityUtils_GetAvatarID}, gamecore::{AvatarSkillRowData_get_AttackType, AvatarSkillRowData_get_SkillName, BattleEventSkillRowData_get_AttackType, BattleEventSkillRowData_get_SkillName, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager, ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName}}, statics::{S_MODULEMANAGER_FIELD_OFFSET, TEXTID_TYPE_PTR_OFFSET}, types::rpg::{client::{AvatarData, ModuleManager, TextID}, gamecore::{AttackType, FixPoint, GameEntity, SkillData}}};
@@ -98,7 +98,7 @@ pub unsafe fn get_skill_from_skilldata(
             if !row_data.is_null() {
                 let mut text_id: TextID = mem::zeroed::<TextID>();
                 get_skill_name_callback(&mut text_id, row_data);
-                let textid_type_ptr = *(*TEXTID_TYPE_PTR_OFFSET as *const *const Il2CppArray<Il2CppObject>);
+                let textid_type_ptr = *(*TEXTID_TYPE_PTR_OFFSET as *const *const NativeArray<NativeObject>);
                 let skill_name = TextmapStatic_GetText(&text_id, textid_type_ptr);
     
                 let skill_type = get_skill_type_callback(row_data);

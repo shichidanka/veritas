@@ -4,8 +4,8 @@
 #![allow(non_camel_case_types)]
 pub mod functions;
 pub mod helpers;
-pub mod il2cpp_types;
+pub mod native_types;
 pub mod types;
 pub mod statics;
 
-use crate::sr::types::rpg::*;
+use crate::kreide::types::rpg::*;

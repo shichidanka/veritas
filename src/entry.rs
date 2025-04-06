@@ -1,4 +1,4 @@
-use crate::hooks;
+use crate::subscribers;
 use ctor::ctor;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use std::thread::{self};
@@ -16,8 +16,8 @@ fn entry() {
         }
 
         log::info!("Installing hooks...");
-        hooks::directx::install_hooks().unwrap();
-        hooks::battle::install_hooks().unwrap();
+        subscribers::directx::subscribe().unwrap();
+        subscribers::battle::subscribe().unwrap();
         log::info!("Finished installing hooks.");
     });
 

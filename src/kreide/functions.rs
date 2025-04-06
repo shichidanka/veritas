@@ -1,26 +1,26 @@
 pub mod rpg {
     pub mod client {
         use std::{ffi::c_void, sync::LazyLock};
-        use crate::sr::gamecore::*;
-        use crate::sr::client::*;
-        use crate::sr::il2cpp_types::*;
+        use crate::kreide::gamecore::*;
+        use crate::kreide::client::*;
+        use crate::kreide::native_types::*;
         
         pub static UIGameEntityUtils_GetAvatarID: LazyLock<fn(*const GameEntity) -> u32> =
             lazy_initialize_address!(0x8e39db0);
         pub static AvatarModule_GetAvatar: LazyLock<fn(*const c_void, u32) -> *const AvatarData> =
             lazy_initialize_address!(0x8926d80);
         pub static AvatarData_get_AvatarName: LazyLock<
-            fn(*const AvatarData) -> *const Il2CppString,
+            fn(*const AvatarData) -> *const NativeString,
         > = lazy_initialize_address!(0x82c35a0);
         pub static TextmapStatic_GetText: LazyLock<
-            fn(*const TextID, *const Il2CppArray<Il2CppObject>) -> *const Il2CppString,
+            fn(*const TextID, *const NativeArray<NativeObject>) -> *const NativeString,
         > = lazy_initialize_address!(0x8e43c30);
     }
     pub mod gamecore {
         use std::{ffi::c_void, sync::LazyLock};
-        use crate::sr::gamecore::*;
-        use crate::sr::client::*;
-        use crate::sr::il2cpp_types::*;
+        use crate::kreide::gamecore::*;
+        use crate::kreide::client::*;
+        use crate::kreide::native_types::*;
 
         pub static AbilityStatic_GetActualOwner: LazyLock<
             fn(*const GameEntity) -> *const GameEntity,
@@ -53,10 +53,10 @@ pub mod rpg {
             fn(*const SkillCharacterComponent, i32, i32) -> *const SkillData,
         > = lazy_initialize_address!(0x8f20df0);
         pub static TurnBasedAbilityComponent_GetAbilityMappedSkill: LazyLock<
-            fn(*const TurnBasedAbilityComponent, *const Il2CppString) -> *const Il2CppString,
+            fn(*const TurnBasedAbilityComponent, *const NativeString) -> *const NativeString,
         > = lazy_initialize_address!(0x93f7390);
         pub static CharacterConfig_GetSkillIndexByTriggerKey: LazyLock<
-            fn(*const c_void, *const Il2CppString) -> i32,
+            fn(*const c_void, *const NativeString) -> i32,
         > = lazy_initialize_address!(0x54ea720);
     }
 }
