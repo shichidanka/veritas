@@ -10,7 +10,7 @@ macro_rules! subscribe_function {
         $target:expr,
         $reroute:ident
     ) => {
-        $detour.initialize($target, $reroute)?;
+        $detour.initialize(std::mem::transmute($target), $reroute)?;
         $detour.enable()?;
     };
 }

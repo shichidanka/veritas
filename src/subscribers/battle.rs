@@ -32,10 +32,7 @@ use anyhow::Result;
 use anyhow::{anyhow, Error};
 use function_name::named;
 use retour::static_detour;
-use std::{
-    ffi::c_void,
-    mem::{self},
-};
+use std::ffi::c_void;
 
 static_detour! {
     static DMFMLMJKKHB_OMPLOLLELLK_Detour: fn(
@@ -493,42 +490,42 @@ pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
             DMFMLMJKKHB_OMPLOLLELLK_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x75d1360),
+            *GAMEASSEMBLY_HANDLE + 0x75d1360,
             on_damage
         );
         subscribe_function!(
             RPG_GameCore_SkillCharacterComponent_UseSkill_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x8f21e80),
+            *GAMEASSEMBLY_HANDLE + 0x8f21e80,
             use_skill
         );
         subscribe_function!(
             MMNDIEBMDNL_FECMPGBOBOI_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x7781fd0),
+            *GAMEASSEMBLY_HANDLE + 0x7781fd0,
             try_insert_ability
         );
         subscribe_function!(
             RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x762dba0),
+            *GAMEASSEMBLY_HANDLE + 0x762dba0,
             set_battle_lineup_data
         );
         subscribe_function!(
             RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943eab0),
+            *GAMEASSEMBLY_HANDLE + 0x943eab0,
             game_mode_begin
         );
         subscribe_function!(
             RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x943ebd0),
+            *GAMEASSEMBLY_HANDLE + 0x943ebd0,
             game_mode_end
         );
         subscribe_function!(
             RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x94392d0),
+            *GAMEASSEMBLY_HANDLE + 0x94392d0,
             turn_begin
         );
         subscribe_function!(
             RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour,
-            mem::transmute(*GAMEASSEMBLY_HANDLE + 0x9400f10),
+            *GAMEASSEMBLY_HANDLE + 0x9400f10,
             turn_end
         );
         Ok(())
