@@ -5,8 +5,8 @@ use anyhow::{Context, Result};
 use crate::{
     models::{
         events::{
-            BattleEndEvent, Event, OnDamageEvent, OnKillEvent, OnUseSkillEvent,
-            SetBattleLineupEvent, TurnBeginEvent,
+            OnBattleEndEvent, Event, OnDamageEvent, OnKillEvent, OnUseSkillEvent,
+            OnSetLineupEvent, OnTurnBeginEvent,
         },
         misc::{Avatar, TurnInfo},
         packets::{EventPacket, Packet},
@@ -72,7 +72,7 @@ impl BattleContext {
         battle_context.real_time_damages = vec![0f64; lineup.len()];
     }
 
-    fn handle_battle_begin_event(
+    fn handle_on_battle_begin_event(
         mut _battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         log::info!("Battle has started");
@@ -82,8 +82,8 @@ impl BattleContext {
             .with_context(|| format!("Failed to create {}", packet_body.name()))
     }
 
-    fn handle_set_batle_lineup_event(
-        e: SetBattleLineupEvent,
+    fn handle_on_set_lineup_event(
+        e: OnSetLineupEvent,
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         battle_context.state = BattleState::Started;
@@ -121,8 +121,8 @@ impl BattleContext {
             .with_context(|| format!("Failed to create {}", packet_body.name()))
     }
 
-    fn handle_turn_begin_event(
-        e: TurnBeginEvent,
+    fn handle_on_turn_begin_event(
+        e: OnTurnBeginEvent,
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         let action_value = e.action_value;
@@ -133,7 +133,7 @@ impl BattleContext {
             .with_context(|| format!("Failed to create {}", packet_body.name()))
     }
 
-    fn handle_turn_end_event(
+    fn handle_on_turn_end_event(
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         let mut turn_info = battle_context.current_turn_info.clone();
@@ -202,8 +202,8 @@ impl BattleContext {
             .with_context(|| format!("Failed to create {}", packet_body.name()))
     }
 
-    fn handle_battle_end_event(
-        e: BattleEndEvent,
+    fn handle_on_battle_end_event(
+        e: OnBattleEndEvent,
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         battle_context.state = BattleState::Ended;
@@ -238,16 +238,16 @@ impl BattleContext {
         let packet = match event {
             Result::Ok(event) => {
                 match event {
-                    Event::BattleBegin => Self::handle_battle_begin_event(battle_context),
-                    Event::SetBattleLineup(e) => {
-                        Self::handle_set_batle_lineup_event(e, battle_context)
+                    Event::OnBattleBegin => Self::handle_on_battle_begin_event(battle_context),
+                    Event::OnSetLineup(e) => {
+                        Self::handle_on_set_lineup_event(e, battle_context)
                     }
                     Event::OnDamage(e) => Self::handle_on_damage_event(e, battle_context),
-                    Event::TurnBegin(e) => Self::handle_turn_begin_event(e, battle_context),
-                    Event::TurnEnd => Self::handle_turn_end_event(battle_context),
+                    Event::OnTurnBegin(e) => Self::handle_on_turn_begin_event(e, battle_context),
+                    Event::OnTurnEnd => Self::handle_on_turn_end_event(battle_context),
                     // Not used atm
                     Event::OnKill(e) => Self::handle_on_kill_event(e, battle_context),
-                    Event::BattleEnd(e) => Self::handle_battle_end_event(e, battle_context),
+                    Event::OnBattleEnd(e) => Self::handle_on_battle_end_event(e, battle_context),
                     Event::OnUseSkill(e) => Self::handle_on_use_skill_event(e, battle_context),
                 }
             }

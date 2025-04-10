@@ -215,18 +215,7 @@ pub fn resize_buffers(
     swap_chain_flags: u32,
 ) -> HRESULT {
     unsafe {
-        if let Some(app) = APP.get_mut() {
-            app.resize_buffers(mem::transmute(&(swap_chain_vtbl)), || {
-                Resize_Buffers_Detour.call(
-                    swap_chain_vtbl,
-                    buffer_count,
-                    width,
-                    height,
-                    new_format,
-                    swap_chain_flags,
-                )
-            })
-        } else {
+        let resize_buffers = || {
             Resize_Buffers_Detour.call(
                 swap_chain_vtbl,
                 buffer_count,
@@ -235,6 +224,11 @@ pub fn resize_buffers(
                 new_format,
                 swap_chain_flags,
             )
+        };
+        if let Some(app) = APP.get_mut() {
+            app.resize_buffers(mem::transmute(&(swap_chain_vtbl)), resize_buffers)
+        } else {
+            resize_buffers()
         }
     }
 }

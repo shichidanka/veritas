@@ -2,21 +2,21 @@
 use super::misc::{Avatar, Skill};
 
 pub enum Event {
-    BattleBegin,
-    SetBattleLineup(SetBattleLineupEvent),
+    OnBattleBegin,
+    OnSetLineup(OnSetLineupEvent),
     OnDamage(OnDamageEvent),
-    TurnBegin(TurnBeginEvent),
-    TurnEnd,
+    OnTurnBegin(OnTurnBeginEvent),
+    OnTurnEnd,
     OnKill(OnKillEvent),
     OnUseSkill(OnUseSkillEvent),
-    BattleEnd(BattleEndEvent),
+    OnBattleEnd(OnBattleEndEvent),
 }
 
-pub struct TurnBeginEvent {
+pub struct OnTurnBeginEvent {
     pub action_value: f64
 }
 
-pub struct BattleEndEvent {
+pub struct OnBattleEndEvent {
     pub action_value: f64
 }
 
@@ -25,7 +25,7 @@ pub struct OnUseSkillEvent {
     pub skill: Skill
 }
 
-pub struct SetBattleLineupEvent {
+pub struct OnSetLineupEvent {
     pub avatars: Vec<Avatar>,
 }
 

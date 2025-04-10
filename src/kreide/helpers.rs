@@ -1,6 +1,6 @@
 use std::{ffi::c_void, mem, sync::LazyLock};
 
-use crate::{models::misc::{Avatar, Skill}, kreide::{native_types::{NativeArray, NativeObject}, statics::GLOBAL_VARS_PTR_OFFSET}};
+use crate::{kreide::{native_types::{NativeArray, NativeObject}, statics::GLOBAL_VARS_PTR_OFFSET}, models::misc::{Avatar, Skill}};
 use anyhow::{anyhow, Ok, Result};
 use function_name::named;
 use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar, TextmapStatic_GetText, UIGameEntityUtils_GetAvatarID}, gamecore::{AvatarSkillRowData_get_AttackType, AvatarSkillRowData_get_SkillName, BattleEventSkillRowData_get_AttackType, BattleEventSkillRowData_get_SkillName, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager, ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName}}, statics::{S_MODULEMANAGER_FIELD_OFFSET, TEXTID_TYPE_PTR_OFFSET}, types::rpg::{client::{AvatarData, ModuleManager, TextID}, gamecore::{AttackType, FixPoint, GameEntity, SkillData}}};
@@ -16,6 +16,7 @@ impl GlobalVars {
         log::debug!(function_name!());
         unsafe {
             let global_vars_ptr = *(*GLOBAL_VARS_PTR_OFFSET as *const *const c_void);
+            // let global_vars_ptr = GlobalVars_cctor();
             *(global_vars_ptr.byte_offset(global_var as _) as *const *const c_void)
         }
     }

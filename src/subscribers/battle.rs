@@ -1,33 +1,22 @@
-use crate::{
-    battle::BattleContext,
-    models::{
-        events::{
-            BattleEndEvent, Event, OnDamageEvent, OnUseSkillEvent, SetBattleLineupEvent,
-            TurnBeginEvent,
-        },
-        misc::Avatar,
-    },
-    kreide::{
-        functions::rpg::gamecore::{
-            AbilityStatic_GetActualOwner, CharacterConfig_GetSkillIndexByTriggerKey,
-            SkillCharacterComponent_GetSkillData, TurnBasedAbilityComponent_GetAbilityMappedSkill,
-        },
-        helpers::{
-            self, fixpoint_to_raw, get_avatar_from_entity, get_avatar_from_servant_entity,
-            get_avatar_skill_from_skilldata, get_battle_event_skill_from_skilldata,
-            get_servant_skill_from_skilldata,
-        },
-        native_types::NativeString,
-        types::{
-            rpg::gamecore::{
-                BattleEventDataComponent, BattleLineupData, EntityType, GameEntity,
-                SkillCharacterComponent, SkillData, TeamType, TurnBasedGameMode,
-            },
-            MMNDIEBMDNL, NOPBAAAGGLA,
-        },
-    },
-    GAMEASSEMBLY_HANDLE,
-};
+use crate::battle::BattleContext;
+// use crate::kreide::native_types::*;
+use crate::kreide::types::rpg::gamecore::*;
+use crate::kreide::types::*;
+use crate::kreide::*;
+// use crate::kreide::types::rpg::client::*;
+use crate::kreide::functions::rpg::gamecore::*;
+// use crate::kreide::functions::rpg::client::*;
+use crate::kreide::helpers::*;
+
+use crate::models::events::OnBattleEndEvent;
+use crate::models::events::Event;
+use crate::models::events::OnDamageEvent;
+use crate::models::events::OnUseSkillEvent;
+use crate::models::events::OnSetLineupEvent;
+use crate::models::events::OnTurnBeginEvent;
+use crate::models::misc::Avatar;
+use crate::GAMEASSEMBLY_HANDLE;
+
 use anyhow::Result;
 use anyhow::{anyhow, Error};
 use function_name::named;
@@ -35,7 +24,7 @@ use retour::static_detour;
 use std::ffi::c_void;
 
 static_detour! {
-    static DMFMLMJKKHB_OMPLOLLELLK_Detour: fn(
+    static ON_DAMAGE_Detour: fn(
         *const c_void,
         *const c_void,
         *const NOPBAAAGGLA,
@@ -47,15 +36,13 @@ static_detour! {
         bool,
         *const c_void
     ) -> bool;
-    static MMNDIEBMDNL_FECMPGBOBOI_Detour: fn(*const MMNDIEBMDNL);
-    static RPG_GameCore_SkillCharacterComponent_UseSkill_Detour: fn(*const SkillCharacterComponent, i32, *const c_void, bool, i32);
-    static RPG_GameCore_AbilityStatic_ComboProcessAfterSkillUse_Detour: fn(*const GameEntity, *const SkillData);
-    static RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour: fn(*const c_void, *const BattleLineupData);
-    static RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour: fn(*const TurnBasedGameMode);
-    static RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour: fn(*const TurnBasedGameMode);
-    static RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour: fn(*const TurnBasedGameMode);
-    static RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour: fn(*const c_void, i32) -> *const c_void;
-    // static RPG_GameCore_TurnBasedGameMode__MakeLimboEntityDie_Detour: fn(*const c_void, *const HBIAGLPHICO) -> bool;
+    static ON_COMBO_Detour: fn(*const MMNDIEBMDNL);
+    static ON_USE_SKILL_Detour: fn(*const SkillCharacterComponent, i32, *const c_void, bool, i32);
+    static ON_SET_LINEUP_Detour: fn(*const c_void, *const BattleLineupData);
+    static ON_BATTLE_BEGIN_Detour: fn(*const TurnBasedGameMode);
+    static ON_BATTLE_END_Detour: fn(*const TurnBasedGameMode);
+    static ON_TURN_BEGIN_Detour: fn(*const TurnBasedGameMode);
+    static ON_TURN_END_Detour: fn(*const c_void, i32) -> *const c_void;
 }
 
 static mut TURN_BASED_GAME_MODE_REF: Option<*const TurnBasedGameMode> = None;
@@ -106,7 +93,6 @@ fn on_damage(
                         event = Some(e);
                     }
                     EntityType::Servant => {
-
                         let e = match helpers::get_avatar_from_servant_entity(attack_owner) {
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
@@ -131,7 +117,7 @@ fn on_damage(
             BattleContext::handle_event(event);
         }
     }
-    return DMFMLMJKKHB_OMPLOLLELLK_Detour.call(
+    return ON_DAMAGE_Detour.call(
         task_context,
         damage_by_attack_property,
         nopbaaaggla,
@@ -147,7 +133,7 @@ fn on_damage(
 
 // Called when a manual skill is used. Does not account for insert skills (out of turn automatic skills)
 #[named]
-fn use_skill(
+fn on_use_skill(
     instance: *const SkillCharacterComponent,
     skill_index: i32,
     a3: *const c_void,
@@ -156,7 +142,7 @@ fn use_skill(
 ) {
     log::debug!(function_name!());
     unsafe {
-        let entity = ((*instance)._parent_class)._OwnerRef;
+        let entity = ((*instance)._parent_object)._OwnerRef;
         let skill_owner = AbilityStatic_GetActualOwner(entity);
         let mut event: Option<Result<Event>> = None;
         match (*skill_owner)._Team {
@@ -266,33 +252,25 @@ fn use_skill(
         }
     }
 
-    RPG_GameCore_SkillCharacterComponent_UseSkill_Detour.call(
-        instance,
-        skill_index,
-        a3,
-        a4,
-        skill_extra_use_param,
-    );
+    ON_USE_SKILL_Detour.call(instance, skill_index, a3, a4, skill_extra_use_param);
 }
 
 // Insert skills are out of turn automatic skills
 #[named]
-fn try_insert_ability(instance: *const MMNDIEBMDNL) {
+fn on_combo(instance: *const MMNDIEBMDNL) {
     log::debug!(function_name!());
 
-    MMNDIEBMDNL_FECMPGBOBOI_Detour.call(instance);
+    ON_COMBO_Detour.call(instance);
     unsafe {
-        // Needs to be manually updated
         let turn_based_ability_component = (*instance).FIMNOPAAFEP;
         let skill_character_component = (*instance).HECCDOHIAFD;
-        //
-        let entity = (*skill_character_component)._parent_class._OwnerRef;
+        let entity = (*skill_character_component)._parent_object._OwnerRef;
         let skill_owner = AbilityStatic_GetActualOwner(entity);
 
         let mut event: Option<Result<Event>> = None;
         match (*skill_owner)._Team {
             TeamType::TeamLight => {
-                let ability_name = *((instance as usize + 0x30) as *const *const NativeString);
+                let ability_name = ((*(instance)).HMCDHMFHABF).FKHHOBBFMEH;
 
                 let skill_name = TurnBasedAbilityComponent_GetAbilityMappedSkill(
                     turn_based_ability_component,
@@ -412,7 +390,7 @@ fn try_insert_ability(instance: *const MMNDIEBMDNL) {
 }
 
 #[named]
-fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const BattleLineupData) {
+fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineupData) {
     log::debug!(function_name!());
     unsafe {
         let light_team = (*battle_lineup_data).LightTeam;
@@ -421,6 +399,7 @@ fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const Ba
         for character_ptr in (*light_team).to_slice() {
             let character = *character_ptr;
             let avatar_id = (*character).CharacterID;
+            log::debug!("{}", format!("AVATAR ID: {}", avatar_id));
             match helpers::get_avatar_from_id(avatar_id) {
                 Ok(avatar) => avatars.push(avatar),
                 Err(e) => {
@@ -436,29 +415,29 @@ fn set_battle_lineup_data(instance: *const c_void, battle_lineup_data: *const Ba
                 .collect::<String>();
             Err(anyhow!(errors))
         } else {
-            Ok(Event::SetBattleLineup(SetBattleLineupEvent { avatars }))
+            Ok(Event::OnSetLineup(OnSetLineupEvent { avatars }))
         };
         BattleContext::handle_event(event);
     }
-    RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour.call(instance, battle_lineup_data);
+    ON_SET_LINEUP_Detour.call(instance, battle_lineup_data);
 }
 
 #[named]
-fn game_mode_begin(instance: *const TurnBasedGameMode) {
+fn on_battle_begin(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     unsafe {
-        RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour.call(instance);
+        ON_BATTLE_BEGIN_Detour.call(instance);
         TURN_BASED_GAME_MODE_REF = Some(instance);
-        BattleContext::handle_event(Ok(Event::BattleBegin));
+        BattleContext::handle_event(Ok(Event::OnBattleBegin));
     }
 }
 
 #[named]
-fn game_mode_end(instance: *const TurnBasedGameMode) {
+fn on_battle_end(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     unsafe {
-        RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour.call(instance);
-        BattleContext::handle_event(Ok(Event::BattleEnd(BattleEndEvent {
+        ON_BATTLE_END_Detour.call(instance);
+        BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
             action_value: get_elapsed_av(),
         })));
         TURN_BASED_GAME_MODE_REF = None;
@@ -466,67 +445,62 @@ fn game_mode_end(instance: *const TurnBasedGameMode) {
 }
 
 #[named]
-fn turn_begin(instance: *const TurnBasedGameMode) {
+fn on_turn_begin(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     // Update AV first
-    RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour.call(instance);
-    BattleContext::handle_event(Ok(Event::TurnBegin(TurnBeginEvent {
+    ON_TURN_BEGIN_Detour.call(instance);
+    BattleContext::handle_event(Ok(Event::OnTurnBegin(OnTurnBeginEvent {
         action_value: get_elapsed_av(),
     })));
 }
 
 #[named]
-fn turn_end(instance: *const c_void, a1: i32) -> *const c_void {
+fn on_turn_end(instance: *const c_void, a1: i32) -> *const c_void {
     log::debug!(function_name!());
     // Can match player v enemy turn w/
     // RPG.GameCore.TurnBasedGameMode.GetCurrentTurnTeam
-    let res = RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour
-        .call(instance, a1);
-    BattleContext::handle_event(Ok(Event::TurnEnd));
+    let res = ON_TURN_END_Detour.call(instance, a1);
+    BattleContext::handle_event(Ok(Event::OnTurnEnd));
     return res;
 }
 
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
-            DMFMLMJKKHB_OMPLOLLELLK_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x75d1360,
+            ON_DAMAGE_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x674d700,
             on_damage
         );
+        subscribe_function!(ON_COMBO_Detour, *GAMEASSEMBLY_HANDLE + 0x6621fa0, on_combo);
         subscribe_function!(
-            RPG_GameCore_SkillCharacterComponent_UseSkill_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x8f21e80,
-            use_skill
+            ON_USE_SKILL_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x65c3400,
+            on_use_skill
         );
         subscribe_function!(
-            MMNDIEBMDNL_FECMPGBOBOI_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7781fd0,
-            try_insert_ability
+            ON_SET_LINEUP_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x7f84500,
+            on_set_lineup
         );
         subscribe_function!(
-            RPG_Client_BattleAssetPreload_SetBattleLineupData_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x762dba0,
-            set_battle_lineup_data
+            ON_BATTLE_BEGIN_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x5df4a50,
+            on_battle_begin
         );
         subscribe_function!(
-            RPG_GameCore_TurnBasedGameMode_GameModeBegin_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x943eab0,
-            game_mode_begin
+            ON_BATTLE_END_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x5df4b70,
+            on_battle_end
         );
         subscribe_function!(
-            RPG_GameCore_TurnBasedGameMode_GameModeEnd_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x943ebd0,
-            game_mode_end
+            ON_TURN_BEGIN_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x5def070,
+            on_turn_begin
         );
         subscribe_function!(
-            RPG_GameCore_TurnBasedGameMode_DoTurnPrepareStartWork_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x94392d0,
-            turn_begin
-        );
-        subscribe_function!(
-            RPG_GameCore_TurnBasedAbilityComponent_ProcessOnLevelTurnActionEndEvent_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x9400f10,
-            turn_end
+            ON_TURN_END_Detour,
+            *GAMEASSEMBLY_HANDLE + 0x5ddb620,
+            on_turn_end
         );
         Ok(())
     }
