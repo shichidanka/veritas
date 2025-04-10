@@ -1,6 +1,6 @@
-use egui::{Stroke, Ui};
-use egui_plot::{Legend, Plot, PlotPoints, Polygon};
-
+use egui::{ahash::HashMap, Stroke, Ui};
+use egui_plot::{Legend, Plot, PlotPoints, Polygon, BarChart, Bar, Line};
+use crate::ui::app::Unit;
 
 use crate::{battle::BattleContext, models::misc::Avatar};
 
@@ -50,6 +50,160 @@ pub fn show_damage_distribution_widget(app_state: &mut AppState, ui: &mut Ui) {
     });
 }
 
+fn create_bar_data(battle_context: &BattleContext) -> Vec<(&Avatar, f64, usize)> {        
+    let total_damage: Vec<f64> = battle_context.turn_history.iter()
+        .flat_map(|turn| turn.avatars_damage.iter())
+        .copied()
+        .collect();
+
+    battle_context.lineup.iter()
+        .enumerate()
+        .map(|(i, avatar)| {
+            let damage = total_damage
+                .chunks(battle_context.lineup.len())
+                .map(|chunk| chunk.get(i).copied().unwrap_or(0.0))
+                .sum::<f64>();
+            (avatar, damage, i)
+        })
+        .collect()
+}
+
+pub fn show_damage_bar_widget(_app_state: &mut AppState, ui: &mut Ui) {
+    let battle_context = BattleContext::get_instance();
+    Plot::new("damage_bars")
+        .legend(Legend::default())
+        .height(300.0)
+        .width(ui.available_width())
+        .allow_drag(false)
+        .allow_zoom(false)
+        .allow_scroll(false)
+        .show_background(false)
+        .y_axis_formatter(|y, _| helpers::format_damage(y.value))
+        .x_axis_formatter(|x, _| {
+            let index = x.value.floor() as usize;
+            battle_context.lineup.get(index)
+                .map(|avatar| avatar.name.clone())
+                .unwrap_or_default()
+        })
+        .show(ui, |plot_ui| {
+            let bars_data = create_bar_data(&battle_context);
+            let bars: Vec<Bar> = bars_data
+                .iter()
+                .enumerate()
+                .map(|(pos, (avatar, value, color_idx))| {
+                    Bar::new(pos as f64, *value)
+                        .name(&avatar.name)
+                        .fill(helpers::get_character_color(*color_idx))
+                        .width(0.7)
+                })
+                .collect();
+
+            plot_ui.bar_chart(BarChart::new(bars));
+        });
+}
+
+pub fn show_turn_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
+    let battle_context = BattleContext::get_instance();
+    Plot::new("turn_damage_plot")
+        .legend(Legend::default())
+        .height(250.0)
+        .include_y(0.0)
+        .x_axis_label("Turn")
+        .y_axis_label("Damage")
+        .y_axis_formatter(|y, _| helpers::format_damage(y.value))
+        .show(ui, |plot_ui| {
+            for (i, avatar) in battle_context.lineup.iter().enumerate() {
+                let color = helpers::get_character_color(i);
+                let points = battle_context.turn_history
+                    .iter()
+                    .enumerate()
+                    .map(|(turn_idx, turn)| {
+                        [turn_idx as f64 + 1.0, turn.avatars_damage[i]]
+                    })
+                    .collect::<Vec<[f64; 2]>>();
+
+                if !points.is_empty() {
+                    plot_ui.line(
+                        Line::new(PlotPoints::from(points))
+                            .name(&avatar.name)
+                            .color(color)
+                            .width(2.0)
+                    );
+                }
+            }
+        });
+}
+
+pub fn show_av_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
+    let battle_context = BattleContext::get_instance();
+    Plot::new("av_damage_plot")
+        .legend(Legend::default())
+        .height(250.0)
+        .include_y(0.0) 
+        .x_axis_label("Action Value")
+        .y_axis_label("Damage")
+        .y_axis_formatter(|y, _| helpers::format_damage(y.value))
+        .show(ui, |plot_ui| {
+            for (i, avatar) in battle_context.lineup.iter().enumerate() {
+                let color = helpers::get_character_color(i);
+                let points = battle_context.turn_history
+                    .iter()
+                    .map(|turn| [turn.action_value, turn.avatars_damage[i]])
+                    .collect::<Vec<[f64; 2]>>();
+
+                if !points.is_empty() {
+                    plot_ui.line(
+                        Line::new(PlotPoints::from(points))
+                            .name(&avatar.name)
+                            .color(color)
+                            .width(2.0)
+                    );
+                }
+            }
+        });
+}
+
+pub fn show_real_time_damage_graph(_app_state: &mut AppState, ui: &mut Ui) {
+    ui.vertical(|ui| {
+        ui.horizontal(|ui| {
+            ui.radio_value(&mut _app_state.graph_x_unit, Unit::Turn, "Turn");
+            ui.radio_value(&mut _app_state.graph_x_unit, Unit::ActionValue, "Action Value");
+        });
+        ui.add_space(8.0);
+        
+        match _app_state.graph_x_unit {
+            Unit::Turn => show_turn_damage_plot(_app_state, ui),
+            Unit::ActionValue => show_av_damage_plot(_app_state, ui),
+        }
+    });
+}
+
+pub fn show_av_metrics(_app_state: &mut AppState, ui: &mut Ui) {
+    let battle_context = BattleContext::get_instance();
+    
+    ui.heading("Action Value Metrics");
+    ui.separator();
+    
+    if let Some(current_turn) = battle_context.turn_history.last() {
+        ui.label("Current Turn");
+        ui.horizontal(|ui| {
+            ui.label("AV:");
+            ui.label(format!("{:.2}", current_turn.action_value));
+        });
+        ui.horizontal(|ui| {
+            ui.label("Total Damage:");
+            ui.label(helpers::format_damage(current_turn.total_damage));
+        });
+        ui.horizontal(|ui| {
+            ui.label("DpAV:");
+            if current_turn.action_value > 0.0 {
+                ui.label(format!("{:.2}", current_turn.total_damage / current_turn.action_value));
+            } else {
+                ui.label("0.00");
+            }
+        });
+    }
+}
 
 fn create_pie_segments(real_time_damages: &Vec<f64>, avatars: &Vec<Avatar>) -> Vec<(Avatar, PieSegment, usize)> {
     let total = real_time_damages.into_iter().sum::<f64>();
