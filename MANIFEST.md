@@ -1,5 +1,5 @@
 # Overview
-Described in here are details on how to update the binary for each major patch.
+Described in here is a description of the source modules. 
 # Manifest
 - ``src``
     - ``entry`` - The entrypoint of the binary. Waits for the needed modules to be loaded before each ``src/subscribers`` submodule subscribes. Afterwards, spawns the ``src/server``.
@@ -20,9 +20,3 @@ Described in here are details on how to update the binary for each major patch.
         - ``directx``
             -  Subscribes to the Directx 11 screen drawing event. Not intrinsic to the game itself. Utilizes a forked ``egui-directx11`` backend created/updated/inspired by ``unknowntrojan``, ``sy1ntexx``, and ``ohchase``. The implementation is a little rusty, so might cause intermittent and random crashes, but it is what allows the egui overlay in ``src/ui`` to render on the screen.
     -  ``ui`` - Overlay powered by [egui](https://github.com/emilk/egui)!
-# Updating
-## Major patch
-- Check ``imports.json``. Certain mangled symbols must be changed. Repo owner has specific instructions and guide.
-- ``src/kreide/statics`` needs to be updated every patch.
-## Minor patch
-- ``src/kreide/statics`` needs to be updated every patch.
