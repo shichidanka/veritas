@@ -1,8 +1,14 @@
 use std::sync::Once;
-use egui::{CentralPanel, Color32, Context, Slider, Frame, Label, Vec2, Window};
+use egui::{CentralPanel, Color32, Context, FontId, Frame, Label, Slider, Vec2, Window};
 use windows::Win32::{System::Console::GetConsoleWindow, UI::WindowsAndMessaging::{ShowWindow, SW_HIDE, SW_RESTORE, SW_SHOW}};
 use crate::ui::widgets;
-
+use egui::TextStyle::Name;
+use egui::TextStyle::Heading;
+use egui::TextStyle::Monospace;
+use egui::TextStyle::Body;
+use egui::TextStyle::Button;
+use egui::TextStyle::Small;
+use egui::FontFamily::Proportional;
 #[derive(Default, PartialEq)]
 pub enum Unit {
     #[default]
@@ -45,6 +51,22 @@ impl AppState {
 }
 
 pub fn ui(ctx: &Context, app_state: &mut AppState) {
+    static ONCE: Once = Once::new();
+    ONCE.call_once(|| {
+        ctx.style_mut(|style| {
+            let factor = 1.5;
+            style.text_styles = [
+                (Heading, FontId::new(factor * 30.0, Proportional)),
+                (Name("Heading2".into()), FontId::new(factor * 25.0, Proportional)),
+                (Name("Context".into()), FontId::new(factor * 23.0, Proportional)),
+                (Body, FontId::new(factor * 18.0, Proportional)),
+                (Monospace, FontId::new(factor * 14.0, Proportional)),
+                (Button, FontId::new(factor * 14.0, Proportional)),
+                (Small, FontId::new(factor * 10.0, Proportional)),
+              ].into();
+        });    
+    });
+
     if app_state.show_menu {
         CentralPanel::default()
         .frame(Frame {
@@ -86,30 +108,6 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
             egui_logger::logger_ui().show(ui);
         });    
     }
-
-    static ONCE: Once = Once::new();
-    ONCE.call_once(|| {
-        // Uncomment this to set other fonts.
-        // let mut fonts = FontDefinitions::default();
-        // let mut tweak = FontTweak::default();
-        // fonts.font_data.insert(
-        //     "my_font".to_owned(),
-        //     FontData::from_static(include_bytes!("Lobster-Regular.ttf")).tweak(tweak),
-        // );
-        // fonts
-        //     .families
-        //     .get_mut(&FontFamily::Proportional)
-        //     .unwrap()
-        //     .insert(0, "my_font".to_owned());
-        // fonts
-        //     .families
-        //     .get_mut(&FontFamily::Monospace)
-        //     .unwrap()
-        //     .push("my_font".to_owned());
-        // ctx.set_fonts(fonts);
-
-        // egui_extras::install_image_loaders(ctx);
-    });
 
     let opacity = app_state.widget_opacity.clamp(0.0, 1.0);
     let window_frame = egui::Frame::none()
