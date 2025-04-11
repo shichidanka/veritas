@@ -1,31 +1,23 @@
 use std::{ffi::c_void, mem, sync::LazyLock};
 
-use crate::{kreide::{native_types::{NativeArray, NativeObject}, statics::GLOBAL_VARS_PTR_OFFSET}, models::misc::{Avatar, Skill}};
+use crate::{kreide::{native_types::{NativeArray, NativeObject}, statics::MODULES_PTR_OFFSET}, models::misc::{Avatar, Skill}};
 use anyhow::{anyhow, Ok, Result};
 use function_name::named;
-use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar, TextmapStatic_GetText, UIGameEntityUtils_GetAvatarID}, gamecore::{AvatarSkillRowData_get_AttackType, AvatarSkillRowData_get_SkillName, BattleEventSkillRowData_get_AttackType, BattleEventSkillRowData_get_SkillName, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager, ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName}}, statics::{S_MODULEMANAGER_FIELD_OFFSET, TEXTID_TYPE_PTR_OFFSET}, types::rpg::{client::{AvatarData, ModuleManager, TextID}, gamecore::{AttackType, FixPoint, GameEntity, SkillData}}};
+use super::{functions::rpg::{client::{AvatarData_get_AvatarName, AvatarModule_GetAvatar, TextmapStatic_GetText, UIGameEntityUtils_GetAvatarID}, gamecore::{AvatarSkillRowData_get_AttackType, AvatarSkillRowData_get_SkillName, BattleEventSkillRowData_get_AttackType, BattleEventSkillRowData_get_SkillName, EntityManager__GetEntitySummoner, GamePlayStatic_GetEntityManager, ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName}}, statics::{MODULEMANAGER_FIELD_OFFSET, TEXTID_TYPE_PTR_OFFSET}, types::rpg::{client::{AvatarData, ModuleManager, TextID}, gamecore::{AttackType, FixPoint, GameEntity, SkillData}}};
 
-
-pub enum GlobalVars {
-    s_ModuleManager = S_MODULEMANAGER_FIELD_OFFSET,
-}
-
-impl GlobalVars {
-    #[named]
-    pub fn get_global_var(global_var: Self) -> *const c_void {
-        log::debug!(function_name!());
-        unsafe {
-            let global_vars_ptr = *(*GLOBAL_VARS_PTR_OFFSET as *const *const c_void);
-            // let global_vars_ptr = GlobalVars_cctor();
-            *(global_vars_ptr.byte_offset(global_var as _) as *const *const c_void)
-        }
+#[named]
+pub fn get_module_manager() -> *const c_void {
+    log::debug!(function_name!());
+    unsafe {
+        let modules_ptr = *(*MODULES_PTR_OFFSET as *const *const c_void);
+        *(modules_ptr.byte_offset(MODULEMANAGER_FIELD_OFFSET as _) as *const *const c_void)
     }
 }
 
 #[named]
 fn get_avatar_data_from_id(avatar_id: u32) -> *const AvatarData {
     log::debug!(function_name!());
-    let s_module_manager = GlobalVars::get_global_var(GlobalVars::s_ModuleManager) as *const ModuleManager;
+    let s_module_manager = get_module_manager() as *const ModuleManager;
     let avatar_module = unsafe { (*s_module_manager).AvatarModule };
     AvatarModule_GetAvatar(avatar_module, avatar_id)
 }

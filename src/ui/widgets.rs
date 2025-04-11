@@ -52,7 +52,7 @@ pub fn show_damage_distribution_widget(app_state: &mut AppState, ui: &mut Ui) {
 
 fn create_bar_data(battle_context: &BattleContext) -> Vec<(&Avatar, f64, usize)> {        
     let total_damage: Vec<f64> = battle_context.turn_history.iter()
-        .flat_map(|turn| turn.avatars_damage.iter())
+        .flat_map(|turn| turn.avatars_turn_damage.iter())
         .copied()
         .collect();
 
@@ -118,7 +118,7 @@ pub fn show_turn_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
                     .iter()
                     .enumerate()
                     .map(|(turn_idx, turn)| {
-                        [turn_idx as f64 + 1.0, turn.avatars_damage[i]]
+                        [turn_idx as f64 + 1.0, turn.avatars_turn_damage[i]]
                     })
                     .collect::<Vec<[f64; 2]>>();
 
@@ -146,9 +146,9 @@ pub fn show_av_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
         .show(ui, |plot_ui| {
             for (i, avatar) in battle_context.lineup.iter().enumerate() {
                 let color = helpers::get_character_color(i);
-                let points = battle_context.turn_history
+                let points = battle_context.av_history
                     .iter()
-                    .map(|turn| [turn.action_value, turn.avatars_damage[i]])
+                    .map(|turn| [turn.action_value, turn.avatars_turn_damage[i]])
                     .collect::<Vec<[f64; 2]>>();
 
                 if !points.is_empty() {
@@ -184,25 +184,23 @@ pub fn show_av_metrics(_app_state: &mut AppState, ui: &mut Ui) {
     ui.heading("Action Value Metrics");
     ui.separator();
     
-    if let Some(current_turn) = battle_context.turn_history.last() {
-        ui.label("Current Turn");
-        ui.horizontal(|ui| {
-            ui.label("AV:");
-            ui.label(format!("{:.2}", current_turn.action_value));
-        });
-        ui.horizontal(|ui| {
-            ui.label("Total Damage:");
-            ui.label(helpers::format_damage(current_turn.total_damage));
-        });
-        ui.horizontal(|ui| {
-            ui.label("DpAV:");
-            if current_turn.action_value > 0.0 {
-                ui.label(format!("{:.2}", current_turn.total_damage / current_turn.action_value));
-            } else {
-                ui.label("0.00");
-            }
-        });
-    }
+    ui.label("Current Turn");
+    ui.horizontal(|ui| {
+        ui.label("AV:");
+        ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
+    });
+    ui.horizontal(|ui| {
+        ui.label("Total Damage:");
+        ui.label(helpers::format_damage(battle_context.total_damage));
+    });
+    ui.horizontal(|ui| {
+        ui.label("DpAV:");
+        if battle_context.current_turn_info.action_value > 0.0 {
+            ui.label(format!("{:.2}", battle_context.total_damage / battle_context.current_turn_info.action_value));
+        } else {
+            ui.label("0.00");
+        }
+    });
 }
 
 fn create_pie_segments(real_time_damages: &Vec<f64>, avatars: &Vec<Avatar>) -> Vec<(Avatar, PieSegment, usize)> {

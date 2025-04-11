@@ -1,4 +1,4 @@
-use std::sync::{LazyLock, Mutex, MutexGuard};
+use std::{iter::zip, sync::{LazyLock, Mutex, MutexGuard}};
 
 use anyhow::{Context, Result};
 
@@ -31,10 +31,12 @@ pub struct BattleContext {
     pub state: BattleState,
     pub lineup: Vec<Avatar>,
     pub turn_history: Vec<TurnInfo>,
+    pub av_history: Vec<TurnInfo>,
     pub current_turn_info: TurnInfo,
     pub turn_count: usize,
     pub total_damage: f64,
     // Index w/ lineup index
+    // Used to update UI damage when dmg occurs
     pub real_time_damages: Vec<f64>,
 }
 
@@ -63,9 +65,9 @@ impl BattleContext {
         lineup: Vec<Avatar>,
     ) {
         battle_context.current_turn_info = TurnInfo::default();
-        battle_context.current_turn_info.avatars_damage = vec![0f64; lineup.len()];
-        battle_context.current_turn_info.avatars_damage_chunks = vec![Vec::new(); lineup.len()];
+        battle_context.current_turn_info.avatars_turn_damage = vec![0f64; lineup.len()];
         battle_context.turn_history = Vec::new();
+        battle_context.av_history = Vec::new();
         battle_context.turn_count = 0;
         battle_context.lineup = lineup.clone();
         battle_context.total_damage = 0.;
@@ -108,7 +110,7 @@ impl BattleContext {
             .with_context(|| format!("Could not find avatar {} in lineup", e.attacker))?;
         let turn = &mut battle_context.current_turn_info;
         // Record character damage chunk
-        turn.avatars_damage_chunks[lineup_index].push(e.damage);
+        turn.avatars_turn_damage[lineup_index] += e.damage;
 
         battle_context.total_damage += e.damage as f64;
         battle_context.real_time_damages[lineup_index] += e.damage as f64;
@@ -139,30 +141,33 @@ impl BattleContext {
         let mut turn_info = battle_context.current_turn_info.clone();
 
         // Calculate net damages
-        let avatars_damage = turn_info
-            .avatars_damage_chunks
-            .iter()
-            .map(|avatar_dmg_string| {
-                if avatar_dmg_string.is_empty() {
-                    0.0
-                } else {
-                    avatar_dmg_string.iter().sum()
-                }
-            })
-            .collect::<Vec<f64>>();
-        turn_info.total_damage = if avatars_damage.is_empty() {
+        turn_info.total_damage = if turn_info.avatars_turn_damage.is_empty() {
             0.0
         } else {
-            avatars_damage.iter().sum()
+            turn_info.avatars_turn_damage.iter().sum()
         };
-        turn_info.avatars_damage = avatars_damage;
         battle_context.turn_history.push(turn_info.clone());
 
+        if let Some(last_turn) = battle_context.av_history.last_mut() {
+            // If same AV, update damage
+            if last_turn.action_value == turn_info.action_value {
+                for (i, incoming_dmg) in turn_info.avatars_turn_damage.iter().enumerate() {
+                   last_turn.avatars_turn_damage[i] += incoming_dmg;
+                }
+            }
+            else {
+                battle_context.av_history.push(turn_info.clone());
+            }
+        }
+        else {
+            battle_context.av_history.push(turn_info.clone());
+        }
+        
         for (i, avatar) in battle_context.lineup.iter().enumerate() {
             log::info!(
                 "Turn Summary: {} has dealt {:.2} damage",
                 avatar,
-                turn_info.avatars_damage[i]
+                turn_info.avatars_turn_damage[i]
             )
         }
 
@@ -173,16 +178,14 @@ impl BattleContext {
 
         let packet_body = EventPacket::TurnEnd {
             avatars: battle_context.lineup.clone(),
-            avatars_damage: turn_info.avatars_damage,
+            avatars_damage: turn_info.avatars_turn_damage,
             total_damage: turn_info.total_damage,
             action_value: turn_info.action_value,
         };
 
         // Restart turn info
-        battle_context.current_turn_info = TurnInfo::default();
-        battle_context.current_turn_info.avatars_damage = vec![0f64; battle_context.lineup.len()];
-        battle_context.current_turn_info.avatars_damage_chunks =
-            vec![Vec::new(); battle_context.lineup.len()];
+        battle_context.current_turn_info.total_damage = 0.0;
+        battle_context.current_turn_info.avatars_turn_damage = vec![0f64; battle_context.lineup.len()];
         battle_context.turn_count += 1;
 
         Packet::from_event_packet(packet_body.clone())
@@ -209,6 +212,7 @@ impl BattleContext {
         battle_context.state = BattleState::Ended;
         let packet_body = EventPacket::BattleEnd {
             avatars: battle_context.lineup.clone(),
+            // add to packet av history
             turn_history: battle_context.turn_history.clone(),
             turn_count: battle_context.turn_count,
             total_damage: battle_context.total_damage as f64,

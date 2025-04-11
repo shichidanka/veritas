@@ -34,8 +34,7 @@ impl fmt::Display for Skill {
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
 pub struct TurnInfo {
     pub action_value: f64,
-    pub avatars_damage_chunks: Vec<Vec<f64>>,
-    pub avatars_damage: Vec<f64>,
+    pub avatars_turn_damage: Vec<f64>,
     pub total_damage: f64,
     // pub turn_owner: Avatar
 }
