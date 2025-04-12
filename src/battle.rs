@@ -1,4 +1,4 @@
-use std::{iter::zip, sync::{LazyLock, Mutex, MutexGuard}};
+use std::sync::{LazyLock, Mutex, MutexGuard};
 
 use anyhow::{Context, Result};
 
@@ -14,16 +14,12 @@ use crate::{
     server,
 };
 
+#[derive(Default)]
 pub enum BattleState {
+    #[default]
     Preparing,
     Started,
     Ended,
-}
-
-impl Default for BattleState {
-    fn default() -> Self {
-        Self::Preparing
-    }
 }
 
 #[derive(Default)]
@@ -212,7 +208,7 @@ impl BattleContext {
         battle_context.state = BattleState::Ended;
         let packet_body = EventPacket::BattleEnd {
             avatars: battle_context.lineup.clone(),
-            // add to packet av history
+            // TODO: add to packet av history
             turn_history: battle_context.turn_history.clone(),
             turn_count: battle_context.turn_count,
             total_damage: battle_context.total_damage as f64,
@@ -243,9 +239,7 @@ impl BattleContext {
             Result::Ok(event) => {
                 match event {
                     Event::OnBattleBegin => Self::handle_on_battle_begin_event(battle_context),
-                    Event::OnSetLineup(e) => {
-                        Self::handle_on_set_lineup_event(e, battle_context)
-                    }
+                    Event::OnSetLineup(e) => Self::handle_on_set_lineup_event(e, battle_context),
                     Event::OnDamage(e) => Self::handle_on_damage_event(e, battle_context),
                     Event::OnTurnBegin(e) => Self::handle_on_turn_begin_event(e, battle_context),
                     Event::OnTurnEnd => Self::handle_on_turn_end_event(battle_context),

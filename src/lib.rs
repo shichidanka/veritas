@@ -10,6 +10,7 @@ mod models;
 mod server;
 mod kreide;
 mod ui;
+mod logging;
 
 use std::sync::LazyLock;
 use windows::{
