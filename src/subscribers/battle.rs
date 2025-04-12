@@ -47,8 +47,10 @@ static_detour! {
 
 static mut TURN_BASED_GAME_MODE_REF: Option<*const TurnBasedGameMode> = None;
 
+#[named]
 fn get_elapsed_av() -> f64 {
     unsafe {
+        log::debug!(function_name!());
         match TURN_BASED_GAME_MODE_REF {
             Some(x) => fixpoint_to_raw(&(*x).ElapsedActionDelay__BackingField) * 10f64,
             None => panic!("There was no reference to RPG.GameCore.TurnBasedGameMode"),
