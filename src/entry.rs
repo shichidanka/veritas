@@ -12,7 +12,7 @@ fn entry() {
 
         while GetModuleHandleW(windows::core::w!("GameAssembly")).is_err() ||
             GetModuleHandleW(windows::core::w!("UnityPlayer")).is_err() {
-            thread::sleep(Duration::from_millis(10));
+            thread::sleep(Duration::from_millis(5000));
         }
 
         log::info!("Installing hooks...");

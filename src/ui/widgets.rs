@@ -1,4 +1,4 @@
-use egui::{ahash::HashMap, Stroke, Ui};
+use egui::{ahash::HashMap, Stroke, Ui, TextStyle};
 use egui_plot::{Legend, Plot, PlotPoints, Polygon, BarChart, Bar, Line};
 use crate::ui::app::Unit;
 
@@ -13,10 +13,13 @@ pub struct PieSegment {
 
 pub fn show_damage_distribution_widget(app_state: &mut AppState, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
+    let available = ui.available_size();
     Plot::new("damage_pie")
-        .legend(Legend::default().position(egui_plot::Corner::RightTop))
-        .height(300.0)
-        .width(ui.available_width() * 0.5)
+        .legend(Legend::default()
+            .position(egui_plot::Corner::RightTop)
+            .text_style(TextStyle::Small))
+        .height(available.y)
+        .width(available.x)
         .data_aspect(1.0)
         .clamp_grid(true)
         .show_grid(false)
@@ -70,10 +73,11 @@ fn create_bar_data(battle_context: &BattleContext) -> Vec<(&Avatar, f64, usize)>
 
 pub fn show_damage_bar_widget(_app_state: &mut AppState, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
+    let available = ui.available_size();
     Plot::new("damage_bars")
         .legend(Legend::default())
-        .height(300.0)
-        .width(ui.available_width())
+        .height(available.y)
+        .width(available.x)
         .allow_drag(false)
         .allow_zoom(false)
         .allow_scroll(false)
@@ -104,9 +108,13 @@ pub fn show_damage_bar_widget(_app_state: &mut AppState, ui: &mut Ui) {
 
 pub fn show_turn_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
+    let available = ui.available_size();
     Plot::new("turn_damage_plot")
-        .legend(Legend::default())
-        .height(250.0)
+        .legend(Legend::default()
+            .position(egui_plot::Corner::RightTop)
+            .text_style(TextStyle::Small))
+        .height(available.y)
+        .width(available.x)
         .include_y(0.0)
         .x_axis_label("Turn")
         .y_axis_label("Damage")
@@ -136,9 +144,13 @@ pub fn show_turn_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
 
 pub fn show_av_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
+    let available = ui.available_size();
     Plot::new("av_damage_plot")
-        .legend(Legend::default())
-        .height(250.0)
+        .legend(Legend::default()
+            .position(egui_plot::Corner::RightTop)
+            .text_style(TextStyle::Small))
+        .height(available.y)
+        .width(available.x)
         .include_y(0.0) 
         .x_axis_label("Action Value")
         .y_axis_label("Damage")
@@ -180,10 +192,6 @@ pub fn show_real_time_damage_graph(_app_state: &mut AppState, ui: &mut Ui) {
 
 pub fn show_av_metrics(_app_state: &mut AppState, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
-    
-    ui.heading("Action Value Metrics");
-    ui.separator();
-    
     ui.label("Current Turn");
     ui.horizontal(|ui| {
         ui.label("AV:");
