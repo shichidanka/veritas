@@ -145,9 +145,13 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
         .inner_margin(8.0)
         .rounding(5.0);
 
+    let transparent_frame = egui::Frame::none()
+        .inner_margin(8.0)
+        .rounding(5.0);
+
     if app_state.show_damage_distribution {
         egui::containers::Window::new("Damage Distribution")
-            .frame(window_frame)
+            .frame(transparent_frame)
             .resizable(true)
             .min_width(200.0)
             .min_height(200.0)
