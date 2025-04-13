@@ -9,6 +9,7 @@ use egui::TextStyle::Body;
 use egui::TextStyle::Button;
 use egui::TextStyle::Small;
 use egui::FontFamily::Proportional;
+
 #[derive(Default, PartialEq)]
 pub enum Unit {
     #[default]
@@ -16,7 +17,6 @@ pub enum Unit {
     ActionValue
 }
 
-#[derive(Default)]
 pub struct AppState {
     pub keybind: Option<egui::Key>,
     pub show_menu: bool,
@@ -32,21 +32,25 @@ pub struct AppState {
     pub text_scale: f32,
 }
 
-impl AppState {
-    fn new() -> Self {
+impl Default for AppState {
+    fn default() -> Self {
         Self {
+            keybind: None,
+            show_menu: false,
+            show_console: false,
             show_windows: false,
             show_damage_distribution: false,
             show_damage_bars: false,
             show_real_time_damage: false,
             show_av_metrics: false,
-            widget_opacity: 0.5,
+            widget_opacity: 0.15,
             graph_x_unit: Unit::Turn,
-            text_scale: 2.0,
-            ..Default::default()
+            text_scale: 1.25,
         }
     }
+}
 
+impl AppState {
     pub fn set_keybind(&mut self, key: egui::Key) {
         self.keybind = Some(key);
     }
