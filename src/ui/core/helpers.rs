@@ -1,11 +1,7 @@
 pub fn format_damage(value: f64) -> String {
     if value >= 1_000_000.0 {
         let m = value / 1_000_000.0;
-        if m.fract() < 0.1 {
-            format!("{}M", m.floor())
-        } else {
-            format!("{:.1}M", (value / 1_000_000.0).floor() * 10.0 / 10.0)
-        }
+        format!("{:.1}M", m)
     } else if value >= 1_000.0 {
         format!("{}K", (value / 1_000.0).floor())
     } else {
