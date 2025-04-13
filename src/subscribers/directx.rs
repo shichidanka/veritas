@@ -187,7 +187,10 @@ pub fn present(
                 EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state);
 
             // Example
-            app.ui_state.set_keybind(egui::Key::P);
+            app.ui_state.set_keybind(egui::Key::M, Some(egui::Modifiers {
+                ctrl: true,
+                ..Default::default()
+            }));
 
             OLD_WND_PROC
                 .set(mem::transmute(SetWindowLongPtrW(
@@ -243,7 +246,7 @@ unsafe extern "stdcall" fn hk_wnd_proc(
     let input = app.wnd_proc(msg, wparam, lparam);
     // Has some issues like blocking closing the process window
     // Handle keybinding
-    if let Some(keybind) = app.ui_state.keybind {
+    if let Some(keybind) = &app.ui_state.keybind {
         match input {
             InputResult::Key => {
                 for e in &app.input_manager.events {
@@ -253,20 +256,36 @@ unsafe extern "stdcall" fn hk_wnd_proc(
                             physical_key: _,
                             pressed,
                             repeat: _,
-                            modifiers: _,
+                            modifiers,
                         } => {
                             // Add modifiers as well
-                            if *key == keybind && *pressed {
-                                app.ui_state.show_menu = !app.ui_state.show_menu;
+                            if *key == keybind.key && *pressed  {
+                                if let Some(keybind_modifiers) = keybind.modifiers {
+                                    if modifiers.matches_exact(keybind_modifiers) {
+                                        app.ui_state.show_menu = !app.ui_state.show_menu;
 
-                                // We simulate alt to get cursor
-                                return CallWindowProcW(
-                                    *OLD_WND_PROC.get().unwrap(),
-                                    hwnd,
-                                    WM_KEYDOWN,
-                                    WPARAM(VK_MENU.0 as _),
-                                    LPARAM(0),
-                                );
+                                        // We simulate alt to get cursor
+                                        return CallWindowProcW(
+                                            *OLD_WND_PROC.get().unwrap(),
+                                            hwnd,
+                                            WM_KEYDOWN,
+                                            WPARAM(VK_MENU.0 as _),
+                                            LPARAM(0),
+                                        );        
+                                    }
+                                }
+                                else {
+                                    app.ui_state.show_menu = !app.ui_state.show_menu;
+
+                                    // We simulate alt to get cursor
+                                    return CallWindowProcW(
+                                        *OLD_WND_PROC.get().unwrap(),
+                                        hwnd,
+                                        WM_KEYDOWN,
+                                        WPARAM(VK_MENU.0 as _),
+                                        LPARAM(0),
+                                    );    
+                                }
                             }
                         }
                         _ => {}

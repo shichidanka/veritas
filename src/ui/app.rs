@@ -1,5 +1,5 @@
 use std::sync::Once;
-use egui::{CentralPanel, Color32, Context, FontId, Frame, Label, Slider, Vec2, Window};
+use egui::{epaint::text::{FontInsert, InsertFontFamily}, CentralPanel, Color32, Context, FontId, Frame, Label, Slider, Vec2, Window};
 use windows::Win32::{System::Console::GetConsoleWindow, UI::WindowsAndMessaging::{ShowWindow, SW_HIDE, SW_RESTORE, SW_SHOW}};
 use crate::ui::widgets;
 use egui::TextStyle::Name;
@@ -17,8 +17,13 @@ pub enum Unit {
     ActionValue
 }
 
+pub struct Keybind {
+    pub key: egui::Key,
+    pub modifiers: Option<egui::Modifiers>
+}
+
 pub struct AppState {
-    pub keybind: Option<egui::Key>,
+    pub keybind: Option<Keybind>,
     pub show_menu: bool,
     pub show_console: bool,
     
@@ -51,24 +56,54 @@ impl Default for AppState {
 }
 
 impl AppState {
-    pub fn set_keybind(&mut self, key: egui::Key) {
-        self.keybind = Some(key);
+    pub fn set_keybind(&mut self, key: egui::Key, modifiers: Option<egui::Modifiers>) {
+        self.keybind = Some({Keybind {
+            key,
+            modifiers
+        }});
     }
 }
 
 pub fn ui(ctx: &Context, app_state: &mut AppState) {
-    ctx.style_mut(|style| {
-        let factor = app_state.text_scale;
-        style.text_styles = [
-            (Heading, FontId::new(factor * 30.0, Proportional)),
-            (Name("Heading2".into()), FontId::new(factor * 25.0, Proportional)),
-            (Name("Context".into()), FontId::new(factor * 23.0, Proportional)),
-            (Body, FontId::new(factor * 18.0, Proportional)),
-            (Monospace, FontId::new(factor * 14.0, Proportional)),
-            (Button, FontId::new(factor * 14.0, Proportional)),
-            (Small, FontId::new(factor * 10.0, Proportional)),
-        ].into();
-    });    
+    static ONCE: Once = Once::new();
+    ONCE.call_once(|| {
+        let path = r"StarRail_Data\StreamingAssets\MiHoYoSDKRes\HttpServerResources\font\zh-cn.ttf";
+        match std::fs::read(path) {
+            Ok(font) => {
+                {
+                    // Start with the default fonts (we will be adding to them rather than replacing them).
+                    ctx.add_font(FontInsert::new(
+                        "game_font",
+                        egui::FontData::from_owned(font),
+                        vec![
+                            InsertFontFamily {
+                                family: egui::FontFamily::Proportional,
+                                priority: egui::epaint::text::FontPriority::Highest,
+                            },
+                            InsertFontFamily {
+                                family: egui::FontFamily::Monospace,
+                                priority: egui::epaint::text::FontPriority::Lowest,
+                            },
+                        ],
+                    ));                    
+                }
+            },
+            Err(e) => log::error!("{} : Failed to load {}. Defaulting to default font", e, path),
+        }
+
+        ctx.style_mut(|style| {
+            let factor = app_state.text_scale;
+            style.text_styles = [
+                (Heading, FontId::new(factor * 30.0, Proportional)),
+                (Name("Heading2".into()), FontId::new(factor * 25.0, Proportional)),
+                (Name("Context".into()), FontId::new(factor * 23.0, Proportional)),
+                (Body, FontId::new(factor * 18.0, Proportional)),
+                (Monospace, FontId::new(factor * 14.0, Proportional)),
+                (Button, FontId::new(factor * 14.0, Proportional)),
+                (Small, FontId::new(factor * 10.0, Proportional)),
+            ].into();
+        });    
+    });
 
     if app_state.show_menu {
         CentralPanel::default()
