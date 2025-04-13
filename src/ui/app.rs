@@ -93,6 +93,7 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
 
         ctx.style_mut(|style| {
             let factor = app_state.text_scale;
+            style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
             style.text_styles = [
                 (Heading, FontId::new(factor * 30.0, Proportional)),
                 (Name("Heading2".into()), FontId::new(factor * 25.0, Proportional)),
