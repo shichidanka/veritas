@@ -469,40 +469,28 @@ fn on_turn_end(instance: *const c_void, a1: i32) -> *const c_void {
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
-            ON_DAMAGE_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x674d700,
-            on_damage
-        );
-        subscribe_function!(ON_COMBO_Detour, *GAMEASSEMBLY_HANDLE + 0x6621fa0, on_combo);
-        subscribe_function!(
-            ON_USE_SKILL_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x65c3400,
-            on_use_skill
+            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x680fa70, on_damage
         );
         subscribe_function!(
-            ON_SET_LINEUP_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7f84500,
-            on_set_lineup
+            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0x645a040, on_combo
         );
         subscribe_function!(
-            ON_BATTLE_BEGIN_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x5df4a50,
-            on_battle_begin
+            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x666fb90, on_use_skill
         );
         subscribe_function!(
-            ON_BATTLE_END_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x5df4b70,
-            on_battle_end
+            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0x7fa0f70, on_set_lineup
         );
         subscribe_function!(
-            ON_TURN_BEGIN_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x5def070,
-            on_turn_begin
+            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x5c5fc00, on_battle_begin
         );
         subscribe_function!(
-            ON_TURN_END_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x5ddb620,
-            on_turn_end
+            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x5c5fd20, on_battle_end
+        );
+        subscribe_function!(
+            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x5c5aad0, on_turn_begin
+        );
+        subscribe_function!(
+            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x5c483a0, on_turn_end
         );
         Ok(())
     }
