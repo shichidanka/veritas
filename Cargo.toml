@@ -15,14 +15,17 @@ anyhow = "1.0.97"
 log = "0.4"
 egui = "0.31.1"
 egui_plot = "0.31.0"
-egui-directx11 = { git = "https://github.com/hessiser/egui-directx.git", rev = "fca2a7a" }
+# eido11 = { path = "../../egui-d11-overlay" }
+eido11 = { git = "https://github.com/hessiser/eido11-rs.git" }
+
+# egui-directx11 = { git = "https://github.com/hessiser/egui-directx.git", rev = "fca2a7a" }
 egui_logger = "0.6.3"
 function_name = "0.3.0"
 slog = "2.7.0"
 slog-term = "2.9.1"
 
 [dependencies.windows]
-version = "0.59.0"
+version = "0.60.0"
 features = [
     "Win32_Foundation",
     "Win32_System_LibraryLoader",

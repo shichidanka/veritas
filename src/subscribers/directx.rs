@@ -1,5 +1,4 @@
 use anyhow::Result;
-use egui_directx11::{app::EguiDx11, input_manager::InputResult};
 use retour::static_detour;
 use std::{
     cell::OnceCell,
@@ -171,150 +170,12 @@ pub fn get_vtable() -> Box<[usize; 205]> {
     }
 }
 
-static mut APP: OnceCell<EguiDx11<AppState>> = OnceCell::new();
-static mut OLD_WND_PROC: OnceCell<WNDPROC> = OnceCell::new();
-
-pub fn present(
-    swap_chain_vtbl: *const IDXGISwapChain_Vtbl,
-    sync_interval: u32,
-    flags: DXGI_PRESENT,
-) -> HRESULT {
-    unsafe {
-        static INIT: Once = Once::new();
-        INIT.call_once(|| {
-            let state = AppState::default();
-            let mut app =
-                EguiDx11::init_with_state(mem::transmute(&(swap_chain_vtbl)), app::ui, state);
-
-            // Example
-            app.ui_state.set_keybind(egui::Key::M, Some(egui::Modifiers {
-                ctrl: true,
-                ..Default::default()
-            }));
-
-            OLD_WND_PROC
-                .set(mem::transmute(SetWindowLongPtrW(
-                    app.hwnd,
-                    GWLP_WNDPROC,
-                    hk_wnd_proc as usize as _,
-                )))
-                .unwrap();
-            let _ = APP.set(app);
-        });
-
-        APP.get_mut()
-            .unwrap()
-            .present(mem::transmute(&(swap_chain_vtbl)));
-        Present_Detour.call(swap_chain_vtbl, sync_interval, flags)
-    }
-}
-
-pub fn resize_buffers(
-    swap_chain_vtbl: *const IDXGISwapChain_Vtbl,
-    buffer_count: u32,
-    width: u32,
-    height: u32,
-    new_format: DXGI_FORMAT,
-    swap_chain_flags: u32,
-) -> HRESULT {
-    unsafe {
-        let resize_buffers = || {
-            Resize_Buffers_Detour.call(
-                swap_chain_vtbl,
-                buffer_count,
-                width,
-                height,
-                new_format,
-                swap_chain_flags,
-            )
-        };
-        if let Some(app) = APP.get_mut() {
-            app.resize_buffers(mem::transmute(&(swap_chain_vtbl)), resize_buffers)
-        } else {
-            resize_buffers()
-        }
-    }
-}
-
-unsafe extern "stdcall" fn hk_wnd_proc(
-    hwnd: HWND,
-    msg: u32,
-    wparam: WPARAM,
-    lparam: LPARAM,
-) -> LRESULT {
-    let app = APP.get_mut().unwrap();
-    let input = app.wnd_proc(msg, wparam, lparam);
-    // Has some issues like blocking closing the process window
-    // Handle keybinding
-    if let Some(keybind) = &app.ui_state.keybind {
-        match input {
-            InputResult::Key => {
-                for e in &app.input_manager.events {
-                    match e {
-                        egui::Event::Key {
-                            key,
-                            physical_key: _,
-                            pressed,
-                            repeat: _,
-                            modifiers,
-                        } => {
-                            // Add modifiers as well
-                            if *key == keybind.key && *pressed  {
-                                if let Some(keybind_modifiers) = keybind.modifiers {
-                                    if modifiers.matches_exact(keybind_modifiers) {
-                                        app.ui_state.show_menu = !app.ui_state.show_menu;
-
-                                        // We simulate alt to get cursor
-                                        return CallWindowProcW(
-                                            *OLD_WND_PROC.get().unwrap(),
-                                            hwnd,
-                                            WM_KEYDOWN,
-                                            WPARAM(VK_MENU.0 as _),
-                                            LPARAM(0),
-                                        );        
-                                    }
-                                }
-                                else {
-                                    app.ui_state.show_menu = !app.ui_state.show_menu;
-
-                                    // We simulate alt to get cursor
-                                    return CallWindowProcW(
-                                        *OLD_WND_PROC.get().unwrap(),
-                                        hwnd,
-                                        WM_KEYDOWN,
-                                        WPARAM(VK_MENU.0 as _),
-                                        LPARAM(0),
-                                    );    
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            }
-            _ => {}
-        };
-    }
-
-    return if app.ui_state.show_menu {
-        LRESULT(1 as isize)
-    } else {
-        CallWindowProcW(*OLD_WND_PROC.get().unwrap(), hwnd, msg, wparam, lparam)
-    };
-}
 
 pub fn subscribe() -> Result<()> {
     let vtable = get_vtable();
     unsafe {
-        subscribe_function!(Present_Detour, vtable[8], present);
+        let overlay = AppState::default();
+        eido11::set_overlay(Box::new(overlay), mem::transmute(vtable[8]), mem::transmute(vtable[13])).unwrap();
     }
-    unsafe {
-        subscribe_function!(
-            Resize_Buffers_Detour,
-            vtable[13],
-            resize_buffers
-        );
-    }
-
     Ok(())
 }
