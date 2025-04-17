@@ -430,7 +430,7 @@ dependencies = [
 [[package]]
 name = "egui-directx11"
 version = "0.1.0"
-source = "git+https://github.com/hessiser/egui-directx.git?rev=fca2a7a#fca2a7a32a82d017753c47818c85d22f83d1b67c"
+source = "git+https://github.com/hessiser/egui-directx.git?rev=c73218d#c73218d5fde5cbfe1a08661a145aec334d9453a2"
 dependencies = [
  "arboard",
  "egui",
