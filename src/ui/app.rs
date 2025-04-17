@@ -1,6 +1,5 @@
 use std::sync::Once;
-use egui::{epaint::text::{FontInsert, InsertFontFamily}, CentralPanel, Color32, Context, FontId, Frame, Label, Slider, Vec2, Window};
-use windows::Win32::{System::Console::GetConsoleWindow, UI::WindowsAndMessaging::{ShowWindow, SW_HIDE, SW_RESTORE, SW_SHOW}};
+use egui::{epaint::text::{FontInsert, InsertFontFamily}, CentralPanel, Color32, Context, FontId, Frame, Slider, Stroke, Window};
 use crate::ui::widgets;
 use egui::TextStyle::Name;
 use egui::TextStyle::Heading;
@@ -176,14 +175,15 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
     }
 
     let opacity = app_state.widget_opacity.clamp(0.0, 1.0);
-    let window_frame = egui::Frame::none()
+    let window_frame = egui::Frame::new()
+        .stroke(Stroke::new(0.5, Color32::WHITE))
         .fill(Color32::from_black_alpha((255.0 * opacity) as u8))
         .inner_margin(8.0)
-        .rounding(5.0);
+        .corner_radius(15.0);
 
-    let transparent_frame = egui::Frame::none()
+    let transparent_frame = egui::Frame::new()
         .inner_margin(8.0)
-        .rounding(5.0);
+        .corner_radius(15.0);
 
     if app_state.show_damage_distribution {
         egui::containers::Window::new("Damage Distribution")
