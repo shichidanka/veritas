@@ -5,6 +5,7 @@ Described in here is a description of the source modules.
     - ``entry`` - The entrypoint of the binary. Waits for the needed modules to be loaded before each ``src/subscribers`` submodule subscribes. Afterwards, spawns the ``src/server``.
     - ``battle`` - The heart of this module is ``BattleContext``, which keeps track of battle events and dispatches the events to clients. ``BattleContext::handle_event`` is only called in ``src/subscribers/battle`` to handle and process the incoming event.
     - ``lib`` - Contains some macros and the address of the necessary module handle in order to initialize this module's own statics.
+    - ``logging`` - Just logging implementation for console/file/UI
     - ``models``
         - ``events`` - Contains the ``Event`` variant struct enums that both ``src/subscribers/battle`` and ``src/battle`` uses to handle and process battle events.
         - ``misc`` - Miscellaneous and non-specific data structures. Only used to store data that dispatched packets use.
