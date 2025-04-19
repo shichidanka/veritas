@@ -252,6 +252,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "edio11"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "egui",
+ "egui-directx11",
+ "log",
+ "retour",
+ "thiserror 2.0.12",
+ "windows",
+]
+
+[[package]]
 name = "egui"
 version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -298,20 +311,6 @@ dependencies = [
  "ahash",
  "egui",
  "emath",
-]
-
-[[package]]
-name = "eido11"
-version = "0.1.0"
-source = "git+https://github.com/hessiser/eido11-rs.git#123862bc894d8a23e36ce4e5f55eba83388a62bc"
-dependencies = [
- "arboard",
- "egui",
- "egui-directx11",
- "log",
- "retour",
- "thiserror 2.0.12",
- "windows",
 ]
 
 [[package]]
@@ -1105,10 +1104,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "ctor",
+ "edio11",
  "egui",
  "egui_logger",
  "egui_plot",
- "eido11",
  "function_name",
  "log",
  "retour",

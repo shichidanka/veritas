@@ -15,10 +15,9 @@ anyhow = "1.0.97"
 log = "0.4"
 egui = "0.31.1"
 egui_plot = "0.31.0"
-# eido11 = { path = "../../egui-d11-overlay" }
-eido11 = { git = "https://github.com/hessiser/eido11-rs.git" }
+edio11 = { path = "../../edio11-rs" }
+# edio11 = { git = "https://github.com/hessiser/eido11-rs.git" }
 
-# egui-directx11 = { git = "https://github.com/hessiser/egui-directx.git", rev = "fca2a7a" }
 egui_logger = "0.6.3"
 function_name = "0.3.0"
 slog = "2.7.0"

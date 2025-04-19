@@ -4,7 +4,7 @@ use crate::ui::app::Unit;
 
 use crate::{battle::BattleContext, models::misc::Avatar};
 
-use super::{app::AppState, core::helpers};
+use super::{app::AppState, helpers};
 
 pub struct PieSegment {
     pub points: Vec<[f64; 2]>,
