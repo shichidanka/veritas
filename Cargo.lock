@@ -254,6 +254,7 @@ dependencies = [
 [[package]]
 name = "edio11"
 version = "0.1.0"
+source = "git+https://github.com/hessiser/edio11-rs.git?rev=5b64a20#5b64a205fff546d036c13df8d4d154e794965987"
 dependencies = [
  "arboard",
  "egui",
@@ -281,8 +282,7 @@ dependencies = [
 [[package]]
 name = "egui-directx11"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66ffaeba1fbae28defe2249df3d7063cdb37d8305dce570c4f271f7376d42cca"
+source = "git+https://github.com/hessiser/egui-directx11.git?rev=14ea68d#14ea68d8063a17949cbcbc8b6cdb9975587d2a70"
 dependencies = [
  "egui",
  "log",

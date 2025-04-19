@@ -1,4 +1,4 @@
-use crate::{logging, subscribers};
+use crate::{logging, overlay, subscribers};
 use ctor::ctor;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use std::thread::{self};
@@ -17,7 +17,7 @@ fn entry() {
         }
 
         log::info!("Setting up...");
-        subscribers::directx::subscribe().unwrap();
+        overlay::initialize();
         subscribers::battle::subscribe().unwrap();
         log::info!("Finished setup.");
     });

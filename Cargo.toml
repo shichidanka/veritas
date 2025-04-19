@@ -15,8 +15,7 @@ anyhow = "1.0.97"
 log = "0.4"
 egui = "0.31.1"
 egui_plot = "0.31.0"
-edio11 = { path = "../../edio11-rs" }
-# edio11 = { git = "https://github.com/hessiser/eido11-rs.git" }
+edio11 = { git = "https://github.com/hessiser/edio11-rs.git", rev = "5b64a20" }
 
 egui_logger = "0.6.3"
 function_name = "0.3.0"

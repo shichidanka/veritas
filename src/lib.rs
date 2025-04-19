@@ -11,6 +11,7 @@ mod server;
 mod kreide;
 mod ui;
 mod logging;
+mod overlay;
 
 use std::sync::LazyLock;
 use windows::{

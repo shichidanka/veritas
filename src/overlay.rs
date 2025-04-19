@@ -39,23 +39,11 @@ use windows::{
     },
 };
 
-use crate::ui::app::{self, AppState};
+use crate::ui::app::{self, App};
 
 // rdbo Kiero
 // https://github.com/eugen15/directx-present-hook
 
-static_detour! {
-    pub static Present_Detour: unsafe extern "stdcall" fn(*const IDXGISwapChain_Vtbl, u32, DXGI_PRESENT) -> HRESULT;
-    pub static Resize_Buffers_Detour: fn(
-        *const IDXGISwapChain_Vtbl,
-        u32,
-        u32,
-        u32,
-        DXGI_FORMAT,
-        u32
-    ) -> HRESULT;
-
-}
 // This can be done in shorter calls
 // Should we tho?
 pub fn get_vtable() -> Box<[usize; 205]> {
@@ -171,11 +159,17 @@ pub fn get_vtable() -> Box<[usize; 205]> {
 }
 
 
-pub fn subscribe() -> Result<()> {
+pub fn initialize() -> Result<()> {
     let vtable = get_vtable();
     unsafe {
-        let overlay = AppState::default();
-        eido11::set_overlay(Box::new(overlay), mem::transmute(vtable[8]), mem::transmute(vtable[13])).unwrap();
+        edio11::set_overlay(Box::new(|ctx| {
+            let mut app = App::new(ctx);
+            app.set_menu_keybind(egui::Key::M, Some(egui::Modifiers {
+                ctrl: true,
+                ..Default::default()
+            }));
+            Box::new(app)
+        }), mem::transmute(vtable[8]), mem::transmute(vtable[13])).unwrap();
     }
     Ok(())
 }

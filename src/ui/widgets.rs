@@ -4,14 +4,14 @@ use crate::ui::app::Unit;
 
 use crate::{battle::BattleContext, models::misc::Avatar};
 
-use super::{app::AppState, helpers};
+use super::{app::App, helpers};
 
 pub struct PieSegment {
     pub points: Vec<[f64; 2]>,
     pub value: f64,
 }
 
-pub fn show_damage_distribution_widget(app_state: &mut AppState, ui: &mut Ui) {
+pub fn show_damage_distribution_widget(app_state: &mut App, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
     let available = ui.available_size();
     Plot::new("damage_pie")
@@ -71,7 +71,7 @@ fn create_bar_data(battle_context: &BattleContext) -> Vec<(&Avatar, f64, usize)>
         .collect()
 }
 
-pub fn show_damage_bar_widget(_app_state: &mut AppState, ui: &mut Ui) {
+pub fn show_damage_bar_widget(_app_state: &mut App, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
     let available = ui.available_size();
     Plot::new("damage_bars")
@@ -106,7 +106,7 @@ pub fn show_damage_bar_widget(_app_state: &mut AppState, ui: &mut Ui) {
         });
 }
 
-pub fn show_turn_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
+pub fn show_turn_damage_plot(_app_state: &mut App, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
     let available = ui.available_size();
     Plot::new("turn_damage_plot")
@@ -142,7 +142,7 @@ pub fn show_turn_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
         });
 }
 
-pub fn show_av_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
+pub fn show_av_damage_plot(_app_state: &mut App, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
     let available = ui.available_size();
     Plot::new("av_damage_plot")
@@ -175,7 +175,7 @@ pub fn show_av_damage_plot(_app_state: &mut AppState, ui: &mut Ui) {
         });
 }
 
-pub fn show_real_time_damage_graph(_app_state: &mut AppState, ui: &mut Ui) {
+pub fn show_real_time_damage_graph(_app_state: &mut App, ui: &mut Ui) {
     ui.vertical(|ui| {
         ui.horizontal(|ui| {
             ui.radio_value(&mut _app_state.graph_x_unit, Unit::Turn, "Turn");
@@ -190,7 +190,7 @@ pub fn show_real_time_damage_graph(_app_state: &mut AppState, ui: &mut Ui) {
     });
 }
 
-pub fn show_av_metrics(_app_state: &mut AppState, ui: &mut Ui) {
+pub fn show_av_metrics(_app_state: &mut App, ui: &mut Ui) {
     let battle_context = BattleContext::get_instance();
     ui.label("Current Turn");
     ui.horizontal(|ui| {
