@@ -87,7 +87,7 @@ pub fn ui(ctx: &Context, app_state: &mut AppState) {
                     ));                    
                 }
             },
-            Err(e) => log::error!("{} : Failed to load {}. Defaulting to default font", e, path),
+            Err(e) => log::warn!("{} : Could not locate {}. Defaulting to default font.", e, path),
         }
 
         ctx.style_mut(|style| {

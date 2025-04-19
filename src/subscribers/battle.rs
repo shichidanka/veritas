@@ -161,6 +161,9 @@ fn on_use_skill(
                             let e = match get_avatar_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(skill_owner) {
                                     Ok(avatar) => {
+                                        if skill.name.is_empty() {
+                                            return ON_USE_SKILL_Detour.call(instance, skill_index, a3, a4, skill_extra_use_param);
+                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {

@@ -16,10 +16,10 @@ fn entry() {
             thread::sleep(Duration::from_millis(10));
         }
 
-        log::info!("Installing hooks...");
+        log::info!("Setting up...");
         subscribers::directx::subscribe().unwrap();
         subscribers::battle::subscribe().unwrap();
-        log::info!("Finished installing hooks.");
+        log::info!("Finished setup.");
     });
 
     thread::spawn(|| {
