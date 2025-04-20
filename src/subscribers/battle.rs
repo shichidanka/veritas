@@ -5,7 +5,7 @@ use crate::kreide::types::*;
 use crate::kreide::*;
 // use crate::kreide::types::rpg::client::*;
 use crate::kreide::functions::rpg::gamecore::*;
-// use crate::kreide::functions::rpg::client::*;
+use crate::kreide::functions::rpg::client::*;
 use crate::kreide::helpers::*;
 
 use crate::models::events::OnBattleEndEvent;
@@ -28,8 +28,8 @@ static_detour! {
         *const c_void,
         *const c_void,
         *const NOPBAAAGGLA,
-        *const c_void,
-        *const c_void,
+        *const TurnBasedAbilityComponent,
+        *const TurnBasedAbilityComponent,
         *const GameEntity,
         *const GameEntity,
         *const GameEntity,
@@ -64,8 +64,8 @@ fn on_damage(
     task_context: *const c_void,
     damage_by_attack_property: *const c_void,
     nopbaaaggla: *const NOPBAAAGGLA,
-    turn_based_ability_component_1: *const c_void,
-    turn_based_ability_component_2: *const c_void,
+    attacker_ability: *const TurnBasedAbilityComponent,
+    defender_ability: *const TurnBasedAbilityComponent,
     attacker: *const GameEntity,
     defender: *const GameEntity,
     attacker_task_single_target: *const GameEntity,
@@ -114,6 +114,23 @@ fn on_damage(
                             }
                         };
                         event = Some(e);
+                    },
+                    EntityType::Snapshot => {
+                        // Unsure if this is if only a servant died and inflicted a DOT
+                        let character_data_comp = (*attacker_ability)._CharacterDataRef;
+                        let summoner_entity = (*character_data_comp).Summoner;
+
+                        let e = match helpers::get_avatar_from_entity(summoner_entity) {
+                            Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
+                                attacker: avatar,
+                                damage,
+                            })),
+                            Err(e) => {
+                                log::error!("Snapshot Event Error: {}", e);
+                                Err(anyhow!("{} Snapshot Event Error: {}", function_name!(), e))
+                            }
+                        };
+                        event = Some(e);
                     }
                     _ => log::warn!(
                         "Light entity type {} was not matched",
@@ -131,8 +148,8 @@ fn on_damage(
         task_context,
         damage_by_attack_property,
         nopbaaaggla,
-        turn_based_ability_component_1,
-        turn_based_ability_component_2,
+        attacker_ability,
+        defender_ability,
         attacker,
         defender,
         attacker_task_single_target,
