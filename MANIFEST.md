@@ -2,7 +2,7 @@
 Described in here is a description of the source modules. 
 # Manifest
 - ``src``
-    - ``entry`` - The entrypoint of the binary. Waits for the needed modules to be loaded before each ``src/subscribers`` submodule subscribes. Afterwards, spawns the ``src/server``.
+    - ``entry`` - The entrypoint of the binary. Initializes the overlay from ``src/overlay`` and Waits for the needed modules to be loaded before each ``src/subscribers`` submodule subscribes. Afterwards, spawns the ``src/server``.
     - ``battle`` - The heart of this module is ``BattleContext``, which keeps track of battle events and dispatches the events to clients. ``BattleContext::handle_event`` is only called in ``src/subscribers/battle`` to handle and process the incoming event.
     - ``lib`` - Contains some macros and the address of the necessary module handle in order to initialize this module's own statics.
     - ``logging`` - Just logging implementation for console/file/UI
