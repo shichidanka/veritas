@@ -46,7 +46,7 @@ Dispatched when handling an event.
 ## BattleBegin
 Dispatched when battle begins.
 
-## 🧙 SetBattleLineup
+## SetBattleLineup
 Dispatched when setting up battle lineup avatars.
 
 ### Structure
@@ -80,7 +80,7 @@ Dispatched when any entity's turn begins.
 
 ---
 
-## 🏁 TurnEnd
+## TurnEnd
 Dispatched when any entity's turn ends.
 
 ### Structure
@@ -104,7 +104,7 @@ Dispatched when any avatar kills an enemy.
 | attacker | [Avatar](#avatar) | The killer avatar |
 
 
-## 🧠 OnUseSkill
+## OnUseSkill
 Dispatched when any avatar uses any skill.
 
 ### Structure
@@ -116,7 +116,7 @@ Dispatched when any avatar uses any skill.
 
 ---
 
-## 🏆 BattleEnd
+## BattleEnd
 Dispatched when battle ends. Final summary of the battle.
 
 ### Structure
