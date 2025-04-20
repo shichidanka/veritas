@@ -1,4 +1,4 @@
-use std::{slice, string::FromUtf16Error};
+use std::{fmt::Display, slice, string::FromUtf16Error};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -21,6 +21,15 @@ impl NativeString {
             let ptr = &self.m_firstChar;
             let array = std::slice::from_raw_parts(ptr, self.m_stringLength as usize);
             String::from_utf16(&array)
+        }
+    }
+}
+
+impl Display for NativeString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.to_string() {
+            Ok(string) => write!(f, "{}", string),
+            Err(e) => write!(f, "{}", e),
         }
     }
 }
