@@ -1,3 +1,4 @@
+use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 use crate::ui::widgets;
 use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::FontFamily::Proportional;
@@ -37,7 +38,7 @@ pub struct App {
     pub menu_keybind: Option<Keybind>,
     pub show_menu: bool,
     pub show_console: bool,
-
+    fps: i32,
     show_windows: bool,
     show_damage_distribution: bool,
     show_damage_bars: bool,
@@ -108,7 +109,15 @@ impl Overlay for App {
                                             .into();
                                         });
                                     }
-    
+
+                                    ui.separator();
+                                    ui.label("FPS");
+                                    if ui.add(Slider::new(&mut self.fps, 0..=300))
+                                        .changed()
+                                    {
+                                        Application_set_targetFrameRate(self.fps)
+                                    };
+
                                     ui.separator();
                                     if ui.button("Close Menu").clicked() {
                                         self.show_menu = false;
@@ -150,7 +159,7 @@ impl Overlay for App {
                     .min_width(200.0)
                     .min_height(200.0)
                     .show(ctx, |ui| {
-                        widgets::show_damage_distribution_widget(self, ui);
+                        self.show_damage_distribution_widget(ui);
                     });
             }
     
@@ -161,7 +170,7 @@ impl Overlay for App {
                     .min_width(200.0)
                     .min_height(200.0)
                     .show(ctx, |ui| {
-                        widgets::show_damage_bar_widget(self, ui);
+                        self.show_damage_bar_widget(ui);
                     });
             }
     
@@ -172,7 +181,7 @@ impl Overlay for App {
                     .min_width(200.0)
                     .min_height(200.0)
                     .show(ctx, |ui| {
-                        widgets::show_real_time_damage_graph(self, ui);
+                        self.show_real_time_damage_graph(ui);
                     });
             }
     
@@ -183,7 +192,7 @@ impl Overlay for App {
                     .min_width(200.0)
                     .min_height(150.0)
                     .show(ctx, |ui| {
-                        widgets::show_av_metrics(self, ui);
+                        self.show_av_metrics(ui);
                     });
             }    
         }
@@ -292,9 +301,12 @@ impl App {
             .into();
         });
 
+        let fps = 60;
+        Application_set_targetFrameRate(fps);
         Self {
             widget_opacity: 0.15,
             text_scale,
+            fps,
             ..Default::default()
         }
     }

@@ -16,21 +16,17 @@ use windows::{
             },
             Dxgi::{
                 Common::{
-                    DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC,
-                    DXGI_MODE_SCALING_UNSPECIFIED, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
-                    DXGI_RATIONAL, DXGI_SAMPLE_DESC,
+                    DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED,
+                    DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC,
                 },
-                IDXGISwapChain, DXGI_SWAP_CHAIN_DESC,
-                DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD,
-                DXGI_USAGE_RENDER_TARGET_OUTPUT,
+                IDXGISwapChain, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH,
+                DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT,
             },
         },
-        UI::
-            WindowsAndMessaging::{
-                CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW,
-                UnregisterClassW, CS_HREDRAW, CS_VREDRAW, WINDOW_EX_STYLE, WNDCLASSEXW, WS_OVERLAPPEDWINDOW,
-            }
-        ,
+        UI::WindowsAndMessaging::{
+            CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW, UnregisterClassW,
+            CS_HREDRAW, CS_VREDRAW, WINDOW_EX_STYLE, WNDCLASSEXW, WS_OVERLAPPEDWINDOW,
+        },
     },
 };
 
@@ -153,18 +149,22 @@ pub fn get_vtable() -> Box<[usize; 205]> {
     }
 }
 
-
 pub fn initialize() -> Result<()> {
     let vtable = get_vtable();
     unsafe {
-        edio11::set_overlay(Box::new(|ctx| {
-            let mut app = App::new(ctx);
-            app.set_menu_keybind(egui::Key::M, Some(egui::Modifiers {
-                ctrl: true,
-                ..Default::default()
-            }));
-            Box::new(app)
-        }), mem::transmute(vtable[8]), mem::transmute(vtable[13])).unwrap();
+        edio11::set_overlay(
+            Box::new(|ctx| {
+                let mut app = App::new(ctx);
+                app.set_menu_keybind(
+                    egui::Key::M,
+                    Some(egui::Modifiers::CTRL),
+                );
+                Box::new(app)
+            }),
+            mem::transmute(vtable[8]),
+            mem::transmute(vtable[13]),
+        )
+        .unwrap();
     }
     Ok(())
 }
