@@ -15,22 +15,17 @@ pub struct NativeString {
     pub m_firstChar: u16,
 }
 
-impl NativeString {
-    pub fn to_string(&self) -> Result<String, FromUtf16Error> {
-        unsafe {
-            let ptr = &self.m_firstChar;
-            let array = std::slice::from_raw_parts(ptr, self.m_stringLength as usize);
-            String::from_utf16(&array)
-        }
-    }
-}
-
 impl Display for NativeString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.to_string() {
-            Ok(string) => write!(f, "{}", string),
-            Err(e) => write!(f, "{}", e),
+        unsafe {
+            let ptr: &u16 = &self.m_firstChar;
+            let array = std::slice::from_raw_parts(ptr, self.m_stringLength as usize);
+            match String::from_utf16(&array) {
+                Ok(string) => write!(f, "{}", string),
+                Err(e) => write!(f, "{}", e),
+            }
         }
+
     }
 }
 

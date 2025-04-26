@@ -6,7 +6,6 @@ use std::time::Duration;
 
 #[ctor]
 fn entry() {
-
     thread::spawn(|| unsafe {
         #[cfg(debug_assertions)]
         windows::Win32::System::Console::AllocConsole();    
@@ -16,6 +15,7 @@ fn entry() {
             thread::sleep(Duration::from_millis(10));
         }
 
+        log::info!("Build: {}", env!("TARGET_BUILD"));
         log::info!("Setting up...");
         overlay::initialize();
         subscribers::battle::subscribe().unwrap();

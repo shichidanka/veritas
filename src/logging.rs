@@ -56,14 +56,14 @@ impl MultiLogger {
         {
             let decorator = slog_term::PlainSyncDecorator::new(file);
             let drain = Mutex::new(slog_term::FullFormat::new(decorator).build()).fuse();
-            let slog = slog::Logger::root(drain, o!("version" => env!("CARGO_PKG_VERSION")));
+            let slog = slog::Logger::root(drain, o!());
             sloggers.push(slog);
         }
 
         {
             let decorator = slog_term::TermDecorator::new().build();
             let drain = Mutex::new(slog_term::FullFormat::new(decorator).build()).fuse();
-            let slog = slog::Logger::root(drain, o!("version" => env!("CARGO_PKG_VERSION")));
+            let slog = slog::Logger::root(drain, o!());
             sloggers.push(slog);
         }
     
