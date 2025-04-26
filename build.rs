@@ -78,4 +78,9 @@ fn main() {
         format!("{}-prod-{}-{}", region, patch, hotfix)
     };
     println!("cargo:rustc-env=TARGET_BUILD={}", build_metadata);
+
+    winres::WindowsResource::new()
+        .set("FileDescription", &build_metadata)
+        .compile()
+        .unwrap();
 }
