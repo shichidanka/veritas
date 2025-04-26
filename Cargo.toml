@@ -5,10 +5,10 @@ license-file = "LICENSE"
 repository = "https://github.com/hessiser/veritas/"
 
 [package.metadata]
-region = "global"
+region = "cn"
 is_beta = true
 patch = "3.2.3"
-hotfix = "0.4"
+hotfix = "0.1"
 
 [lib]
 crate-type = ["cdylib"]
