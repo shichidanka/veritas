@@ -1,7 +1,14 @@
 [package]
 name = "veritas"
-version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+repository = "https://github.com/hessiser/veritas/"
+
+[package.metadata]
+region = "global"
+is_beta = true
+patch = "3.2.3"
+hotfix = "0.4"
 
 [lib]
 crate-type = ["cdylib"]
@@ -36,3 +43,8 @@ features = [
     "Win32_Graphics_Dxgi_Common",
     "Win32_Graphics_Direct3D11"
 ]
+
+[build-dependencies]
+cargo_metadata = "0.19.2"
+regex = "1.11.1"
+toml_edit = "0.22.25"
