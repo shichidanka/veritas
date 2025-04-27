@@ -7,7 +7,7 @@ repository = "https://github.com/hessiser/veritas/"
 [package.metadata]
 region = "global"
 is_beta = true
-patch = "3.2.3"
+patch = "3.2.4"
 hotfix = "0.4"
 
 [lib]
