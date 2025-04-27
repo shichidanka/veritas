@@ -1,5 +1,3 @@
-use crate::kreide::functions::unityengine::Application_get_targetFrameRate;
-use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::Key;
 use egui::KeyboardShortcut;
@@ -32,7 +30,6 @@ pub struct App {
     pub menu_keybind: Option<Keybind>,
     pub show_menu: bool,
     pub show_console: bool,
-    fps: i32,
     show_damage_distribution: bool,
     show_damage_bars: bool,
     show_real_time_damage: bool,
@@ -80,14 +77,6 @@ impl Overlay for App {
                                     ui.separator();
                                     ui.label("Window Opacity");
                                     ui.add(Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""));
-    
-                                    ui.separator();
-                                    ui.label("FPS");
-                                    if ui.add(Slider::new(&mut self.fps, 0..=300))
-                                        .changed()
-                                    {
-                                        Application_set_targetFrameRate(self.fps)
-                                    };
 
                                     ui.separator();
                                     if ui.button("Close Menu").clicked() {
@@ -245,9 +234,12 @@ impl App {
             ),
         }
 
+        ctx.style_mut(|style| {
+            style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
+        });
+
         Self {
             widget_opacity: 0.15,
-            fps: Application_get_targetFrameRate(),
             ..Default::default()
         }
     }
