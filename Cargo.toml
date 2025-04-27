@@ -30,7 +30,7 @@ slog = "2.7.0"
 slog-term = "2.9.1"
 
 [dependencies.windows]
-version = "0.60.0"
+version = "0.61.1"
 features = [
     "Win32_Foundation",
     "Win32_System_LibraryLoader",
