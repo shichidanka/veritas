@@ -1,4 +1,4 @@
-use std::{fmt::Display, slice, string::FromUtf16Error};
+use std::{fmt::Display, slice};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]

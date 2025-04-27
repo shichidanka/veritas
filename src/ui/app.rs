@@ -1,20 +1,13 @@
 use crate::kreide::functions::unityengine::Application_get_targetFrameRate;
 use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
-use crate::ui::widgets;
 use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
-use egui::FontFamily::Proportional;
 use egui::Key;
+use egui::KeyboardShortcut;
 use egui::Modifiers;
 use egui::Stroke;
-use egui::TextStyle::Body;
-use egui::TextStyle::Button;
-use egui::TextStyle::Heading;
-use egui::TextStyle::Monospace;
-use egui::TextStyle::Name;
-use egui::TextStyle::Small;
 use egui::{
     epaint::text::{FontInsert, InsertFontFamily},
-    CentralPanel, Color32, Context, FontId, Frame, Slider, Window,
+    CentralPanel, Color32, Context, Frame, Slider, Window,
 };
 use windows::Win32::{
     Foundation::{LPARAM, WPARAM},
@@ -49,8 +42,14 @@ pub struct App {
     pub should_hide: bool
 }
 
+pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
+
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
+        if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
+            self.should_hide = !self.should_hide;
+        }
+
         if !self.should_hide {
             if self.show_menu {
                 CentralPanel::default()
@@ -58,7 +57,7 @@ impl Overlay for App {
                         fill: Color32::GRAY.gamma_multiply(0.25),
                         ..Default::default()
                     })
-                    .show(ctx, |ui: &mut egui::Ui| {
+                    .show(ctx, |_ui: &mut egui::Ui| {
                         Window::new("Overlay Menu")
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .resizable(false)
@@ -205,12 +204,6 @@ impl Overlay for App {
                                         }
                                     }
                                 }    
-                            }
-
-                            if *key == Key::H && *pressed {
-                                if modifiers.matches_exact(Modifiers::CTRL) {
-                                    self.should_hide = !self.should_hide;
-                                }
                             }
                         }
                         _ => {}

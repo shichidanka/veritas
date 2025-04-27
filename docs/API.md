@@ -16,18 +16,18 @@ All event data is transmitted using a binary `Packet` structure.
 # Events
 This section describes events dispatched by the server.
 
-| EventType       | Description                                                 |
-| --------------- | ----------------------------------------------------------- |
-| Heartbeat       | Heartbeat dispatched every second.                          |
-| Error           | Dispatched when handling an event.                          |
-| BattleBegin     | Dispatched when battle begins.                              |
-| SetBattleLineup | Dispatched when setting up battle lineup avatars.           |
-| OnDamage        | Dispatched when any avatar inflicts any instance of damage. |
-| TurnBegin       | Dispatched when any entity's turn begins.                   |
-| TurnEnd         | Dispatched when any entity's turn ends.                     |
-| OnKill          | Dispatched when any avatar kills an enemy.                  |
-| OnUseSkill      | Dispatched when any avatar uses any skill.                  |
-| BattleEnd       | Dispatched when battle ends.                                |
+| EventType         | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| Heartbeat         | Heartbeat dispatched every second.                          |
+| Error             | Dispatched when handling an event.                          |
+| OnBattleBegin     | Dispatched when battle begins.                              |
+| OnSetBattleLineup | Dispatched when setting up battle lineup avatars.           |
+| OnDamage          | Dispatched when any avatar inflicts any instance of damage. |
+| OnTurnBegin       | Dispatched when any entity's turn begins.                   |
+| OnTurnEnd         | Dispatched when any entity's turn ends.                     |
+| OnKill            | Dispatched when any avatar kills an enemy.                  |
+| OnUseSkill        | Dispatched when any avatar uses any skill.                  |
+| OnBattleEnd       | Dispatched when battle ends.                                |
 
 ##  Heartbeat
 Heartbeat dispatched every second. Clients can handle this event to determine whether the connection is alive.
@@ -43,10 +43,10 @@ Dispatched when handling an event.
 
 ---
 
-## BattleBegin
+## OnBattleBegin
 Dispatched when battle begins.
 
-## SetBattleLineup
+## OnSetBattleLineup
 Dispatched when setting up battle lineup avatars.
 
 ### Structure
@@ -69,7 +69,7 @@ Dispatched when any avatar inflicts any instance of damage.
 
 ---
 
-## TurnBegin
+## OnTurnBegin
 Dispatched when any entity's turn begins.
 
 ### Structure
@@ -80,7 +80,7 @@ Dispatched when any entity's turn begins.
 
 ---
 
-## TurnEnd
+## OnTurnEnd
 Dispatched when any entity's turn ends.
 
 ### Structure
@@ -116,7 +116,7 @@ Dispatched when any avatar uses any skill.
 
 ---
 
-## BattleEnd
+## OnBattleEnd
 Dispatched when battle ends. Final summary of the battle.
 
 ### Structure

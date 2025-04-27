@@ -181,8 +181,6 @@ pub struct MMNDIEBMDNL {
     pub NMJEMHAMIHD: i32,                              // 0x90
 }
 pub mod rpg {
-    use crate::kreide::types::*;
-    use std::ffi::c_void;
     pub mod client {
         use crate::kreide::types::*;
         use std::ffi::c_void;
