@@ -3,6 +3,7 @@ use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Modifiers;
 use egui::Stroke;
+use egui::TextEdit;
 use egui::{
     epaint::text::{FontInsert, InsertFontFamily},
     CentralPanel, Color32, Context, Frame, Slider, Window,
@@ -11,7 +12,6 @@ use windows::Win32::{
     Foundation::{LPARAM, WPARAM},
     UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::WM_KEYDOWN},
 };
-
 
 #[derive(Default, PartialEq)]
 pub enum Unit {
@@ -36,7 +36,9 @@ pub struct App {
     show_av_metrics: bool,
     widget_opacity: f32,
     pub graph_x_unit: Unit,
-    pub should_hide: bool
+    pub should_hide: bool,
+    streamer_mode: bool,
+    streamer_msg: String
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
@@ -61,7 +63,8 @@ impl Overlay for App {
                             .show(ctx, |ui| {
                                 ui.vertical_centered(|ui| {
                                     ui.heading("Widget Controls");
-    
+
+                                    ui.checkbox(&mut self.streamer_mode, "Streamer Mode");
                                     ui.checkbox(&mut self.show_console, "Show Logs");
                                     ui.checkbox(
                                         &mut self.show_damage_distribution,
@@ -73,10 +76,18 @@ impl Overlay for App {
                                         "Show Real-Time Damage",
                                     );
                                     ui.checkbox(&mut self.show_av_metrics, "Show AV Metrics");
-    
+
                                     ui.separator();
                                     ui.label("Window Opacity");
-                                    ui.add(Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""));
+                                    ui.add(
+                                        Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""),
+                                    );
+
+                                    ui.separator();
+                                    ui.label("Streamer Message");
+                                    ui.add(
+                                        TextEdit::singleline(&mut self.streamer_msg),
+                                    );
 
                                     ui.separator();
                                     if ui.button("Close Menu").clicked() {
@@ -86,7 +97,7 @@ impl Overlay for App {
                             });
                     });
             }
-    
+
             if self.show_console {
                 egui::Window::new("Log")
                     .resizable(true)
@@ -102,16 +113,16 @@ impl Overlay for App {
                         });
                     });
             }
-    
+
             let opacity = self.widget_opacity.clamp(0.0, 1.0);
             let window_frame = egui::Frame::new()
                 .fill(Color32::from_black_alpha((255.0 * opacity) as u8))
                 .stroke(Stroke::new(0.5, Color32::WHITE))
                 .inner_margin(8.0)
                 .corner_radius(10.0);
-    
+
             let transparent_frame = egui::Frame::new().inner_margin(8.0);
-    
+
             if self.show_damage_distribution {
                 egui::containers::Window::new("Damage Distribution")
                     .frame(transparent_frame)
@@ -122,7 +133,7 @@ impl Overlay for App {
                         self.show_damage_distribution_widget(ui);
                     });
             }
-    
+
             if self.show_damage_bars {
                 egui::containers::Window::new("Damage by Character")
                     .frame(window_frame)
@@ -133,7 +144,7 @@ impl Overlay for App {
                         self.show_damage_bar_widget(ui);
                     });
             }
-    
+
             if self.show_real_time_damage {
                 egui::containers::Window::new("Real-Time Damage")
                     .frame(window_frame)
@@ -144,7 +155,7 @@ impl Overlay for App {
                         self.show_real_time_damage_graph(ui);
                     });
             }
-    
+
             if self.show_av_metrics {
                 egui::containers::Window::new("Action Value Metrics")
                     .frame(window_frame)
@@ -154,7 +165,13 @@ impl Overlay for App {
                     .show(ctx, |ui| {
                         self.show_av_metrics(ui);
                     });
-            }    
+            }
+        }
+
+        if self.streamer_mode {
+            egui::TopBottomPanel::bottom("statusbar").show(ctx, |ui| {
+                ui.label(&self.streamer_msg);
+            });
         }
     }
 
@@ -180,7 +197,7 @@ impl Overlay for App {
                                     if let Some(keybind_modifiers) = menu_keybind.modifiers {
                                         if modifiers.matches_exact(keybind_modifiers) {
                                             self.show_menu = !self.show_menu;
-    
+
                                             return Some(WindowProcessOptions {
                                                 // Simulate alt to get cursor
                                                 window_message: Some(WindowMessage {
@@ -192,7 +209,7 @@ impl Overlay for App {
                                             });
                                         }
                                     }
-                                }    
+                                }
                             }
                         }
                         _ => {}
@@ -240,6 +257,8 @@ impl App {
 
         Self {
             widget_opacity: 0.15,
+            streamer_mode: true,
+            streamer_msg: String::from("Powered by Egui!"),
             ..Default::default()
         }
     }
