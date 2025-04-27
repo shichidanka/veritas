@@ -1,6 +1,7 @@
 pub mod unityengine {
 	use std::sync::LazyLock;
 	pub static Application_set_targetFrameRate: LazyLock<fn(i32)> = lazy_initialize_address!(0xe65e5f0);
+	pub static Application_get_targetFrameRate: LazyLock<fn() -> i32> = lazy_initialize_address!(0xe65e5e0);
 }
 	
 pub mod rpg {

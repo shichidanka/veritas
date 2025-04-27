@@ -1,3 +1,4 @@
+use crate::kreide::functions::unityengine::Application_get_targetFrameRate;
 use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 use crate::ui::widgets;
 use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
@@ -39,14 +40,12 @@ pub struct App {
     pub show_menu: bool,
     pub show_console: bool,
     fps: i32,
-    show_windows: bool,
     show_damage_distribution: bool,
     show_damage_bars: bool,
     show_real_time_damage: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
     pub graph_x_unit: Unit,
-    pub text_scale: f32,
     pub should_hide: bool
 }
 
@@ -83,33 +82,6 @@ impl Overlay for App {
                                     ui.label("Window Opacity");
                                     ui.add(Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""));
     
-                                    ui.separator();
-                                    ui.label("Text Size");
-                                    if ui
-                                        .add(Slider::new(&mut self.text_scale, 0.5..=3.0).text(""))
-                                        .changed()
-                                    {
-                                        ctx.style_mut(|style| {
-                                            let factor = self.text_scale;
-                                            style.text_styles = [
-                                                (Heading, FontId::new(factor * 30.0, Proportional)),
-                                                (
-                                                    Name("Heading2".into()),
-                                                    FontId::new(factor * 25.0, Proportional),
-                                                ),
-                                                (
-                                                    Name("Context".into()),
-                                                    FontId::new(factor * 23.0, Proportional),
-                                                ),
-                                                (Body, FontId::new(factor * 18.0, Proportional)),
-                                                (Monospace, FontId::new(factor * 14.0, Proportional)),
-                                                (Button, FontId::new(factor * 14.0, Proportional)),
-                                                (Small, FontId::new(factor * 10.0, Proportional)),
-                                            ]
-                                            .into();
-                                        });
-                                    }
-
                                     ui.separator();
                                     ui.label("FPS");
                                     if ui.add(Slider::new(&mut self.fps, 0..=300))
@@ -254,7 +226,6 @@ impl Overlay for App {
 
 impl App {
     pub fn new(ctx: Context) -> Self {
-        let text_scale = 1.25;
         let path = r"StarRail_Data\StreamingAssets\MiHoYoSDKRes\HttpServerResources\font\zh-cn.ttf";
         match std::fs::read(path) {
             Ok(font) => {
@@ -281,32 +252,9 @@ impl App {
             ),
         }
 
-        ctx.style_mut(|style| {
-            style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
-            style.text_styles = [
-                (Heading, FontId::new(text_scale * 30.0, Proportional)),
-                (
-                    Name("Heading2".into()),
-                    FontId::new(text_scale * 25.0, Proportional),
-                ),
-                (
-                    Name("Context".into()),
-                    FontId::new(text_scale * 23.0, Proportional),
-                ),
-                (Body, FontId::new(text_scale * 18.0, Proportional)),
-                (Monospace, FontId::new(text_scale * 14.0, Proportional)),
-                (Button, FontId::new(text_scale * 14.0, Proportional)),
-                (Small, FontId::new(text_scale * 10.0, Proportional)),
-            ]
-            .into();
-        });
-
-        let fps = 60;
-        Application_set_targetFrameRate(fps);
         Self {
             widget_opacity: 0.15,
-            text_scale,
-            fps,
+            fps: Application_get_targetFrameRate(),
             ..Default::default()
         }
     }
