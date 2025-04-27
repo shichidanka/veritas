@@ -91,7 +91,7 @@ impl BattleContext {
             log::info!("{} was loaded in lineup", avatar);
         }
 
-        let packet_body = EventPacket::SetBattleLineup {
+        let packet_body = EventPacket::OnSetBattleLineup {
             avatars: battle_context.lineup.clone(),
         };
         Packet::from_event_packet(packet_body.clone())
@@ -126,7 +126,7 @@ impl BattleContext {
         let action_value = e.action_value;
         battle_context.current_turn_info.action_value = action_value;
         log::info!("AV: {:.2}", action_value);
-        let packet_body = EventPacket::TurnBegin { action_value };
+        let packet_body = EventPacket::OnTurnBegin { action_value };
         Packet::from_event_packet(packet_body.clone())
             .with_context(|| format!("Failed to create {}", packet_body.name()))
     }
@@ -176,7 +176,7 @@ impl BattleContext {
             );
         }
 
-        let packet_body = EventPacket::TurnEnd {
+        let packet_body = EventPacket::OnTurnEnd {
             avatars: battle_context.lineup.clone(),
             avatars_damage: turn_info.avatars_turn_damage.clone(),
             total_damage: turn_info.total_damage,
@@ -210,7 +210,7 @@ impl BattleContext {
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         battle_context.state = BattleState::Ended;
-        let packet_body = EventPacket::BattleEnd {
+        let packet_body = EventPacket::OnBattleEnd {
             avatars: battle_context.lineup.clone(),
             // TODO: add to packet av history
             turn_history: battle_context.turn_history.clone(),

@@ -38,13 +38,16 @@ fn main() {
                         patch.major += 1;
                         patch.minor = 0;
                         patch.revision = 0;
+                        metadata["hotfix"] = toml_edit::value(0);
                     },
                     "MINOR_PATCH" => {
                         patch.minor += 1;
                         patch.revision = 0;
+                        metadata["hotfix"] = toml_edit::value(0);
                     },
                     "REVISION_PATCH" => {
                         patch.revision += 1;
+                        metadata["hotfix"] = toml_edit::value(0);
                     },
                     "HOTFIX_PATCH" => {
                         let hotfix = metadata["hotfix"].as_str().unwrap().parse::<f32>().unwrap() + 0.1;
@@ -78,4 +81,9 @@ fn main() {
         format!("{}-prod-{}-{}", region, patch, hotfix)
     };
     println!("cargo:rustc-env=TARGET_BUILD={}", build_metadata);
+
+    winres::WindowsResource::new()
+        .set("FileDescription", &build_metadata)
+        .compile()
+        .unwrap();
 }

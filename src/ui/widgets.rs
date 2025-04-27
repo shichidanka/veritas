@@ -1,4 +1,4 @@
-use egui::{ahash::HashMap, Stroke, Ui, TextStyle};
+use egui::{Stroke, Ui, TextStyle};
 use egui_plot::{Legend, Plot, PlotPoints, Polygon, BarChart, Bar, Line};
 use crate::ui::app::Unit;
 
@@ -39,7 +39,7 @@ impl App {
                         let percentage = segment.value / total_damage * 100.0;
     
                         let plot_points = PlotPoints::new(segment.points);
-                        let polygon = Polygon::new(plot_points)
+                        let polygon = Polygon::new("Damage Pie", plot_points)
                             .stroke(Stroke::new(1.5, color))
                             .name(format!(
                                 "{}: {:.1}% ({} dmg)",
@@ -85,7 +85,7 @@ impl App {
                     })
                     .collect();
     
-                plot_ui.bar_chart(BarChart::new(bars));
+                plot_ui.bar_chart(BarChart::new("Damage Bars", bars));
             });
     }
     
@@ -115,8 +115,7 @@ impl App {
     
                     if !points.is_empty() {
                         plot_ui.line(
-                            Line::new(PlotPoints::from(points))
-                                .name(&avatar.name)
+                            Line::new(&avatar.name, PlotPoints::from(points))
                                 .color(color)
                                 .width(2.0)
                         );
@@ -148,8 +147,7 @@ impl App {
     
                     if !points.is_empty() {
                         plot_ui.line(
-                            Line::new(PlotPoints::from(points))
-                                .name(&avatar.name)
+                            Line::new(&avatar.name, PlotPoints::from(points))
                                 .color(color)
                                 .width(2.0)
                         );

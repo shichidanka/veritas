@@ -76,12 +76,11 @@ event_packet!(
     Error { msg: String }
     // Game
     BattleBegin {}
-    SetBattleLineup { avatars: Vec<Avatar> }
+    OnSetBattleLineup { avatars: Vec<Avatar> }
     OnDamage { attacker: Avatar, damage: f64 }
-    TurnBegin { action_value: f64 }
-    TurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f64>, total_damage: f64, action_value: f64 }
+    OnTurnBegin { action_value: f64 }
+    OnTurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f64>, total_damage: f64, action_value: f64 }
     OnKill { attacker: Avatar }
     OnUseSkill { avatar: Avatar, skill: Skill }
-
-    BattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, action_value: f64 }
+    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, action_value: f64 }
 );
