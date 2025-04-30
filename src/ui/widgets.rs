@@ -188,8 +188,8 @@ impl App {
         });
         ui.horizontal(|ui| {
             ui.label("DpAV:");
-            if battle_context.current_turn_info.action_value > 0.0 {
-                ui.label(format!("{:.2}", battle_context.total_damage / battle_context.current_turn_info.action_value));
+            if battle_context.total_elapsed_action_value > 0.0 {
+                ui.label(format!("{:.2}", battle_context.total_damage / battle_context.total_elapsed_action_value));
             } else {
                 ui.label("0.00");
             }
