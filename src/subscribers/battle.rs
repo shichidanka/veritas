@@ -51,11 +51,9 @@ static_detour! {
 }
 
 #[named]
-fn get_elapsed_av(game_mode: *const TurnBasedGameMode) -> f64 {
-    unsafe {
-        log::debug!(function_name!());
-        fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64
-    }
+unsafe fn get_elapsed_av(game_mode: *const TurnBasedGameMode) -> f64 {
+    log::debug!(function_name!());
+    fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64
 }
 
 // Called on any instance of damage
@@ -502,10 +500,12 @@ fn on_battle_begin(instance: *const TurnBasedGameMode) {
 fn on_battle_end(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     ON_BATTLE_END_Detour.call(instance);
-    BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
-        total_elapsed_action_value: get_elapsed_av(instance),
-    })));
-}
+    unsafe {
+        BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
+            total_elapsed_action_value: get_elapsed_av(instance),
+        })));           
+    }
+ }
 
 #[named]
 fn on_turn_begin(instance: *const TurnBasedGameMode) {
