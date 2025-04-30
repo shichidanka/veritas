@@ -548,9 +548,8 @@ fn on_turn_end(instance: *const c_void, a1: i32) -> *const c_void {
     log::debug!(function_name!());
     // Can match player v enemy turn w/
     // RPG.GameCore.TurnBasedGameMode.GetCurrentTurnTeam
-    let res = ON_TURN_END_Detour.call(instance, a1);
     BattleContext::handle_event(Ok(Event::OnTurnEnd));
-    return res;
+    ON_TURN_END_Detour.call(instance, a1)
 }
 
 pub fn on_update_wave(instance: *const TurnBasedGameMode) {
