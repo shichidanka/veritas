@@ -40,7 +40,6 @@ pub struct BattleContext {
     pub max_waves: u32,
     pub wave: u32,
     pub cycle: u32,
-
 }
 
 static BATTLE_CONTEXT: LazyLock<Mutex<BattleContext>> =
@@ -236,7 +235,10 @@ impl BattleContext {
             turn_count: battle_context.turn_count,
             total_damage: battle_context.total_damage as f64,
             total_elapsed_action_value: e.total_elapsed_action_value,
-            action_value: cur_action_value
+            action_value: cur_action_value,
+            cycle: battle_context.cycle,
+            wave: battle_context.wave,
+
         };
         Packet::from_event_packet(packet_body.clone())
             .with_context(|| format!("Failed to create {}", packet_body.name()))
