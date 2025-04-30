@@ -62,6 +62,22 @@ impl BattleContext {
         res.map_or(None, |(index, _)| Some(index))
     }
 
+    fn initialize_battle_context(
+        battle_context: &mut MutexGuard<'static, Self>,
+    ) {
+        battle_context.current_turn_info = TurnInfo::default();
+        battle_context.turn_history = Vec::new();
+        battle_context.av_history = Vec::new();
+        battle_context.turn_count = 0;
+        battle_context.total_damage = 0.;
+        battle_context.last_wave_action_value = 0.;
+        battle_context.total_elapsed_action_value = 0.;
+        battle_context.max_waves = 0;
+        battle_context.wave = 0;
+        battle_context.cycle = 0;
+
+    }
+
 
     // A word of caution:
     // The lineup is setup first 
@@ -69,14 +85,7 @@ impl BattleContext {
         e: OnBattleBeginEvent,
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
-        *battle_context = BattleContext {
-            state: BattleState::Started,
-            max_waves: e.max_waves,
-            current_turn_info: battle_context.current_turn_info.clone(),
-            lineup: battle_context.lineup.clone(),
-            real_time_damages: battle_context.real_time_damages.clone(),
-            ..Default::default()
-        };
+        battle_context.state = BattleState::Started;
         log::info!("Battle has started");
         log::info!("Max Waves: {}", e.max_waves);
         battle_context.max_waves = e.max_waves;
@@ -90,6 +99,7 @@ impl BattleContext {
         e: OnSetLineupEvent,
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
+        Self::initialize_battle_context(&mut battle_context);
         battle_context.current_turn_info.avatars_turn_damage = vec![0f64; e.avatars.len()];
         battle_context.lineup = e.avatars.clone();
         battle_context.real_time_damages = vec![0f64; e.avatars.len()];
