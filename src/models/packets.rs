@@ -75,12 +75,15 @@ event_packet!(
     Heartbeat {}
     Error { msg: String }
     // Game
-    BattleBegin {}
+    OnBattleBegin { max_waves: u32 }
     OnSetBattleLineup { avatars: Vec<Avatar> }
-    OnDamage { attacker: Avatar, damage: f64 }
-    OnTurnBegin { action_value: f64 }
+    OnDamage { attacker: Avatar, damage: f64, damage_type: &'static str }
+    OnTurnBegin { action_value: f64, turn_owner: Option<Avatar> }
     OnTurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f64>, total_damage: f64, action_value: f64 }
     OnKill { attacker: Avatar }
     OnUseSkill { avatar: Avatar, skill: Skill }
-    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, action_value: f64 }
+    OnUpdateWave { wave: u32 }
+    OnUpdateCycle { cycle: u32 }
+
+    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, av_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, total_elapsed_action_value: f64 , action_value: f64 }
 );
