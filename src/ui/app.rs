@@ -124,7 +124,7 @@ impl Overlay for App {
             let transparent_frame = egui::Frame::new().inner_margin(8.0);
 
             if self.show_damage_distribution {
-                egui::containers::Window::new("Damage Distribution")
+                egui::containers::Window::new("")
                     .frame(transparent_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -258,7 +258,7 @@ impl App {
         Self {
             widget_opacity: 0.15,
             streamer_mode: true,
-            streamer_msg: String::from("Powered by Egui!"),
+            streamer_msg: String::new(),
             ..Default::default()
         }
     }

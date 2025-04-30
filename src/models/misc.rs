@@ -38,3 +38,14 @@ pub struct TurnInfo {
     pub total_damage: f64,
     // pub turn_owner: Avatar
 }
+
+#[derive(Clone, Debug, Deserialize, Serialize, Default)]
+pub struct CycleInfo {
+    pub turn_history: Vec<TurnInfo>,
+    pub av_history: Vec<TurnInfo>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, Default)]
+pub struct WaveInfo {
+    pub cyle_history: CycleInfo
+}
