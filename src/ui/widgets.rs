@@ -199,13 +199,9 @@ impl App {
 }
 
 fn create_bar_data(real_time_damages: &Vec<f64>, avatars: &Vec<Avatar>) -> Vec<(Avatar, f64, usize)> {        
-    let total_damage = real_time_damages.into_iter().sum::<f64>();
-
     let mut bar_data = Vec::new();
     for (i, avatar) in avatars.iter().enumerate() {
-        let damage = real_time_damages[i];
-        let fraction = damage as f64 / total_damage;
-        bar_data.push((avatar.clone(), fraction, i));
+        bar_data.push((avatar.clone(), real_time_damages[i], i));
     }
     bar_data
 }
