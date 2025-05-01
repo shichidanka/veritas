@@ -21,6 +21,10 @@ pub enum BattleState {
     Ended,
 }
 
+pub struct AppContext {
+
+}
+
 #[derive(Default)]
 pub struct BattleContext {
     pub state: BattleState,
@@ -92,8 +96,9 @@ impl BattleContext {
             max_waves: e.max_waves,
             stage_id: e.stage_id
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_set_lineup_event(
@@ -102,8 +107,8 @@ impl BattleContext {
     ) -> Result<Packet> {
         Self::initialize_battle_context(&mut battle_context);
         battle_context.current_turn_info.avatars_turn_damage = vec![0f64; e.avatars.len()];
-        battle_context.lineup = e.avatars.clone();
         battle_context.real_time_damages = vec![0f64; e.avatars.len()];
+        battle_context.lineup = e.avatars;
 
         for avatar in &battle_context.lineup {
             log::info!("{} was loaded in lineup", avatar);
@@ -112,8 +117,9 @@ impl BattleContext {
         let packet_body = EventPacket::OnSetBattleLineup {
             avatars: battle_context.lineup.clone(),
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_damage_event(
@@ -125,34 +131,35 @@ impl BattleContext {
         let turn = &mut battle_context.current_turn_info;
         // Record character damage chunk
         turn.avatars_turn_damage[lineup_index] += e.damage;
-
-        battle_context.total_damage += e.damage as f64;
         battle_context.real_time_damages[lineup_index] += e.damage as f64;
+        battle_context.total_damage += e.damage as f64;
 
         let packet_body = EventPacket::OnDamage {
             attacker: e.attacker,
             damage: e.damage,
             damage_type: e.damage_type
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_turn_begin_event(
         e: OnTurnBeginEvent,
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
-        let cur_action_value = e.action_value - battle_context.last_wave_action_value;
         battle_context.total_elapsed_action_value = e.action_value;
         battle_context.current_turn_info.action_value = e.action_value;
 
-        log::info!("AV: {:.2}", cur_action_value);
+        log::info!("AV: {:.2}", e.action_value);
+        
         let packet_body = EventPacket::OnTurnBegin {
             action_value: e.action_value,
             turn_owner: e.turn_owner
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_turn_end_event(
@@ -209,25 +216,28 @@ impl BattleContext {
         };
 
         // Restart turn info
-        battle_context.current_turn_info.total_damage = 0.0;
+        // battle_context.current_turn_info.total_damage = 0.0;
         battle_context.current_turn_info.avatars_turn_damage = vec![0f64; battle_context.lineup.len()];
         battle_context.turn_count += 1;
 
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_kill_event(
         e: OnKillEvent,
         mut _battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
-        log::info!("{} has killed", e.attacker);
+        todo!()
+        // log::info!("{} has killed", e.attacker);
 
-        let packet_body = EventPacket::OnKill {
-            attacker: e.attacker,
-        };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        // let packet_body = EventPacket::OnKill {
+        //     attacker: e.attacker,
+        // };
+        // let packet_name = packet_body.name();
+        // Packet::from_event_packet(packet_body)
+        //     .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_battle_end_event(
@@ -237,7 +247,6 @@ impl BattleContext {
         battle_context.state = BattleState::Ended;
 
         let total_elapsed_action_value = e.action_value;
-        let cur_action_value = battle_context.total_elapsed_action_value - battle_context.last_wave_action_value;
         battle_context.total_elapsed_action_value = total_elapsed_action_value;
         battle_context.current_turn_info.action_value = total_elapsed_action_value;
 
@@ -252,8 +261,9 @@ impl BattleContext {
             wave: battle_context.wave,
             stage_id: battle_context.stage_id
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_use_skill_event(
@@ -266,8 +276,9 @@ impl BattleContext {
             avatar: e.avatar,
             skill: e.skill,
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_update_wave_event(
@@ -280,8 +291,9 @@ impl BattleContext {
         let packet_body = EventPacket::OnUpdateWave { 
             wave: e.wave
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     fn handle_on_update_cycle_event(
@@ -294,8 +306,9 @@ impl BattleContext {
         let packet_body = EventPacket::OnUpdateCycle {
             cycle: e.cycle
         };
-        Packet::from_event_packet(packet_body.clone())
-            .with_context(|| format!("Failed to create {}", packet_body.name()))
+        let packet_name = packet_body.name();
+        Packet::from_event_packet(packet_body)
+            .with_context(|| format!("Failed to create {}", packet_name))
     }
 
     pub fn handle_event(event: Result<Event>) {
@@ -304,7 +317,7 @@ impl BattleContext {
             Result::Ok(event) => {
                 match event {
                     Event::OnBattleBegin(e) => Self::handle_on_battle_begin_event(e, battle_context),
-                    Event::OnSetLineup(e) => Self::handle_on_set_lineup_event(e, battle_context),
+                    Event::OnSetBattleLineup(e) => Self::handle_on_set_lineup_event(e, battle_context),
                     Event::OnDamage(e) => Self::handle_on_damage_event(e, battle_context),
                     Event::OnTurnBegin(e) => Self::handle_on_turn_begin_event(e, battle_context),
                     Event::OnTurnEnd => Self::handle_on_turn_end_event(battle_context),
@@ -332,5 +345,72 @@ impl BattleContext {
             }
             Err(e) => log::error!("Packet Error: {}", e),
         };
+    }
+}
+
+impl EventPacket {
+    pub fn new(battle_context: &MutexGuard<'static, BattleContext>, event: Event) -> Self {
+        match event {
+            Event::OnBattleBegin(e) => {
+                Self::OnBattleBegin {
+                    max_waves: e.max_waves,
+                    stage_id: e.stage_id
+                }
+            },
+            Event::OnSetBattleLineup(e) => {
+                Self::OnSetBattleLineup {
+                    avatars: e.avatars
+                }
+            },
+            Event::OnDamage(e) => {
+                Self::OnDamage {
+                    attacker: e.attacker,
+                    damage: e.damage,
+                    damage_type: e.damage_type
+                }
+            },
+            Event::OnTurnBegin(e) => {
+                Self::OnTurnBegin {
+                    action_value: e.action_value,
+                    turn_owner: e.turn_owner
+                }
+            },
+            Event::OnTurnEnd => {
+                Self::OnTurnEnd {
+                    avatars: battle_context.lineup.clone(),
+                    turn_info: battle_context.current_turn_info.clone()
+                }
+            },
+            Event::OnKill(e) => todo!(),
+            Event::OnUseSkill(e) => {
+                Self::OnUseSkill {
+                    avatar: e.avatar,
+                    skill: e.skill
+                }
+            },
+            Event::OnBattleEnd(e) => {
+                Self::OnBattleEnd {
+                    avatars: battle_context.lineup.clone(),
+                    turn_history: battle_context.turn_history.clone(),
+                    av_history: battle_context.av_history.clone(),
+                    turn_count: battle_context.turn_count,
+                    total_damage: battle_context.total_damage,
+                    action_value: battle_context.total_elapsed_action_value,
+                    cycle: battle_context.cycle,
+                    wave: battle_context.wave,
+                    stage_id: battle_context.stage_id
+                }
+            },
+            Event::OnUpdateWave(e) => {
+                Self::OnUpdateWave {
+                    wave: e.wave
+                }
+            },
+            Event::OnUpdateCycle(e) => {
+                Self::OnUpdateCycle {
+                    cycle: e.cycle
+                }
+            },
+        }
     }
 }

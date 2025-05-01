@@ -3,7 +3,7 @@ use super::misc::{Avatar, Skill};
 
 pub enum Event {
     OnBattleBegin(OnBattleBeginEvent),
-    OnSetLineup(OnSetLineupEvent),
+    OnSetBattleLineup(OnSetLineupEvent),
     OnDamage(OnDamageEvent),
     OnTurnBegin(OnTurnBeginEvent),
     OnTurnEnd,
@@ -21,7 +21,6 @@ pub struct OnBattleBeginEvent {
 
 pub struct OnUpdateWaveEvent {
     pub wave: u32,
-    pub action_value: f64
 }
 
 pub struct OnUpdateCycleEvent {

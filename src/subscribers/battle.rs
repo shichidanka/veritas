@@ -478,7 +478,7 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
                 .collect::<String>();
             Err(anyhow!(errors))
         } else {
-            Ok(Event::OnSetLineup(OnSetLineupEvent { avatars }))
+            Ok(Event::OnSetBattleLineup(OnSetLineupEvent { avatars }))
         };
         BattleContext::handle_event(event);
     }
@@ -553,16 +553,20 @@ fn on_turn_end(instance: *const c_void, a1: i32) -> *const c_void {
     ON_TURN_END_Detour.call(instance, a1)
 }
 
+#[named]
 pub fn on_update_wave(instance: *const TurnBasedGameMode) {
+    log::debug!(function_name!());
     ON_UPDATE_WAVE_Detour.call(instance);
     unsafe {
         BattleContext::handle_event(Ok(Event::OnUpdateWave(OnUpdateWaveEvent {
-            wave: (*instance)._WaveMonsterCurrentCount as _,
-            action_value: get_elapsed_av(instance),
+            wave: (*instance)._WaveMonsterCurrentCount as _
         })));
     }
 }
+
+#[named]
 pub fn on_update_cycle(instance: *const TurnBasedGameMode) -> u32 {
+    log::debug!(function_name!());
     let cycle = ON_UPDATE_CYCLE_Detour.call(instance);
     BattleContext::handle_event(Ok(Event::OnUpdateCycle(OnUpdateCycleEvent {
         cycle

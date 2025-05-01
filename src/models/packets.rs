@@ -134,20 +134,3 @@ event_packet!(
         stage_id: u32
     }
 );
-
-impl EventPacket {
-    pub fn new(event: &Event) {
-        match event {
-            Event::OnBattleBegin(on_battle_begin_event) => todo!(),
-            Event::OnSetLineup(on_set_lineup_event) => todo!(),
-            Event::OnDamage(on_damage_event) => todo!(),
-            Event::OnTurnBegin(on_turn_begin_event) => todo!(),
-            Event::OnTurnEnd => todo!(),
-            Event::OnKill(on_kill_event) => todo!(),
-            Event::OnUseSkill(on_use_skill_event) => todo!(),
-            Event::OnBattleEnd(on_battle_end_event) => todo!(),
-            Event::OnUpdateWave(on_update_wave_event) => todo!(),
-            Event::OnUpdateCycle(on_update_cycle_event) => todo!(),
-        }
-    }
-}
