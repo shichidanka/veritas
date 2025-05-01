@@ -491,7 +491,8 @@ fn on_battle_begin(instance: *const TurnBasedGameMode) {
     ON_BATTLE_BEGIN_Detour.call(instance);
     unsafe {
         BattleContext::handle_event(Ok(Event::OnBattleBegin(OnBattleBeginEvent {
-            max_waves: (*instance).WaveMonsterMaxCount__BackingField as _
+            max_waves: (*instance).WaveMonsterMaxCount__BackingField as _,
+            stage_id: (*instance).CurrentWaveStageID__BackingField
         })));    
     }
 }
@@ -502,8 +503,8 @@ fn on_battle_end(instance: *const TurnBasedGameMode) {
     ON_BATTLE_END_Detour.call(instance);
     unsafe {
         BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
-            total_elapsed_action_value: get_elapsed_av(instance),
-        })));           
+            action_value: get_elapsed_av(instance),
+        })));
     }
  }
 
@@ -520,7 +521,7 @@ fn on_turn_begin(instance: *const TurnBasedGameMode) {
                 let e = match helpers::get_avatar_from_entity(turn_owner) {
                     Ok(avatar) => {
                         Ok(Event::OnTurnBegin(OnTurnBeginEvent {
-                            total_elapsed_action_value: get_elapsed_av(instance),
+                            action_value: get_elapsed_av(instance),
                             turn_owner: Some(avatar)
                         }))
                     },
@@ -534,7 +535,7 @@ fn on_turn_begin(instance: *const TurnBasedGameMode) {
             },
             _ => {
                 BattleContext::handle_event(Ok(Event::OnTurnBegin(OnTurnBeginEvent {
-                    total_elapsed_action_value: get_elapsed_av(instance),
+                    action_value: get_elapsed_av(instance),
                     turn_owner: None
                 })));
             }
@@ -557,6 +558,7 @@ pub fn on_update_wave(instance: *const TurnBasedGameMode) {
     unsafe {
         BattleContext::handle_event(Ok(Event::OnUpdateWave(OnUpdateWaveEvent {
             wave: (*instance)._WaveMonsterCurrentCount as _,
+            action_value: get_elapsed_av(instance),
         })));
     }
 }
