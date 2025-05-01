@@ -121,7 +121,10 @@ impl Overlay for App {
                 .inner_margin(8.0)
                 .corner_radius(10.0);
 
-            let transparent_frame = egui::Frame::new().inner_margin(8.0);
+            let transparent_frame = egui::Frame::new()
+                .stroke(Stroke::new(0.5, Color32::WHITE))
+                .inner_margin(8.0)
+                .corner_radius(10.0);
 
             if self.show_damage_distribution {
                 egui::containers::Window::new("")
