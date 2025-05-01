@@ -567,38 +567,37 @@ pub fn on_update_cycle(instance: *const TurnBasedGameMode) -> u32 {
     })));
     cycle
 }
-
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
-            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x662e9d0, on_damage
+            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x65b8f40, on_damage
         );
         subscribe_function!(
-            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0x6539e80, on_combo
+            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0x6284d30, on_combo
         );
         subscribe_function!(
-            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x58820a0, on_use_skill
+            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x5a88ba0, on_use_skill
         );
         subscribe_function!(
-            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0xa0b7970, on_set_lineup
+            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0x9c705f0, on_set_lineup
         );
         subscribe_function!(
-            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x822bef0, on_battle_begin
+            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x7896ad0, on_battle_begin
         );
         subscribe_function!(
-            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x822c000, on_battle_end
+            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x7896bf0, on_battle_end
         );
         subscribe_function!(
-            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x82260f0, on_turn_begin
+            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x7890c80, on_turn_begin
         );
         subscribe_function!(
-            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x58d40b0, on_turn_end
+            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x787b3f0, on_turn_end
         );
         subscribe_function!(
-            ON_UPDATE_WAVE_Detour, * GAMEASSEMBLY_HANDLE + 0x822b350, on_update_wave
+            ON_UPDATE_WAVE_Detour, * GAMEASSEMBLY_HANDLE + 0x7895f00, on_update_wave
         );
         subscribe_function!(
-            ON_UPDATE_CYCLE_Detour, * GAMEASSEMBLY_HANDLE + 0x8232100, on_update_cycle
+            ON_UPDATE_CYCLE_Detour, * GAMEASSEMBLY_HANDLE + 0x789cd20, on_update_cycle
         );
         Ok(())
     }

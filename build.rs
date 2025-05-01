@@ -38,19 +38,19 @@ fn main() {
                         patch.major += 1;
                         patch.minor = 0;
                         patch.revision = 0;
-                        metadata["hotfix"] = toml_edit::value(0);
+                        metadata["hotfix"] = toml_edit::value(0.1);
                     },
                     "MINOR_PATCH" => {
                         patch.minor += 1;
                         patch.revision = 0;
-                        metadata["hotfix"] = toml_edit::value(0);
+                        metadata["hotfix"] = toml_edit::value(0.1);
                     },
                     "REVISION_PATCH" => {
                         patch.revision += 1;
-                        metadata["hotfix"] = toml_edit::value(0);
+                        metadata["hotfix"] = toml_edit::value(0.1);
                     },
                     "HOTFIX_PATCH" => {
-                        let hotfix = metadata["hotfix"].as_str().unwrap().parse::<f32>().unwrap() + 0.1;
+                        let hotfix = metadata["hotfix"].as_float().unwrap() + 0.1;
                         metadata["hotfix"] = toml_edit::value(hotfix.to_string());
                     }
                     _ => {}
@@ -72,7 +72,7 @@ fn main() {
 
     let region = metadata["region"].as_str().unwrap();
     let patch = metadata["patch"].as_str().unwrap();
-    let hotfix = metadata["hotfix"].as_str().unwrap();
+    let hotfix = metadata["hotfix"].as_f64().unwrap();
 
     let build_metadata = if metadata["is_beta"].as_bool().unwrap() {
         format!("{}-beta-{}-{}", region, patch, hotfix)
