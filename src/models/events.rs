@@ -15,11 +15,13 @@ pub enum Event {
 }
 
 pub struct OnBattleBeginEvent {
-    pub max_waves: u32
+    pub max_waves: u32,
+    pub stage_id: u32
 }
 
 pub struct OnUpdateWaveEvent {
     pub wave: u32,
+    pub action_value: f64
 }
 
 pub struct OnUpdateCycleEvent {
@@ -27,12 +29,12 @@ pub struct OnUpdateCycleEvent {
 }
 
 pub struct OnTurnBeginEvent {
-    pub total_elapsed_action_value: f64,
+    pub action_value: f64,
     pub turn_owner: Option<Avatar>
 }
 
 pub struct OnBattleEndEvent {
-    pub total_elapsed_action_value: f64
+    pub action_value: f64
 }
 
 pub struct OnUseSkillEvent {
