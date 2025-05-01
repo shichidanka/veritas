@@ -77,12 +77,11 @@ event_packet!(
     OnBattleBegin { max_waves: u32 }
     OnSetBattleLineup { avatars: Vec<Avatar> }
     OnDamage { attacker: Avatar, damage: f64, damage_type: &'static str }
-    OnTurnBegin { action_value: f64, turn_owner: Option<Avatar> }
-    OnTurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f64>, total_damage: f64, action_value: f64 }
+    OnTurnBegin { total_elapsed_action_value: f64, relative_action_value: f64, turn_owner: Option<Avatar> }
+    OnTurnEnd { avatars: Vec<Avatar>, turn_info: TurnInfo }
     OnKill { attacker: Avatar }
     OnUseSkill { avatar: Avatar, skill: Skill }
     OnUpdateWave { wave: u32 }
     OnUpdateCycle { cycle: u32 }
-
-    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, av_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, total_elapsed_action_value: f64 , action_value: f64, cycle: u32, wave: u32 }
+    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, av_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, total_elapsed_action_value: f64 , relative_action_value: f64, cycle: u32, wave: u32 }
 );

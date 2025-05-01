@@ -142,7 +142,7 @@ impl App {
                     let color = helpers::get_character_color(i);
                     let points = battle_context.av_history
                         .iter()
-                        .map(|turn| [turn.action_value, turn.avatars_turn_damage[i]])
+                        .map(|turn| [turn.relative_action_value, turn.avatars_turn_damage[i]])
                         .collect::<Vec<[f64; 2]>>();
     
                     if !points.is_empty() {
@@ -180,7 +180,7 @@ impl App {
         ui.label("Current Turn");
         ui.horizontal(|ui| {
             ui.label("AV:");
-            ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
+            ui.label(format!("{:.2}", battle_context.current_turn_info.relative_action_value));
         });
         ui.horizontal(|ui| {
             ui.label("Total Damage:");

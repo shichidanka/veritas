@@ -143,10 +143,13 @@ impl BattleContext {
     ) -> Result<Packet> {
         let cur_action_value = e.total_elapsed_action_value - battle_context.last_wave_action_value;
         battle_context.total_elapsed_action_value = e.total_elapsed_action_value;
-        battle_context.current_turn_info.action_value = cur_action_value;
+        battle_context.current_turn_info.total_elapsed_action_value = e.total_elapsed_action_value;
+        battle_context.current_turn_info.relative_action_value = cur_action_value;
+
         log::info!("AV: {:.2}", cur_action_value);
         let packet_body = EventPacket::OnTurnBegin {
-            action_value: cur_action_value,
+            total_elapsed_action_value: e.total_elapsed_action_value,
+            relative_action_value: cur_action_value,
             turn_owner: e.turn_owner
         };
         Packet::from_event_packet(packet_body.clone())
@@ -156,6 +159,9 @@ impl BattleContext {
     fn handle_on_turn_end_event(
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
+        battle_context.current_turn_info.wave = battle_context.wave;
+        battle_context.current_turn_info.cycle = battle_context.cycle;
+
         let mut turn_info = battle_context.current_turn_info.clone();
 
         // Calculate net damages
@@ -168,7 +174,7 @@ impl BattleContext {
 
         if let Some(last_turn) = battle_context.av_history.last_mut() {
             // If same AV, update damage
-            if last_turn.action_value == turn_info.action_value {
+            if last_turn.total_elapsed_action_value == turn_info.total_elapsed_action_value {
                 for (i, incoming_dmg) in turn_info.avatars_turn_damage.iter().enumerate() {
                    last_turn.avatars_turn_damage[i] += incoming_dmg;
                 }
@@ -200,9 +206,7 @@ impl BattleContext {
 
         let packet_body = EventPacket::OnTurnEnd {
             avatars: battle_context.lineup.clone(),
-            avatars_damage: turn_info.avatars_turn_damage.clone(),
-            total_damage: turn_info.total_damage,
-            action_value: turn_info.action_value,
+            turn_info
         };
 
         // Restart turn info
@@ -236,7 +240,8 @@ impl BattleContext {
         let total_elapsed_action_value = e.total_elapsed_action_value;
         let cur_action_value = battle_context.total_elapsed_action_value - battle_context.last_wave_action_value;
         battle_context.total_elapsed_action_value = total_elapsed_action_value;
-        battle_context.current_turn_info.action_value = cur_action_value;
+        battle_context.current_turn_info.relative_action_value = cur_action_value;
+        battle_context.current_turn_info.total_elapsed_action_value = total_elapsed_action_value;
 
         let packet_body = EventPacket::OnBattleEnd {
             avatars: battle_context.lineup.clone(),
@@ -245,7 +250,7 @@ impl BattleContext {
             turn_count: battle_context.turn_count,
             total_damage: battle_context.total_damage as f64,
             total_elapsed_action_value: e.total_elapsed_action_value,
-            action_value: cur_action_value,
+            relative_action_value: cur_action_value,
             cycle: battle_context.cycle,
             wave: battle_context.wave,
 
@@ -275,8 +280,8 @@ impl BattleContext {
         log::info!("Wave: {}", e.wave);
 
         battle_context.wave = e.wave;
-        battle_context.last_wave_action_value = battle_context.current_turn_info.action_value;
-        battle_context.current_turn_info.action_value = 0.;
+        battle_context.last_wave_action_value = battle_context.current_turn_info.relative_action_value;
+        battle_context.current_turn_info.relative_action_value = 0.;
 
         let packet_body = EventPacket::OnUpdateWave { 
             wave: e.wave
