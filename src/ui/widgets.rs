@@ -142,7 +142,7 @@ impl App {
                     let color = helpers::get_character_color(i);
                     let points = battle_context.av_history
                         .iter()
-                        .map(|turn| [turn.relative_action_value, turn.avatars_turn_damage[i]])
+                        .map(|turn| [turn.total_elapsed_action_value, turn.avatars_turn_damage[i]])
                         .collect::<Vec<[f64; 2]>>();
     
                     if !points.is_empty() {
