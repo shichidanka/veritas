@@ -16,6 +16,7 @@ pub enum Event {
 
 pub struct OnBattleBeginEvent {
     pub max_waves: u32,
+    pub max_cycles: u32,
     pub stage_id: u32
 }
 

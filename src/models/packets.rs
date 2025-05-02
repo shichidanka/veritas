@@ -82,6 +82,7 @@ event_packet!(
     // Game
     OnBattleBegin {
         max_waves: u32,
+        max_cycles: u32,
         stage_id: u32
     }
     

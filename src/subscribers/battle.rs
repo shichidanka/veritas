@@ -480,6 +480,7 @@ fn on_battle_begin(instance: *const TurnBasedGameMode) {
     unsafe {
         BattleContext::handle_event(Ok(Event::OnBattleBegin(OnBattleBeginEvent {
             max_waves: (*instance).WaveMonsterMaxCount__BackingField as _,
+            max_cycles: (*instance).ChallengeTurnLimit__BackingField,
             stage_id: (*instance).CurrentWaveStageID__BackingField
         })));    
     }
@@ -547,7 +548,7 @@ pub fn on_update_wave(instance: *const TurnBasedGameMode) {
     ON_UPDATE_WAVE_Detour.call(instance);
     unsafe {
         BattleContext::handle_event(Ok(Event::OnUpdateWave(OnUpdateWaveEvent {
-            wave: (*instance)._WaveMonsterCurrentCount as _
+            wave: (*instance)._WaveMonsterCurrentCount as _,
         })));
     }
 }
