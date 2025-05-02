@@ -222,7 +222,15 @@ impl Overlay for App {
             _ => {}
         };
 
-        return Some(WindowProcessOptions::default());
+        if self.show_menu {
+            Some(WindowProcessOptions {
+                should_capture_all_input: true,
+                ..Default::default()
+            })
+        }
+        else {
+            Some(WindowProcessOptions::default())
+        }
     }
 }
 

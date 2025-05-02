@@ -9,7 +9,6 @@ use crate::kreide::functions::rpg::gamecore::*;
 use crate::kreide::helpers::*;
 
 use crate::models::events::OnBattleBeginEvent;
-use crate::models::events::OnBattleEndEvent;
 use crate::models::events::Event;
 use crate::models::events::OnDamageEvent;
 use crate::models::events::OnUpdateCycleEvent;
@@ -490,12 +489,8 @@ fn on_battle_begin(instance: *const TurnBasedGameMode) {
 fn on_battle_end(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     ON_BATTLE_END_Detour.call(instance);
-    unsafe {
-        BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
-            action_value: get_elapsed_av(instance),
-        })));
-    }
- }
+    BattleContext::handle_event(Ok(Event::OnBattleEnd));
+}
 
 #[named]
 fn on_turn_begin(instance: *const TurnBasedGameMode) {
