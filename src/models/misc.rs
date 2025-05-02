@@ -21,7 +21,7 @@ impl fmt::Display for Avatar {
 pub struct Skill {
     pub name: String,
     #[serde(rename = "type")]
-    pub skill_type: String,
+    pub skill_type: isize,
 }
 
 impl fmt::Display for Skill {

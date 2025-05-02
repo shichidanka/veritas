@@ -49,7 +49,7 @@ pub struct OnSetLineupEvent {
 pub struct OnDamageEvent {
     pub attacker: Avatar,
     pub damage: f64,
-    pub damage_type: &'static str
+    pub damage_type: isize
 }
 
 pub struct OnKillEvent {

@@ -92,7 +92,7 @@ event_packet!(
     OnDamage {
         attacker: Avatar,
         damage: f64,
-        damage_type: &'static str
+        damage_type: isize
     }
     
     OnTurnBegin {
