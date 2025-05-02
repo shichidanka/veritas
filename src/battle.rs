@@ -90,6 +90,7 @@ impl BattleContext {
 
         let packet_body = EventPacket::OnBattleBegin {
             max_waves: e.max_waves,
+            max_cycles: e.max_cycles,
             stage_id: e.stage_id
         };
         Packet::from_event_packet(packet_body.clone())
