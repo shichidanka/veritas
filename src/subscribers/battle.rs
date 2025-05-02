@@ -76,7 +76,7 @@ fn on_damage(
         match (*attacker)._Team {
             TeamType::TeamLight => {
                 let damage = fixpoint_to_raw(&(*nopbaaaggla).JFKEEOMKMLI);
-                let damage_type = get_skill_type_str((*nopbaaaggla).APDDLHNGGIM); 
+                let damage_type = (*nopbaaaggla).APDDLHNGGIM; 
                 let attack_owner = {
                     let attack_owner = AbilityStatic_GetActualOwner(attacker);
                     if attack_owner.is_null() {
@@ -93,7 +93,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
-                                damage_type
+                                damage_type: damage_type as isize
                             })),
                             Err(e) => {
                                 log::error!("Avatar Event Error: {}", e);
@@ -107,7 +107,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
-                                damage_type
+                                damage_type: damage_type as isize
                             })),
                             Err(e) => {
                                 log::error!("Servant Event Error: {}", e);
@@ -124,7 +124,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
-                                damage_type
+                                damage_type: damage_type as isize
                             })),
                             Err(e) => {
                                 log::error!("Snapshot Event Error: {}", e);
