@@ -9,7 +9,7 @@ pub enum Event {
     OnTurnEnd,
     OnKill(OnKillEvent),
     OnUseSkill(OnUseSkillEvent),
-    OnBattleEnd(OnBattleEndEvent),
+    OnBattleEnd,
     OnUpdateWave(OnUpdateWaveEvent),
     OnUpdateCycle(OnUpdateCycleEvent),
 }
@@ -31,10 +31,6 @@ pub struct OnUpdateCycleEvent {
 pub struct OnTurnBeginEvent {
     pub action_value: f64,
     pub turn_owner: Option<Avatar>
-}
-
-pub struct OnBattleEndEvent {
-    pub action_value: f64
 }
 
 pub struct OnUseSkillEvent {
