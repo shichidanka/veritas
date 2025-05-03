@@ -142,7 +142,7 @@ impl App {
                     let color = helpers::get_character_color(i);
                     let points = battle_context.av_history
                         .iter()
-                        .map(|turn| [turn.total_elapsed_action_value, turn.avatars_turn_damage[i]])
+                        .map(|turn| [turn.action_value, turn.avatars_turn_damage[i]])
                         .collect::<Vec<[f64; 2]>>();
     
                     if !points.is_empty() {
@@ -173,14 +173,14 @@ impl App {
     
     pub fn show_av_metrics(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
-        ui.horizontal(|ui| {
-            ui.label("Total Elapsed AV:");
-            ui.label(format!("{:.2}", battle_context.total_elapsed_action_value));
-        });
+        // ui.horizontal(|ui| {
+        //     ui.label("Total Elapsed AV:");
+        //     ui.label(format!("{:.2}", battle_context.total_elapsed_action_value));
+        // });
         ui.label("Current Turn");
         ui.horizontal(|ui| {
             ui.label("AV:");
-            ui.label(format!("{:.2}", battle_context.current_turn_info.relative_action_value));
+            ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
         });
         ui.horizontal(|ui| {
             ui.label("Total Damage:");
@@ -188,8 +188,8 @@ impl App {
         });
         ui.horizontal(|ui| {
             ui.label("DpAV:");
-            if battle_context.total_elapsed_action_value > 0.0 {
-                ui.label(format!("{:.2}", battle_context.total_damage / battle_context.total_elapsed_action_value));
+            if battle_context.action_value > 0.0 {
+                ui.label(format!("{:.2}", battle_context.total_damage / battle_context.action_value));
             } else {
                 ui.label("0.00");
             }

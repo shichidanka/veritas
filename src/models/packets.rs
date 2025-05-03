@@ -1,7 +1,10 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use super::misc::{Avatar, Skill, TurnInfo};
+use super::{
+    events::Event,
+    misc::{Avatar, Skill, TurnInfo},
+};
 
 #[derive(Default, Serialize, Deserialize, Debug)]
 pub struct Packet {
@@ -72,16 +75,63 @@ macro_rules! event_packet {
 
 event_packet!(
     Heartbeat {}
-    Error { msg: String }
+    Error {
+        msg: String
+    }
+
     // Game
-    OnBattleBegin { max_waves: u32 }
-    OnSetBattleLineup { avatars: Vec<Avatar> }
-    OnDamage { attacker: Avatar, damage: f64, damage_type: &'static str }
-    OnTurnBegin { total_elapsed_action_value: f64, relative_action_value: f64, turn_owner: Option<Avatar> }
-    OnTurnEnd { avatars: Vec<Avatar>, turn_info: TurnInfo }
-    OnKill { attacker: Avatar }
-    OnUseSkill { avatar: Avatar, skill: Skill }
-    OnUpdateWave { wave: u32 }
-    OnUpdateCycle { cycle: u32 }
-    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, av_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, total_elapsed_action_value: f64 , relative_action_value: f64, cycle: u32, wave: u32 }
+    OnBattleBegin {
+        max_waves: u32,
+        max_cycles: u32,
+        stage_id: u32
+    }
+    
+    OnSetBattleLineup {
+        avatars: Vec<Avatar>
+    }
+    
+    OnDamage {
+        attacker: Avatar,
+        damage: f64,
+        damage_type: isize
+    }
+    
+    OnTurnBegin {
+        action_value: f64,
+        turn_owner: Option<Avatar>
+    }
+    
+    OnTurnEnd {
+        avatars: Vec<Avatar>,
+        turn_info: TurnInfo
+    }
+
+    OnKill {
+        attacker: Avatar
+    }
+
+    OnUseSkill {
+        avatar: Avatar,
+        skill: Skill
+    }
+
+    OnUpdateWave {
+        wave: u32
+    }
+
+    OnUpdateCycle {
+        cycle: u32
+    }
+
+    OnBattleEnd {
+        avatars: Vec<Avatar>,
+        turn_history: Vec<TurnInfo>,
+        av_history: Vec<TurnInfo>,
+        turn_count: usize,
+        total_damage: f64,
+        action_value: f64,
+        cycle: u32,
+        wave: u32,
+        stage_id: u32
+    }
 );
