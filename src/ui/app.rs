@@ -1,7 +1,10 @@
 use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::Key;
 use egui::KeyboardShortcut;
+use egui::Label;
+use egui::Layout;
 use egui::Modifiers;
+use egui::ScrollArea;
 use egui::Stroke;
 use egui::TextEdit;
 use egui::{
@@ -47,6 +50,19 @@ impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
         if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
             self.should_hide = !self.should_hide;
+        }
+
+        if self.streamer_mode {
+            egui::TopBottomPanel::bottom("statusbar")
+                .resizable(true)
+                .show(ctx, |ui| {
+                    let label = Label::new(
+                        &self.streamer_msg
+                    ).selectable(false);
+                    
+                    ui.add(label);
+                    ui.allocate_space(ui.available_size())
+            });
         }
 
         if !self.should_hide {
@@ -169,12 +185,6 @@ impl Overlay for App {
                         self.show_av_metrics(ui);
                     });
             }
-        }
-
-        if self.streamer_mode {
-            egui::TopBottomPanel::bottom("statusbar").show(ctx, |ui| {
-                ui.label(&self.streamer_msg);
-            });
         }
     }
 
