@@ -8,9 +8,12 @@ use crate::kreide::functions::rpg::gamecore::*;
 use crate::kreide::functions::rpg::client::*;
 use crate::kreide::helpers::*;
 
+use crate::models::events::OnBattleBeginEvent;
 use crate::models::events::OnBattleEndEvent;
 use crate::models::events::Event;
 use crate::models::events::OnDamageEvent;
+use crate::models::events::OnUpdateCycleEvent;
+use crate::models::events::OnUpdateWaveEvent;
 use crate::models::events::OnUseSkillEvent;
 use crate::models::events::OnSetLineupEvent;
 use crate::models::events::OnTurnBeginEvent;
@@ -43,19 +46,14 @@ static_detour! {
     static ON_BATTLE_END_Detour: fn(*const TurnBasedGameMode);
     static ON_TURN_BEGIN_Detour: fn(*const TurnBasedGameMode);
     static ON_TURN_END_Detour: fn(*const c_void, i32) -> *const c_void;
+    static ON_UPDATE_WAVE_Detour: fn (*const TurnBasedGameMode);
+    static ON_UPDATE_CYCLE_Detour: fn (*const TurnBasedGameMode) -> u32;
 }
 
-static mut TURN_BASED_GAME_MODE_REF: Option<*const TurnBasedGameMode> = None;
-
 #[named]
-fn get_elapsed_av() -> f64 {
-    unsafe {
-        log::debug!(function_name!());
-        match TURN_BASED_GAME_MODE_REF {
-            Some(x) => fixpoint_to_raw(&(*x).ElapsedActionDelay__BackingField) * 10f64,
-            None => panic!("There was no reference to RPG.GameCore.TurnBasedGameMode"),
-        }
-    }
+unsafe fn get_elapsed_av(game_mode: *const TurnBasedGameMode) -> f64 {
+    log::debug!(function_name!());
+    fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64
 }
 
 // Called on any instance of damage
@@ -78,6 +76,7 @@ fn on_damage(
         match (*attacker)._Team {
             TeamType::TeamLight => {
                 let damage = fixpoint_to_raw(&(*nopbaaaggla).JFKEEOMKMLI);
+                let damage_type = get_skill_type_str((*nopbaaaggla).APDDLHNGGIM); 
                 let attack_owner = {
                     let attack_owner = AbilityStatic_GetActualOwner(attacker);
                     if attack_owner.is_null() {
@@ -94,6 +93,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
+                                damage_type
                             })),
                             Err(e) => {
                                 log::error!("Avatar Event Error: {}", e);
@@ -107,6 +107,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
+                                damage_type
                             })),
                             Err(e) => {
                                 log::error!("Servant Event Error: {}", e);
@@ -119,11 +120,11 @@ fn on_damage(
                         // Unsure if this is if only a servant died and inflicted a DOT
                         let character_data_comp = (*attacker_ability)._CharacterDataRef;
                         let summoner_entity = (*character_data_comp).Summoner;
-
                         let e = match helpers::get_avatar_from_entity(summoner_entity) {
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
+                                damage_type
                             })),
                             Err(e) => {
                                 log::error!("Snapshot Event Error: {}", e);
@@ -224,6 +225,9 @@ fn on_use_skill(
                             let e = match get_servant_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_servant_entity(skill_owner) {
                                     Ok(avatar) => {
+                                        if skill.name.is_empty() {
+                                            return ON_USE_SKILL_Detour.call(instance, skill_index, a3, a4, skill_extra_use_param);
+                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -255,6 +259,9 @@ fn on_use_skill(
                             let e = match get_battle_event_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(avatar_entity) {
                                     Ok(avatar) => {
+                                        if skill.name.is_empty() {
+                                            return ON_USE_SKILL_Detour.call(instance, skill_index, a3, a4, skill_extra_use_param);
+                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -341,6 +348,9 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                                 match get_avatar_skill_from_skilldata(skill_data) {
                                     Ok(skill) => match get_avatar_from_entity(skill_owner) {
                                         Ok(avatar) => {
+                                            if skill.name.is_empty() {
+                                                return;
+                                            }
                                             Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                         }
                                         Err(e) => {
@@ -367,6 +377,9 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                             let e = match get_servant_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_servant_entity(skill_owner) {
                                     Ok(avatar) => {
+                                        if skill.name.is_empty() {
+                                            return;
+                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -399,6 +412,9 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                             let e = match get_battle_event_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(avatar_entity) {
                                     Ok(avatar) => {
+                                        if skill.name.is_empty() {
+                                            return;
+                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -472,33 +488,59 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
 #[named]
 fn on_battle_begin(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
+    ON_BATTLE_BEGIN_Detour.call(instance);
     unsafe {
-        ON_BATTLE_BEGIN_Detour.call(instance);
-        TURN_BASED_GAME_MODE_REF = Some(instance);
-        BattleContext::handle_event(Ok(Event::OnBattleBegin));
+        BattleContext::handle_event(Ok(Event::OnBattleBegin(OnBattleBeginEvent {
+            max_waves: (*instance).WaveMonsterMaxCount__BackingField as _
+        })));    
     }
 }
 
 #[named]
 fn on_battle_end(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
+    ON_BATTLE_END_Detour.call(instance);
     unsafe {
-        ON_BATTLE_END_Detour.call(instance);
         BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
-            action_value: get_elapsed_av(),
-        })));
-        TURN_BASED_GAME_MODE_REF = None;
+            total_elapsed_action_value: get_elapsed_av(instance),
+        })));           
     }
-}
+ }
 
 #[named]
 fn on_turn_begin(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     // Update AV first
     ON_TURN_BEGIN_Detour.call(instance);
-    BattleContext::handle_event(Ok(Event::OnTurnBegin(OnTurnBeginEvent {
-        action_value: get_elapsed_av(),
-    })));
+
+    unsafe {
+        let turn_owner = (*instance)._CurrentTurnActionEntity;
+        match (*turn_owner)._EntityType {
+            EntityType::Avatar => {
+                let e = match helpers::get_avatar_from_entity(turn_owner) {
+                    Ok(avatar) => {
+                        Ok(Event::OnTurnBegin(OnTurnBeginEvent {
+                            total_elapsed_action_value: get_elapsed_av(instance),
+                            turn_owner: Some(avatar)
+                        }))
+                    },
+                    Err(e) => {
+                        log::error!("Avatar Event Error: {}", e);
+                        Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+                    }
+                };
+
+                BattleContext::handle_event(e);
+            },
+            _ => {
+                BattleContext::handle_event(Ok(Event::OnTurnBegin(OnTurnBeginEvent {
+                    total_elapsed_action_value: get_elapsed_av(instance),
+                    turn_owner: None
+                })));
+            }
+        }
+    }
+
 }
 
 #[named]
@@ -506,11 +548,25 @@ fn on_turn_end(instance: *const c_void, a1: i32) -> *const c_void {
     log::debug!(function_name!());
     // Can match player v enemy turn w/
     // RPG.GameCore.TurnBasedGameMode.GetCurrentTurnTeam
-    let res = ON_TURN_END_Detour.call(instance, a1);
     BattleContext::handle_event(Ok(Event::OnTurnEnd));
-    return res;
+    ON_TURN_END_Detour.call(instance, a1)
 }
 
+pub fn on_update_wave(instance: *const TurnBasedGameMode) {
+    ON_UPDATE_WAVE_Detour.call(instance);
+    unsafe {
+        BattleContext::handle_event(Ok(Event::OnUpdateWave(OnUpdateWaveEvent {
+            wave: (*instance)._WaveMonsterCurrentCount as _,
+        })));
+    }
+}
+pub fn on_update_cycle(instance: *const TurnBasedGameMode) -> u32 {
+    let cycle = ON_UPDATE_CYCLE_Detour.call(instance);
+    BattleContext::handle_event(Ok(Event::OnUpdateCycle(OnUpdateCycleEvent {
+        cycle
+    })));
+    cycle
+}
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(

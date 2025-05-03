@@ -73,7 +73,7 @@ impl App {
                     .unwrap_or_default()
             })
             .show(ui, |plot_ui| {
-                let bars_data = create_bar_data(&battle_context);
+                let bars_data = create_bar_data(&battle_context.real_time_damages, &battle_context.lineup);
                 let bars: Vec<Bar> = bars_data
                     .iter()
                     .enumerate()
@@ -85,7 +85,7 @@ impl App {
                     })
                     .collect();
     
-                plot_ui.bar_chart(BarChart::new("Damage Bars", bars));
+                plot_ui.bar_chart(BarChart::new("", bars));
             });
     }
     
@@ -142,7 +142,7 @@ impl App {
                     let color = helpers::get_character_color(i);
                     let points = battle_context.av_history
                         .iter()
-                        .map(|turn| [turn.action_value, turn.avatars_turn_damage[i]])
+                        .map(|turn| [turn.total_elapsed_action_value, turn.avatars_turn_damage[i]])
                         .collect::<Vec<[f64; 2]>>();
     
                     if !points.is_empty() {
@@ -173,10 +173,14 @@ impl App {
     
     pub fn show_av_metrics(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
+        ui.horizontal(|ui| {
+            ui.label("Total Elapsed AV:");
+            ui.label(format!("{:.2}", battle_context.total_elapsed_action_value));
+        });
         ui.label("Current Turn");
         ui.horizontal(|ui| {
             ui.label("AV:");
-            ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
+            ui.label(format!("{:.2}", battle_context.current_turn_info.relative_action_value));
         });
         ui.horizontal(|ui| {
             ui.label("Total Damage:");
@@ -184,8 +188,8 @@ impl App {
         });
         ui.horizontal(|ui| {
             ui.label("DpAV:");
-            if battle_context.current_turn_info.action_value > 0.0 {
-                ui.label(format!("{:.2}", battle_context.total_damage / battle_context.current_turn_info.action_value));
+            if battle_context.total_elapsed_action_value > 0.0 {
+                ui.label(format!("{:.2}", battle_context.total_damage / battle_context.total_elapsed_action_value));
             } else {
                 ui.label("0.00");
             }
@@ -194,37 +198,27 @@ impl App {
     
 }
 
-fn create_bar_data(battle_context: &BattleContext) -> Vec<(&Avatar, f64, usize)> {        
-    let total_damage: Vec<f64> = battle_context.turn_history.iter()
-        .flat_map(|turn| turn.avatars_turn_damage.iter())
-        .copied()
-        .collect();
-
-    battle_context.lineup.iter()
-        .enumerate()
-        .map(|(i, avatar)| {
-            let damage = total_damage
-                .chunks(battle_context.lineup.len())
-                .map(|chunk| chunk.get(i).copied().unwrap_or(0.0))
-                .sum::<f64>();
-            (avatar, damage, i)
-        })
-        .collect()
+fn create_bar_data(real_time_damages: &Vec<f64>, avatars: &Vec<Avatar>) -> Vec<(Avatar, f64, usize)> {        
+    let mut bar_data = Vec::new();
+    for (i, avatar) in avatars.iter().enumerate() {
+        bar_data.push((avatar.clone(), real_time_damages[i], i));
+    }
+    bar_data
 }
 
 fn create_pie_segments(real_time_damages: &Vec<f64>, avatars: &Vec<Avatar>) -> Vec<(Avatar, PieSegment, usize)> {
-    let total = real_time_damages.into_iter().sum::<f64>();
+    let total_damage = real_time_damages.into_iter().sum::<f64>();
     let mut segments = Vec::new();
     let mut start_angle = -std::f64::consts::FRAC_PI_2; 
 
-    for (i, name) in avatars.iter().enumerate() {
+    for (i, avatar) in avatars.iter().enumerate() {
         let damage = real_time_damages[i];
-        let fraction = damage as f64 / total;
+        let fraction = damage as f64 / total_damage;
         let angle = fraction * std::f64::consts::TAU;
         let end_angle = start_angle + angle;
 
         segments.push((
-            name.clone(),
+            avatar.clone(),
             PieSegment {
                 points: create_pie_slice(start_angle, end_angle),
                 value: damage as f64,

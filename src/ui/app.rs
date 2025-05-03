@@ -1,7 +1,10 @@
 use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::Key;
 use egui::KeyboardShortcut;
+use egui::Label;
+use egui::Layout;
 use egui::Modifiers;
+use egui::ScrollArea;
 use egui::Stroke;
 use egui::TextEdit;
 use egui::{
@@ -47,6 +50,19 @@ impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
         if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
             self.should_hide = !self.should_hide;
+        }
+
+        if self.streamer_mode {
+            egui::TopBottomPanel::bottom("statusbar")
+                .resizable(true)
+                .show(ctx, |ui| {
+                    let label = Label::new(
+                        &self.streamer_msg
+                    ).selectable(false);
+                    
+                    ui.add(label);
+                    ui.allocate_space(ui.available_size())
+            });
         }
 
         if !self.should_hide {
@@ -121,10 +137,13 @@ impl Overlay for App {
                 .inner_margin(8.0)
                 .corner_radius(10.0);
 
-            let transparent_frame = egui::Frame::new().inner_margin(8.0);
+            let transparent_frame = egui::Frame::new()
+                .stroke(Stroke::new(0.5, Color32::WHITE))
+                .inner_margin(8.0)
+                .corner_radius(10.0);
 
             if self.show_damage_distribution {
-                egui::containers::Window::new("Damage Distribution")
+                egui::containers::Window::new("")
                     .frame(transparent_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -166,12 +185,6 @@ impl Overlay for App {
                         self.show_av_metrics(ui);
                     });
             }
-        }
-
-        if self.streamer_mode {
-            egui::TopBottomPanel::bottom("statusbar").show(ctx, |ui| {
-                ui.label(&self.streamer_msg);
-            });
         }
     }
 
@@ -258,7 +271,7 @@ impl App {
         Self {
             widget_opacity: 0.15,
             streamer_mode: true,
-            streamer_msg: String::from("Powered by Egui!"),
+            streamer_msg: String::new(),
             ..Default::default()
         }
     }

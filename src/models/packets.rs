@@ -13,7 +13,7 @@ pub struct Packet {
 struct Payload<'a, T: Serialize> {
     #[serde(rename = "type")]
     payload_type: &'a str,
-    data: T
+    data: T,
 }
 
 impl Packet {
@@ -35,7 +35,6 @@ impl Packet {
             size: body.len() as u32,
             body,
         })
-
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -75,12 +74,14 @@ event_packet!(
     Heartbeat {}
     Error { msg: String }
     // Game
-    BattleBegin {}
+    OnBattleBegin { max_waves: u32 }
     OnSetBattleLineup { avatars: Vec<Avatar> }
-    OnDamage { attacker: Avatar, damage: f64 }
-    OnTurnBegin { action_value: f64 }
-    OnTurnEnd { avatars: Vec<Avatar>, avatars_damage: Vec<f64>, total_damage: f64, action_value: f64 }
+    OnDamage { attacker: Avatar, damage: f64, damage_type: &'static str }
+    OnTurnBegin { total_elapsed_action_value: f64, relative_action_value: f64, turn_owner: Option<Avatar> }
+    OnTurnEnd { avatars: Vec<Avatar>, turn_info: TurnInfo }
     OnKill { attacker: Avatar }
     OnUseSkill { avatar: Avatar, skill: Skill }
-    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, action_value: f64 }
+    OnUpdateWave { wave: u32 }
+    OnUpdateCycle { cycle: u32 }
+    OnBattleEnd { avatars: Vec<Avatar>, turn_history: Vec<TurnInfo>, av_history: Vec<TurnInfo>, turn_count: usize, total_damage: f64, total_elapsed_action_value: f64 , relative_action_value: f64, cycle: u32, wave: u32 }
 );
