@@ -570,28 +570,34 @@ pub fn on_update_cycle(instance: *const TurnBasedGameMode) -> u32 {
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
-            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x66364c0, on_damage
+            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x6641110, on_damage
         );
         subscribe_function!(
-            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0x65ccd50, on_combo
+            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0x6336860, on_combo
         );
         subscribe_function!(
-            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x58842b0, on_use_skill
+            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x588d8c0, on_use_skill
         );
         subscribe_function!(
-            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0x9b44d80, on_set_lineup
+            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0x9be60f0, on_set_lineup
         );
         subscribe_function!(
-            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x85403a0, on_battle_begin
+            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x81ed7e0, on_battle_begin
         );
         subscribe_function!(
-            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x85404b0, on_battle_end
+            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x81ed900, on_battle_end
         );
         subscribe_function!(
-            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x853a4d0, on_turn_begin
+            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x81e7990, on_turn_begin
         );
         subscribe_function!(
-            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x58d6a80, on_turn_end
+            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x58df950, on_turn_end
+        );
+        subscribe_function!(
+            ON_UPDATE_WAVE_Detour, * GAMEASSEMBLY_HANDLE + 0x81ecbf0, on_update_wave
+        );
+        subscribe_function!(
+            ON_UPDATE_CYCLE_Detour, * GAMEASSEMBLY_HANDLE + 0x81f39f0, on_update_cycle
         );
         Ok(())
     }
