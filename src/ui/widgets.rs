@@ -99,8 +99,8 @@ impl App {
             .height(available.y)
             .width(available.x)
             .include_y(0.0)
-            .x_axis_label("Turn")
-            .y_axis_label("Damage")
+            .x_axis_label(t!("Turn"))
+            .y_axis_label(t!("Damage"))
             .y_axis_formatter(|y, _| helpers::format_damage(y.value))
             .show(ui, |plot_ui| {
                 for (i, avatar) in battle_context.lineup.iter().enumerate() {
@@ -134,8 +134,8 @@ impl App {
             .height(available.y)
             .width(available.x)
             .include_y(0.0) 
-            .x_axis_label("Action Value")
-            .y_axis_label("Damage")
+            .x_axis_label(t!("Action Value"))
+            .y_axis_label(t!("Damage"))
             .y_axis_formatter(|y, _| helpers::format_damage(y.value))
             .show(ui, |plot_ui| {
                 for (i, avatar) in battle_context.lineup.iter().enumerate() {
@@ -159,8 +159,8 @@ impl App {
     pub fn show_real_time_damage_graph(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                ui.radio_value(&mut self.graph_x_unit, Unit::Turn, "Turn");
-                ui.radio_value(&mut self.graph_x_unit, Unit::ActionValue, "Action Value");
+                ui.radio_value(&mut self.graph_x_unit, Unit::Turn, t!("Turn"));
+                ui.radio_value(&mut self.graph_x_unit, Unit::ActionValue, t!("Action Value"));
             });
             ui.add_space(8.0);
             
@@ -173,25 +173,25 @@ impl App {
     
     pub fn show_av_metrics(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
-        // ui.horizontal(|ui| {
-        //     ui.label("Total Elapsed AV:");
-        //     ui.label(format!("{:.2}", battle_context.total_elapsed_action_value));
-        // });
-        ui.label("Current Turn");
         ui.horizontal(|ui| {
-            ui.label("AV:");
+            ui.label(t!("Total Elapsed AV:"));
+            ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
+        });
+        ui.label(t!("Current Turn"));
+        ui.horizontal(|ui| {
+            ui.label(t!("AV:"));
             ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
         });
         ui.horizontal(|ui| {
-            ui.label("Total Damage:");
+            ui.label(t!("Total Damage:"));
             ui.label(helpers::format_damage(battle_context.total_damage));
         });
         ui.horizontal(|ui| {
-            ui.label("DpAV:");
+            ui.label(t!("DpAV:"));
             if battle_context.action_value > 0.0 {
                 ui.label(format!("{:.2}", battle_context.total_damage / battle_context.action_value));
             } else {
-                ui.label("0.00");
+                ui.label(format!("{:.2}", battle_context.total_damage / 1.0));
             }
         });
     }

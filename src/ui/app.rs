@@ -2,9 +2,7 @@ use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Label;
-use egui::Layout;
 use egui::Modifiers;
-use egui::ScrollArea;
 use egui::Stroke;
 use egui::TextEdit;
 use egui::{
@@ -73,40 +71,40 @@ impl Overlay for App {
                         ..Default::default()
                     })
                     .show(ctx, |_ui: &mut egui::Ui| {
-                        Window::new("Overlay Menu")
+                        Window::new(t!("Overlay Menu"))
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .resizable(false)
                             .show(ctx, |ui| {
                                 ui.vertical_centered(|ui| {
-                                    ui.heading("Widget Controls");
+                                    ui.heading(t!("Widget Controls"));
 
-                                    ui.checkbox(&mut self.streamer_mode, "Streamer Mode");
-                                    ui.checkbox(&mut self.show_console, "Show Logs");
+                                    ui.checkbox(&mut self.streamer_mode, t!("Streamer Mode"));
+                                    ui.checkbox(&mut self.show_console, t!("Show Logs"));
                                     ui.checkbox(
                                         &mut self.show_damage_distribution,
-                                        "Show Damage Distribution",
+                                        t!("Show Damage Distribution"),
                                     );
-                                    ui.checkbox(&mut self.show_damage_bars, "Show Damage Bars");
+                                    ui.checkbox(&mut self.show_damage_bars, t!("Show Damage Bars"));
                                     ui.checkbox(
                                         &mut self.show_real_time_damage,
-                                        "Show Real-Time Damage",
+                                        t!("Show Real-Time Damage"),
                                     );
-                                    ui.checkbox(&mut self.show_av_metrics, "Show AV Metrics");
+                                    ui.checkbox(&mut self.show_av_metrics, t!("Show AV Metrics"));
 
                                     ui.separator();
-                                    ui.label("Window Opacity");
+                                    ui.label(t!("Window Opacity"));
                                     ui.add(
                                         Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""),
                                     );
 
                                     ui.separator();
-                                    ui.label("Streamer Message");
+                                    ui.label(t!("Streamer Message"));
                                     ui.add(
                                         TextEdit::singleline(&mut self.streamer_msg),
                                     );
 
                                     ui.separator();
-                                    if ui.button("Close Menu").clicked() {
+                                    if ui.button(t!("Close Menu")).clicked() {
                                         self.show_menu = false;
                                     }
                                 });
@@ -115,7 +113,7 @@ impl Overlay for App {
             }
 
             if self.show_console {
-                egui::Window::new("Log")
+                egui::Window::new(t!("Log"))
                     .resizable(true)
                     .default_height(300.0)
                     .default_width(400.0)
@@ -154,7 +152,7 @@ impl Overlay for App {
             }
 
             if self.show_damage_bars {
-                egui::containers::Window::new("Damage by Character")
+                egui::containers::Window::new(t!("Damage by Character"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -165,7 +163,7 @@ impl Overlay for App {
             }
 
             if self.show_real_time_damage {
-                egui::containers::Window::new("Real-Time Damage")
+                egui::containers::Window::new(t!("Real-Time Damage"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -176,7 +174,7 @@ impl Overlay for App {
             }
 
             if self.show_av_metrics {
-                egui::containers::Window::new("Action Value Metrics")
+                egui::containers::Window::new(t!("Action Value Metrics"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -272,6 +270,7 @@ impl App {
             ),
         }
 
+        rust_i18n::set_locale("zh-cn");
         ctx.style_mut(|style| {
             style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
         });

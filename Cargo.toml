@@ -10,6 +10,14 @@ is_beta = true
 patch = "3.2.3"
 hotfix = "0.4"
 
+[package.metadata.i18n]
+available-locales = ["en", "zh-cn"]
+default-locale = "en"
+load-path = "locales"
+minify-key = true
+minify-key-len = 12
+minify-key-thresh = 8
+
 [lib]
 crate-type = ["cdylib"]
 
@@ -28,6 +36,7 @@ egui_logger = "0.6.3"
 function_name = "0.3.0"
 slog = "2.7.0"
 slog-term = "2.9.1"
+rust-i18n = "3.1.4"
 
 [dependencies.windows]
 version = "0.60.0"
