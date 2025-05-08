@@ -1,6 +1,6 @@
 use egui::{Stroke, Ui, TextStyle};
 use egui_plot::{Legend, Plot, PlotPoints, Polygon, BarChart, Bar, Line};
-use crate::ui::app::Unit;
+use crate::ui::app::GraphUnit;
 
 use crate::{battle::BattleContext, models::misc::Avatar};
 
@@ -159,14 +159,14 @@ impl App {
     pub fn show_real_time_damage_graph(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                ui.radio_value(&mut self.graph_x_unit, Unit::Turn, t!("Turn"));
-                ui.radio_value(&mut self.graph_x_unit, Unit::ActionValue, t!("Action Value"));
+                ui.radio_value(&mut self.graph_x_unit, GraphUnit::Turn, t!("Turn"));
+                ui.radio_value(&mut self.graph_x_unit, GraphUnit::ActionValue, t!("Action Value"));
             });
             ui.add_space(8.0);
             
             match self.graph_x_unit {
-                Unit::Turn => self.show_turn_damage_plot(ui),
-                Unit::ActionValue => self.show_av_damage_plot(ui),
+                GraphUnit::Turn => self.show_turn_damage_plot(ui),
+                GraphUnit::ActionValue => self.show_av_damage_plot(ui),
             }
         });
     }

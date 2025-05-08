@@ -15,20 +15,14 @@ use windows::Win32::{
 };
 
 #[derive(Default, PartialEq)]
-pub enum Unit {
+pub enum GraphUnit {
     #[default]
     Turn,
     ActionValue,
 }
 
-pub struct Keybind {
-    pub key: egui::Key,
-    pub modifiers: Option<egui::Modifiers>,
-}
-
 #[derive(Default)]
 pub struct App {
-    pub menu_keybind: Option<Keybind>,
     pub show_menu: bool,
     pub show_console: bool,
     show_damage_distribution: bool,
@@ -36,13 +30,14 @@ pub struct App {
     show_real_time_damage: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
-    pub graph_x_unit: Unit,
+    pub graph_x_unit: GraphUnit,
     pub should_hide: bool,
     streamer_mode: bool,
     streamer_msg: String
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
+pub const SHOW_MENU: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
 
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
@@ -203,24 +198,18 @@ impl Overlay for App {
                             repeat: _,
                             modifiers,
                         } => {
-                            if let Some(menu_keybind) = &self.menu_keybind {
-                                if *key == menu_keybind.key && *pressed {
-                                    if let Some(keybind_modifiers) = menu_keybind.modifiers {
-                                        if modifiers.matches_exact(keybind_modifiers) {
-                                            self.show_menu = !self.show_menu;
+                            if modifiers.matches_exact(SHOW_MENU.modifiers) && *key == SHOW_MENU.logical_key && *pressed {
+                                self.show_menu = !self.show_menu;
 
-                                            return Some(WindowProcessOptions {
-                                                // Simulate alt to get cursor
-                                                window_message: Some(WindowMessage {
-                                                    msg: WM_KEYDOWN,
-                                                    wparam: WPARAM(VK_MENU.0 as _),
-                                                    lparam: LPARAM(0),
-                                                }),
-                                                ..Default::default()
-                                            });
-                                        }
-                                    }
-                                }
+                                return Some(WindowProcessOptions {
+                                    // Simulate alt to get cursor
+                                    window_message: Some(WindowMessage {
+                                        msg: WM_KEYDOWN,
+                                        wparam: WPARAM(VK_MENU.0 as _),
+                                        lparam: LPARAM(0),
+                                    }),
+                                    ..Default::default()
+                                });
                             }
                         }
                         _ => {}
@@ -270,7 +259,6 @@ impl App {
             ),
         }
 
-        rust_i18n::set_locale("zh-cn");
         ctx.style_mut(|style| {
             style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
         });
@@ -278,12 +266,7 @@ impl App {
         Self {
             widget_opacity: 0.15,
             streamer_mode: true,
-            streamer_msg: String::new(),
             ..Default::default()
         }
-    }
-
-    pub fn set_menu_keybind(&mut self, key: egui::Key, modifiers: Option<egui::Modifiers>) {
-        self.menu_keybind = Some(Keybind { key, modifiers });
     }
 }
