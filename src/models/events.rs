@@ -3,19 +3,21 @@ use super::misc::{Avatar, Skill};
 
 pub enum Event {
     OnBattleBegin(OnBattleBeginEvent),
-    OnSetLineup(OnSetLineupEvent),
+    OnSetBattleLineup(OnSetLineupEvent),
     OnDamage(OnDamageEvent),
     OnTurnBegin(OnTurnBeginEvent),
     OnTurnEnd,
     OnKill(OnKillEvent),
     OnUseSkill(OnUseSkillEvent),
-    OnBattleEnd(OnBattleEndEvent),
+    OnBattleEnd,
     OnUpdateWave(OnUpdateWaveEvent),
     OnUpdateCycle(OnUpdateCycleEvent),
 }
 
 pub struct OnBattleBeginEvent {
-    pub max_waves: u32
+    pub max_waves: u32,
+    pub max_cycles: u32,
+    pub stage_id: u32
 }
 
 pub struct OnUpdateWaveEvent {
@@ -27,12 +29,8 @@ pub struct OnUpdateCycleEvent {
 }
 
 pub struct OnTurnBeginEvent {
-    pub total_elapsed_action_value: f64,
+    pub action_value: f64,
     pub turn_owner: Option<Avatar>
-}
-
-pub struct OnBattleEndEvent {
-    pub total_elapsed_action_value: f64
 }
 
 pub struct OnUseSkillEvent {
@@ -47,7 +45,7 @@ pub struct OnSetLineupEvent {
 pub struct OnDamageEvent {
     pub attacker: Avatar,
     pub damage: f64,
-    pub damage_type: &'static str
+    pub damage_type: isize
 }
 
 pub struct OnKillEvent {
