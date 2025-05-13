@@ -117,7 +117,7 @@ pub unsafe fn get_skill_from_skilldata(
                 if !skill_name.is_null() {
                     Ok(Skill {
                         name: (*skill_name).to_string(),
-                        skill_type: get_skill_type_str(skill_type).to_owned(),
+                        skill_type: skill_type as isize,
                     })
                 } else {
                     Err(anyhow!("SkillData type was null"))
@@ -175,25 +175,4 @@ pub fn fixpoint_to_raw(fixpoint: &FixPoint) -> f64 {
     let hi = ((fixpoint.m_rawValue as u64 & 0xFFFFFFFF00000000) >> 32) as u32;
     let lo = (fixpoint.m_rawValue as u64 & 0x00000000FFFFFFFF) as u32;
     hi as f64 + lo as f64 * *float_conversion_const
-}
-
-#[named]
-pub fn get_skill_type_str(attack_type: AttackType) -> &'static str {
-    log::debug!(function_name!());
-    match attack_type {
-        AttackType::Unknown => "Talent",
-        AttackType::Normal => "Basic",
-        AttackType::BPSkill => "Skill",
-        AttackType::Ultra => "Ultimate",
-        AttackType::QTE => "QTE",
-        AttackType::DOT => "DOT",
-        AttackType::Pursued => "Pursued",
-        AttackType::Maze => "Technique",
-        AttackType::MazeNormal => "MazeNormal",
-        AttackType::Insert => "Follow-up",
-        AttackType::ElementDamage => "Elemental Damage",
-        AttackType::Level => "Level",
-        AttackType::Servant => "Servant",
-        AttackType::TrueDamage => "True Damage",
-    }
 }

@@ -1,4 +1,4 @@
-use crate::{logging, overlay, subscribers};
+use crate::{logging, overlay, server, subscribers};
 use ctor::ctor;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use std::thread::{self};
@@ -17,12 +17,9 @@ fn entry() {
 
         log::info!("Build: {}", env!("TARGET_BUILD"));
         log::info!("Setting up...");
-        overlay::initialize();
+        overlay::initialize().unwrap();
         subscribers::battle::subscribe().unwrap();
         log::info!("Finished setup.");
-    });
-
-    thread::spawn(|| {
-        crate::server::start_server();
+        server::start_server();
     });
 }
