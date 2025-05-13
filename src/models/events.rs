@@ -3,7 +3,7 @@ use super::misc::{Avatar, Skill};
 
 pub enum Event {
     OnBattleBegin(OnBattleBeginEvent),
-    OnSetLineup(OnSetLineupEvent),
+    OnSetBattleLineup(OnSetLineupEvent),
     OnDamage(OnDamageEvent),
     OnTurnBegin(OnTurnBeginEvent),
     OnTurnEnd,

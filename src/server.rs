@@ -1,46 +1,56 @@
-mod socket_manager;
+use std::{net::SocketAddr, str::FromStr, sync::{LazyLock, OnceLock}};
+use anyhow::{Context, Ok};
+use axum::{response::Redirect, routing::get, Router};
+use socketioxide::{extract::SocketRef, SocketIo};
+use tokio::runtime::Runtime;
+use tower::ServiceBuilder;
+use tower_http::cors::{Any, CorsLayer};
 
-use std::{net::{TcpListener, TcpStream}, thread, time::Duration};
-use anyhow::{ Context, Result };
-use crate::models::packets::{EventPacket, Packet};
-
-use self::socket_manager::SocketManager;
+use crate::models::packets::Packet;
 
 const SERVER_ADDR: &str = "127.0.0.1:1305";
 
-pub fn start_server() -> Result<()> {
-    let listener = TcpListener::bind(SERVER_ADDR).with_context(|| format!("Failed to start server address {}", SERVER_ADDR))?;
+static SOCKET_IO: OnceLock<SocketIo> = OnceLock::new();
+static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| Runtime::new().expect("Failed to create Tokio runtime"));
 
-    // Accept connections and process them serially
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                thread::spawn(|| {
-                    handle_client(stream);
-                });
-            }
-            Err(e) => {
-                log::error!("Error: Client failed to connect to server:\n{e}")
-            }
-        }
-    }
-    Ok(())
+pub fn start_server() {
+    RUNTIME.block_on(async {
+        let (layer, io) = SocketIo::new_layer();
+        io.ns("/", on_connect);
+        SOCKET_IO.set(io).unwrap();
+
+        let app = Router::new()
+            .route("/", get(redirect_to_new_page))
+            .layer(
+                ServiceBuilder::new()
+                    .layer(CorsLayer::new()
+                        .allow_origin(Any)
+                        .allow_methods(Any)
+                        .allow_headers(Any)
+                    )
+                    .layer(layer)
+            );
+
+        // HTTP
+        axum_server::bind(SocketAddr::from_str(SERVER_ADDR).unwrap())
+            .serve(app.into_make_service())
+            .await
+            .expect("Failed to start server");
+    });
 }
 
-fn handle_client(stream: TcpStream) {
-    let mut socket_manager = SocketManager::get_instance();
-    socket_manager.push(stream);
-    drop(socket_manager);
-    loop {
-        let packet = Packet::from_event_packet(EventPacket::Heartbeat {  }).unwrap();
-        let mut socket_manager = SocketManager::get_instance();
-        socket_manager.broadcast_packet(packet);
-        drop(socket_manager);
-        std::thread::sleep(Duration::from_secs(1));
-    }
+async fn redirect_to_new_page() -> Redirect {
+    Redirect::temporary("https://sranalysis.kain.id.vn")
+}
+
+fn on_connect(socket: SocketRef) {
+    let packet = Packet::Connected { version: env!("TARGET_BUILD").to_string() };
+    socket.emit(&packet.name(), &packet.payload()).ok();
 }
 
 pub fn broadcast(packet: Packet) {
-    let mut socket_manager = SocketManager::get_instance();
-    socket_manager.broadcast_packet(packet)
+    RUNTIME.spawn(async move {
+        let io = SOCKET_IO.get().unwrap();
+        io.broadcast().emit(&packet.name(), &packet.payload()).await.unwrap();
+    });
 }
