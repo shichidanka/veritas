@@ -2,7 +2,6 @@ use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Label;
-use egui::Layout;
 use egui::Modifiers;
 use egui::ScrollArea;
 use egui::Stroke;
@@ -17,20 +16,14 @@ use windows::Win32::{
 };
 
 #[derive(Default, PartialEq)]
-pub enum Unit {
+pub enum GraphUnit {
     #[default]
     Turn,
     ActionValue,
 }
 
-pub struct Keybind {
-    pub key: egui::Key,
-    pub modifiers: Option<egui::Modifiers>,
-}
-
 #[derive(Default)]
 pub struct App {
-    pub menu_keybind: Option<Keybind>,
     pub show_menu: bool,
     pub show_console: bool,
     show_damage_distribution: bool,
@@ -38,13 +31,14 @@ pub struct App {
     show_real_time_damage: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
-    pub graph_x_unit: Unit,
+    pub graph_x_unit: GraphUnit,
     pub should_hide: bool,
     streamer_mode: bool,
     streamer_msg: String
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
+pub const SHOW_MENU: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
 
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
@@ -73,40 +67,40 @@ impl Overlay for App {
                         ..Default::default()
                     })
                     .show(ctx, |_ui: &mut egui::Ui| {
-                        Window::new("Overlay Menu")
+                        Window::new(t!("Overlay Menu"))
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .resizable(false)
                             .show(ctx, |ui| {
                                 ui.vertical_centered(|ui| {
-                                    ui.heading("Widget Controls");
+                                    ui.heading(t!("Widget Controls"));
 
-                                    ui.checkbox(&mut self.streamer_mode, "Streamer Mode");
-                                    ui.checkbox(&mut self.show_console, "Show Logs");
+                                    ui.checkbox(&mut self.streamer_mode, t!("Streamer Mode"));
+                                    ui.checkbox(&mut self.show_console, t!("Show Logs"));
                                     ui.checkbox(
                                         &mut self.show_damage_distribution,
-                                        "Show Damage Distribution",
+                                        t!("Show Damage Distribution"),
                                     );
-                                    ui.checkbox(&mut self.show_damage_bars, "Show Damage Bars");
+                                    ui.checkbox(&mut self.show_damage_bars, t!("Show Damage Bars"));
                                     ui.checkbox(
                                         &mut self.show_real_time_damage,
-                                        "Show Real-Time Damage",
+                                        t!("Show Real-Time Damage"),
                                     );
-                                    ui.checkbox(&mut self.show_av_metrics, "Show AV Metrics");
+                                    ui.checkbox(&mut self.show_av_metrics, t!("Show AV Metrics"));
 
                                     ui.separator();
-                                    ui.label("Window Opacity");
+                                    ui.label(t!("Window Opacity"));
                                     ui.add(
                                         Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""),
                                     );
 
                                     ui.separator();
-                                    ui.label("Streamer Message");
+                                    ui.label(t!("Streamer Message"));
                                     ui.add(
                                         TextEdit::singleline(&mut self.streamer_msg),
                                     );
 
                                     ui.separator();
-                                    if ui.button("Close Menu").clicked() {
+                                    if ui.button(t!("Close Menu")).clicked() {
                                         self.show_menu = false;
                                     }
                                 });
@@ -115,7 +109,7 @@ impl Overlay for App {
             }
 
             if self.show_console {
-                egui::Window::new("Log")
+                egui::Window::new(t!("Log"))
                     .resizable(true)
                     .default_height(300.0)
                     .default_width(400.0)
@@ -154,7 +148,7 @@ impl Overlay for App {
             }
 
             if self.show_damage_bars {
-                egui::containers::Window::new("Damage by Character")
+                egui::containers::Window::new(t!("Damage by Character"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -165,7 +159,7 @@ impl Overlay for App {
             }
 
             if self.show_real_time_damage {
-                egui::containers::Window::new("Real-Time Damage")
+                egui::containers::Window::new(t!("Real-Time Damage"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -176,7 +170,7 @@ impl Overlay for App {
             }
 
             if self.show_av_metrics {
-                egui::containers::Window::new("Action Value Metrics")
+                egui::containers::Window::new(t!("Action Value Metrics"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -205,24 +199,18 @@ impl Overlay for App {
                             repeat: _,
                             modifiers,
                         } => {
-                            if let Some(menu_keybind) = &self.menu_keybind {
-                                if *key == menu_keybind.key && *pressed {
-                                    if let Some(keybind_modifiers) = menu_keybind.modifiers {
-                                        if modifiers.matches_exact(keybind_modifiers) {
-                                            self.show_menu = !self.show_menu;
+                            if modifiers.matches_exact(SHOW_MENU.modifiers) && *key == SHOW_MENU.logical_key && *pressed {
+                                self.show_menu = !self.show_menu;
 
-                                            return Some(WindowProcessOptions {
-                                                // Simulate alt to get cursor
-                                                window_message: Some(WindowMessage {
-                                                    msg: WM_KEYDOWN,
-                                                    wparam: WPARAM(VK_MENU.0 as _),
-                                                    lparam: LPARAM(0),
-                                                }),
-                                                ..Default::default()
-                                            });
-                                        }
-                                    }
-                                }
+                                return Some(WindowProcessOptions {
+                                    // Simulate alt to get cursor
+                                    window_message: Some(WindowMessage {
+                                        msg: WM_KEYDOWN,
+                                        wparam: WPARAM(VK_MENU.0 as _),
+                                        lparam: LPARAM(0),
+                                    }),
+                                    ..Default::default()
+                                });
                             }
                         }
                         _ => {}
@@ -232,7 +220,15 @@ impl Overlay for App {
             _ => {}
         };
 
-        return Some(WindowProcessOptions::default());
+        if self.show_menu {
+            Some(WindowProcessOptions {
+                should_capture_all_input: true,
+                ..Default::default()
+            })
+        }
+        else {
+            Some(WindowProcessOptions::default())
+        }
     }
 }
 
@@ -271,12 +267,7 @@ impl App {
         Self {
             widget_opacity: 0.15,
             streamer_mode: true,
-            streamer_msg: String::new(),
             ..Default::default()
         }
-    }
-
-    pub fn set_menu_keybind(&mut self, key: egui::Key, modifiers: Option<egui::Modifiers>) {
-        self.menu_keybind = Some(Keybind { key, modifiers });
     }
 }

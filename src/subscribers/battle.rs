@@ -5,11 +5,10 @@ use crate::kreide::types::*;
 use crate::kreide::*;
 // use crate::kreide::types::rpg::client::*;
 use crate::kreide::functions::rpg::gamecore::*;
-// use crate::kreide::functions::rpg::client::*;
+use crate::kreide::functions::rpg::client::*;
 use crate::kreide::helpers::*;
 
 use crate::models::events::OnBattleBeginEvent;
-use crate::models::events::OnBattleEndEvent;
 use crate::models::events::Event;
 use crate::models::events::OnDamageEvent;
 use crate::models::events::OnUpdateCycleEvent;
@@ -76,7 +75,7 @@ fn on_damage(
         match (*attacker)._Team {
             TeamType::TeamLight => {
                 let damage = fixpoint_to_raw(&(*nopbaaaggla).JFKEEOMKMLI);
-                let damage_type = get_skill_type_str((*nopbaaaggla).APDDLHNGGIM); 
+                let damage_type = (*nopbaaaggla).APDDLHNGGIM; 
                 let attack_owner = {
                     let attack_owner = AbilityStatic_GetActualOwner(attacker);
                     if attack_owner.is_null() {
@@ -93,7 +92,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
-                                damage_type
+                                damage_type: damage_type as isize
                             })),
                             Err(e) => {
                                 log::error!("Avatar Event Error: {}", e);
@@ -107,7 +106,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
-                                damage_type
+                                damage_type: damage_type as isize
                             })),
                             Err(e) => {
                                 log::error!("Servant Event Error: {}", e);
@@ -124,7 +123,7 @@ fn on_damage(
                             Ok(avatar) => Ok(Event::OnDamage(OnDamageEvent {
                                 attacker: avatar,
                                 damage,
-                                damage_type
+                                damage_type: damage_type as isize
                             })),
                             Err(e) => {
                                 log::error!("Snapshot Event Error: {}", e);
@@ -225,9 +224,6 @@ fn on_use_skill(
                             let e = match get_servant_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_servant_entity(skill_owner) {
                                     Ok(avatar) => {
-                                        if skill.name.is_empty() {
-                                            return ON_USE_SKILL_Detour.call(instance, skill_index, a3, a4, skill_extra_use_param);
-                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -259,9 +255,6 @@ fn on_use_skill(
                             let e = match get_battle_event_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(avatar_entity) {
                                     Ok(avatar) => {
-                                        if skill.name.is_empty() {
-                                            return ON_USE_SKILL_Detour.call(instance, skill_index, a3, a4, skill_extra_use_param);
-                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -377,9 +370,6 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                             let e = match get_servant_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_servant_entity(skill_owner) {
                                     Ok(avatar) => {
-                                        if skill.name.is_empty() {
-                                            return;
-                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -412,9 +402,6 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                             let e = match get_battle_event_skill_from_skilldata(skill_data) {
                                 Ok(skill) => match get_avatar_from_entity(avatar_entity) {
                                     Ok(avatar) => {
-                                        if skill.name.is_empty() {
-                                            return;
-                                        }
                                         Ok(Event::OnUseSkill(OnUseSkillEvent { avatar, skill }))
                                     }
                                     Err(e) => {
@@ -478,7 +465,7 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
                 .collect::<String>();
             Err(anyhow!(errors))
         } else {
-            Ok(Event::OnSetLineup(OnSetLineupEvent { avatars }))
+            Ok(Event::OnSetBattleLineup(OnSetLineupEvent { avatars }))
         };
         BattleContext::handle_event(event);
     }
@@ -491,7 +478,9 @@ fn on_battle_begin(instance: *const TurnBasedGameMode) {
     ON_BATTLE_BEGIN_Detour.call(instance);
     unsafe {
         BattleContext::handle_event(Ok(Event::OnBattleBegin(OnBattleBeginEvent {
-            max_waves: (*instance).WaveMonsterMaxCount__BackingField as _
+            max_waves: (*instance).WaveMonsterMaxCount__BackingField as _,
+            max_cycles: (*instance).ChallengeTurnLimit__BackingField,
+            stage_id: (*instance).CurrentWaveStageID__BackingField
         })));    
     }
 }
@@ -500,12 +489,8 @@ fn on_battle_begin(instance: *const TurnBasedGameMode) {
 fn on_battle_end(instance: *const TurnBasedGameMode) {
     log::debug!(function_name!());
     ON_BATTLE_END_Detour.call(instance);
-    unsafe {
-        BattleContext::handle_event(Ok(Event::OnBattleEnd(OnBattleEndEvent {
-            total_elapsed_action_value: get_elapsed_av(instance),
-        })));           
-    }
- }
+    BattleContext::handle_event(Ok(Event::OnBattleEnd));
+}
 
 #[named]
 fn on_turn_begin(instance: *const TurnBasedGameMode) {
@@ -520,7 +505,7 @@ fn on_turn_begin(instance: *const TurnBasedGameMode) {
                 let e = match helpers::get_avatar_from_entity(turn_owner) {
                     Ok(avatar) => {
                         Ok(Event::OnTurnBegin(OnTurnBeginEvent {
-                            total_elapsed_action_value: get_elapsed_av(instance),
+                            action_value: get_elapsed_av(instance),
                             turn_owner: Some(avatar)
                         }))
                     },
@@ -534,7 +519,7 @@ fn on_turn_begin(instance: *const TurnBasedGameMode) {
             },
             _ => {
                 BattleContext::handle_event(Ok(Event::OnTurnBegin(OnTurnBeginEvent {
-                    total_elapsed_action_value: get_elapsed_av(instance),
+                    action_value: get_elapsed_av(instance),
                     turn_owner: None
                 })));
             }

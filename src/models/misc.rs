@@ -21,7 +21,7 @@ impl fmt::Display for Avatar {
 pub struct Skill {
     pub name: String,
     #[serde(rename = "type")]
-    pub skill_type: String,
+    pub skill_type: isize,
 }
 
 impl fmt::Display for Skill {
@@ -33,8 +33,7 @@ impl fmt::Display for Skill {
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
 pub struct TurnInfo {
-    pub total_elapsed_action_value: f64,
-    pub relative_action_value: f64,
+    pub action_value: f64,
     pub cycle: u32,
     pub wave: u32,
     pub avatars_turn_damage: Vec<f64>,

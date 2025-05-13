@@ -152,19 +152,12 @@ pub fn get_vtable() -> Box<[usize; 205]> {
 pub fn initialize() -> Result<()> {
     let vtable = get_vtable();
     unsafe {
-        edio11::set_overlay(
+        Ok(edio11::set_overlay(
             Box::new(|ctx| {
-                let mut app = App::new(ctx);
-                app.set_menu_keybind(
-                    egui::Key::M,
-                    Some(egui::Modifiers::CTRL),
-                );
-                Box::new(app)
+                Box::new(App::new(ctx))
             }),
             mem::transmute(vtable[8]),
             mem::transmute(vtable[13]),
-        )
-        .unwrap();
+        )?)
     }
-    Ok(())
 }

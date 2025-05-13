@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate rust_i18n;
+
 macro_rules! lazy_initialize_address {
     ($addr:expr) => {
         LazyLock::new(|| unsafe { std::mem::transmute($addr + *$crate::GAMEASSEMBLY_HANDLE) })
@@ -21,3 +24,5 @@ use windows::{
 
 pub static GAMEASSEMBLY_HANDLE: LazyLock<usize> =
     LazyLock::new(|| unsafe { GetModuleHandleW(w!("GameAssembly")).expect("GameAssembly was not found in the game process").0 as usize });
+
+rust_i18n::i18n!();
