@@ -888,7 +888,7 @@ pub fn subscribe() -> Result<()> {
         );
         subscribe_function!(
             ON_UPDATE_TEAM_FORMATION_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x59509c0,
+            *GAMEASSEMBLY_HANDLE + 0x59507d0,
             on_update_team_formation
         );
         subscribe_function!(
