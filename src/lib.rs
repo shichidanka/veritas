@@ -1,9 +1,11 @@
+#![recursion_limit = "256"]
+
 #[macro_use]
 extern crate rust_i18n;
 
 macro_rules! lazy_initialize_address {
     ($addr:expr) => {
-        LazyLock::new(|| unsafe { std::mem::transmute($addr + *$crate::GAMEASSEMBLY_HANDLE) })
+        std::sync::LazyLock::new(|| unsafe { std::mem::transmute($addr + *$crate::GAMEASSEMBLY_HANDLE) })
     };
 }
 mod battle;

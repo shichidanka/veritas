@@ -28,6 +28,7 @@ pub struct App {
     show_damage_distribution: bool,
     show_damage_bars: bool,
     show_real_time_damage: bool,
+    show_enemy_stats: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
     pub graph_x_unit: GraphUnit,
@@ -84,6 +85,11 @@ impl Overlay for App {
                                         &mut self.show_real_time_damage,
                                         t!("Show Real-Time Damage"),
                                     );
+                                    ui.checkbox(
+                                        &mut self.show_enemy_stats,
+                                        t!("Show Enemy Stats"),
+                                    );
+
                                     ui.checkbox(&mut self.show_av_metrics, t!("Show AV Metrics"));
 
                                     ui.separator();
@@ -178,6 +184,18 @@ impl Overlay for App {
                         self.show_av_metrics(ui);
                     });
             }
+
+            if self.show_enemy_stats {
+                egui::containers::Window::new(t!("Enemy Stats"))
+                    .frame(window_frame)
+                    .resizable(true)
+                    .min_width(200.0)
+                    .min_height(150.0)
+                    .show(ctx, |ui| {
+                        self.show_enemy_stats(ui);
+                    });
+            }
+
         }
     }
 

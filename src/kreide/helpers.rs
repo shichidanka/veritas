@@ -160,6 +160,8 @@ pub unsafe fn get_avatar_from_servant_entity(entity: *const GameEntity) -> Resul
     log::debug!(function_name!());
     if !entity.is_null() {
         // can actually just save ref of battle and access this member thru battleinstance worldinstance
+        // So actually, 
+        // GameEntity -> _OwnerWorldRef -> _EntityManager
         let entity_manager = GamePlayStatic_GetEntityManager();
         let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, entity);
         get_avatar_from_entity(avatar_entity)

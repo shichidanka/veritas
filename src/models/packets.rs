@@ -2,7 +2,7 @@ use serde::Serialize;
 
 use super::{
     events::Event,
-    misc::{Avatar, Skill, TurnInfo},
+    misc::{Avatar, Enemy, Entity, Skill, Stat, Team, TurnInfo},
 };
 
 macro_rules! packet {
@@ -51,33 +51,33 @@ packet!(
         max_cycles: u32,
         stage_id: u32
     }
-    
+
     OnSetBattleLineup {
         avatars: Vec<Avatar>
     }
-    
+
     OnDamage {
-        attacker: Avatar,
+        attacker: Entity,
         damage: f64,
         damage_type: isize
     }
-    
+
     OnTurnBegin {
         action_value: f64,
-        turn_owner: Option<Avatar>
+        turn_owner: Option<Entity>
     }
-    
+
     OnTurnEnd {
-        avatars: Vec<Avatar>,
         turn_info: TurnInfo
     }
 
-    // OnKill {
-    //     attacker: Avatar
-    // }
+    OnEntityDefeated {
+        killer: Entity,
+        entity_defeated: Entity
+    }
 
     OnUseSkill {
-        avatar: Avatar,
+        avatar: Entity,
         skill: Skill
     }
 
@@ -87,6 +87,20 @@ packet!(
 
     OnUpdateCycle {
         cycle: u32
+    }
+
+    OnStatChange {
+        entity: Entity,
+        stat: Stat
+    }
+
+    OnUpdateTeamFormation {
+        entities: Vec<Entity>,
+        team: Team
+    }
+
+    OnInitializeEnemy {
+        enemy: Enemy
     }
 
     OnBattleEnd {
