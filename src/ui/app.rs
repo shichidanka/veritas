@@ -51,21 +51,25 @@ impl Overlay for App {
             self.should_hide = !self.should_hide;
         }
 
-        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
-                ui.menu_button(t!("Language"), |ui| {
-                    for locale_code in rust_i18n::available_locales!() {
-                        if let Some(locale) = LOCALES.get(locale_code) {
-                            if ui.button(*locale).clicked() {
-                                self.config.set_locale(locale_code.to_string());
-                                rust_i18n::set_locale(locale_code);
-                                ui.close_menu();
+        if !self.should_hide {
+            if self.show_menu {
+                egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+                    egui::menu::bar(ui, |ui| {
+                        ui.menu_button(t!("Language"), |ui| {
+                            for locale_code in rust_i18n::available_locales!() {
+                                if let Some(locale) = LOCALES.get(locale_code) {
+                                    if ui.button(*locale).clicked() {
+                                        self.config.set_locale(locale_code.to_string());
+                                        rust_i18n::set_locale(locale_code);
+                                        ui.close_menu();
+                                    }
+                                }
                             }
-                        }
-                    }
+                        });
+                    });
                 });
-            });
-        });
+            }
+        }
 
         if self.streamer_mode {
             egui::TopBottomPanel::bottom("statusbar")
