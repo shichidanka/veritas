@@ -16,9 +16,8 @@ impl log::Log for MultiLogger {
     }
 
     fn log(&self, record: &Record) {
-        if self.enabled(record.metadata()) {
-            self.egui_logger.log(record);   
-        }
+        self.egui_logger.log(record);
+
         let fmt_log = if let Some(mod_path) = record.module_path() {
             format!("{} {}", mod_path, record.args())
         }
@@ -82,8 +81,6 @@ impl MultiLogger {
         
         #[cfg(not(debug_assertions))]
         log::set_max_level(LevelFilter::Info);
-
-
     }
 }
 

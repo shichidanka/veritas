@@ -1,70 +1,379 @@
-1jU7hqlJ0ltf:
-  en: Close Menu
-  zh-cn: 关闭菜单
 1kGvcl5IPAhw:
   en: Show Real-Time Damage
-  zh-cn: 显示实时伤害情况
+  fr: Afficher les dégâts en temps réel
+  es: Mostrar daño en tiempo real
+  de: Echtzeit-Schaden anzeigen
+  it: Mostra danni in tempo reale
+  ja: リアルタイムダメージの表示
+  pt: Mostrar dano em tempo real
+  nl: Toon real-time schade
+  ru: Показать урон в реальном времени
+  # ar: عرض الضرر الفعلي
+  vi: Hiển thị sát thương thời gian thực
+  zh: 显示实时伤害
+  pl: Pokaż obrażenia na żywo
+26mEh5iVozAI:
+  en: Show Enemy Stats
+  fr: Afficher les statistiques de l'ennemi
+  es: Mostrar estadísticas del enemigo
+  de: Feind-Statistiken anzeigen
+  it: Mostra statistiche nemico
+  ja: 敵のステータスの表示
+  pt: Mostrar estatísticas do inimigo
+  nl: Toon vijandelijke statistieken
+  ru: Показать статистику врага
+  # ar: عرض إحصائيات العدو
+  vi: Hiển thị thống kê kẻ thù
+  zh: 显示敌人统计
+  pl: Pokaż statystyki wroga
 2B96nzZHnFPZ:
   en: Show Damage Distribution
-  zh-cn: 显示伤害分布
+  fr: Afficher la répartition des dégâts
+  es: Mostrar distribución de daño
+  de: Schadensverteilung anzeigen
+  it: Mostra distribuzione danni
+  ja: ダメージ分布の表示
+  pt: Mostrar distribuição de dano
+  nl: Toon schadeverdeling
+  ru: Показать распределение урона
+  # ar: عرض توزيع الضرر
+  vi: Hiển thị phân bố sát thương
+  zh: 显示伤害分布
+  pl: Pokaż dystrybucję obrażeń
 2GmyOmLjedCr:
   en: Show AV Metrics
-  zh-cn: 显示行动值指标
-2PNk8PmLFdHE:
-  en: Overlay Menu
-  zh-cn: 叠加菜单
+  fr: Afficher les métriques AV
+  es: Mostrar métricas de AV
+  de: AV-Metriken anzeigen
+  it: Mostra metriche AV
+  ja: AVメトリクスの表示
+  pt: Mostrar métricas de AV
+  nl: Toon AV-metrieken
+  ru: Показать метрики AV
+  # ar: عرض مقاييس AV
+  vi: Hiển thị số liệu AV
+  zh: 显示行动值指标
+  pl: Pokaż wskaźniki WA
 2cuU8okyUVvn:
   en: Action Value Metrics
-  zh-cn: 行动值指标
+  fr: Métriques de la valeur d'action
+  es: Métricas de Valor de Acción
+  de: Action Value-Metriken
+  it: Metriche Valore Azione
+  ja: アクション値メトリクス
+  pt: Métricas de Valor de Ação
+  nl: Actiewaarde-metrieken
+  ru: Метрики значения действия
+  # ar: مقاييس قيمة الإجراء
+  vi: Số liệu Giá trị Hành động
+  zh: 行动值指标
+  pl: Metryki wartości akcji
 2g5xqM9780Le:
   en: Show Damage Bars
-  zh-cn: 显示损伤条
+  fr: Afficher les barres de dégâts
+  es: Mostrar barras de daño
+  de: Schadensbalken anzeigen
+  it: Mostra barre danni
+  ja: ダメージバーの表示
+  pt: Mostrar barras de dano
+  nl: Toon schadebalken
+  ru: Показать панели урона
+  # ar: عرض قضبان الضرر
+  vi: Hiển thị thanh sát thương
+  zh: 显示伤害条
+  pl: Pokaż słupki obrażeń
 2jHXQAOdg4Nm:
   en: Action Value
-  zh-cn: 行动值
+  fr: Valeur d'action
+  es: Valor de Acción
+  de: Action Value
+  it: Valore Azione
+  ja: アクション値
+  pt: Valor de Ação
+  nl: Actiewaarde
+  ru: Значение действия
+  # ar: قيمة الإجراء
+  vi: Giá trị Hành động
+  zh: 行动值
+  pl: Wartość akcji
 3B7dFIywsIA4:
   en: Streamer Message
-  zh-cn: 流媒体信息
+  fr: Message du streamer
+  es: Mensaje del streamer
+  de: Streamer-Nachricht
+  it: Messaggio streamer
+  ja: ストリーマーメッセージ
+  pt: Mensagem do streamer
+  nl: Streamer-bericht
+  ru: Сообщение стримера
+  # ar: رسالة البث المباشر
+  vi: Tin nhắn của người phát trực tiếp
+  zh: 直播消息
+  pl: Wiadomość streamera
 3vmghpOiotac:
   en: Widget Controls
-  zh-cn: 小部件控制
+  fr: Contrôles du widget
+  es: Controles del widget
+  de: Widget-Steuerelemente
+  it: Controlli widget
+  ja: ウィジェットコントロール
+  pt: Controles do widget
+  nl: Widget-besturingselementen
+  ru: Элементы управления виджетом
+  # ar: عناصر تحكم الواجهة
+  vi: Điều khiển trình đơn
+  zh: 小工具控制
+  pl: Narzędzia widżetów
 42SBVEsAhN12:
   en: 'Total Damage:'
-  zh-cn: '总伤害:'
+  fr: 'Dommages totaux:'
+  es: 'Daño total:'
+  de: 'Gesamtschaden:'
+  it: 'Danni totali:'
+  ja: '総ダメージ:'
+  nl: 'Totale schade:'
+  pt: 'Dano total:'
+  ru: 'Общий урон:'
+  # ar: 'الضرر الإجمالي:'
+  vi: 'Tổng sát thương:'
+  zh: '总伤害:'
+  pl: 'Całkowite obrażenia:'
 42qqOY5a5AQ1:
   en: Window Opacity
-  zh-cn: 窗口不透明度
+  fr: Opacité de la fenêtre
+  es: Opacidad de la ventana
+  de: Fensterdeckkraft
+  it: Opacità finestra
+  ja: ウィンドウの透明度
+  nl: Vensteropaciteit
+  pt: Opacidade da janela
+  ru: Прозрачность окна
+  # ar: شفافية النافذة
+  vi: Độ trong suốt của cửa sổ
+  zh: 窗口透明度
+  pl: Przezroczystość okna
+44ud7noa8U3O:
+  en: Enemy Stats
+  fr: Statistiques de l'ennemi
+  es: Estadísticas del enemigo
+  de: Feind-Statistiken
+  it: Statistiche nemico
+  ja: 敵のステータス
+  pt: Estatísticas do inimigo
+  nl: Vijandelijke statistieken
+  ru: Статистика врага
+  # ar: إحصائيات العدو
+  vi: Thống kê kẻ thù
+  zh: 敌人统计
+  pl: Statystyki wroga
 4dwgNbiO1HqM:
   en: Damage by Character
-  zh-cn: 角色伤害
+  fr: Dégâts par personnage
+  es: Daño por personaje
+  de: Schaden pro Charakter
+  it: Danni per personaggio
+  ja: キャラクター別のダメージ
+  pt: Dano por personagem
+  nl: Schade per personage
+  ru: Урон по персонажам
+  # ar: الضرر حسب الشخصية
+  vi: Sát thương theo nhân vật
+  zh: 角色伤害
+  pl: Obrżenia według postaci
 4fO2Pqxp9TxK:
   en: Current Turn
-  zh-cn: 当前回合
+  fr: Tour actuel
+  es: Turno actual
+  de: Aktueller Zug
+  it: Turno corrente
+  ja: 現在のターン
+  pt: Turno atual
+  nl: Huidige beurt
+  ru: Текущий ход
+  # ar: الدور الحالي
+  vi: Vòng hiện tại
+  zh: 当前回合
+  pl: Bieżąca turka
 6Bzv9dbJvO1b:
   en: 'Total Elapsed AV:'
-  zh-cn: '总耗时行动值:'
+  fr: 'AV total écoulé:'
+  es: 'AV total transcurrido:'
+  de: 'Gesamter abgelaufener AV:'
+  it: 'AV totale trascorso:'
+  ja: '経過AV合計:'
+  nl: 'Totaal verstreken AV:'
+  pt: 'AV total decorrido:'
+  ru: 'Общее значение прошедшего AV:'
+  # ar: 'إجمالي قيمة الإجراء المنقضية:'
+  vi: 'Tổng AV đã trôi qua:'
+  zh: '总经过行动值:'
+  pl: 'Całkowity upływający czas WA:'
 6vLZL7YqEuRH:
   en: Real-Time Damage
-  zh-cn: 实时伤害
+  fr: Dégâts en temps réel
+  es: Daño en tiempo real
+  de: Echtzeit-Schaden
+  it: Danni in tempo reale
+  ja: リアルタイムダメージ
+  pt: Dano em tempo real
+  nl: Real-time schade
+  ru: Урон в реальном времени
+  # ar: الضرر الفعلي
+  vi: Sát thương thời gian thực
+  zh: 实时伤害
+  pl: Obrażenia w czasie rzeczywistym
 6yQK18w1rjwi:
   en: Show Logs
-  zh-cn: 显示日志
+  fr: Afficher les journaux
+  es: Mostrar registros
+  de: Protokolle anzeigen
+  it: Mostra log
+  ja: ログの表示
+  pt: Mostrar logs
+  nl: Toon logboeken
+  ru: Показать журналы
+  # ar: عرض السجلات
+  vi: Hiển thị nhật ký
+  zh: 显示日志
+  pl: Pokaż dzienniki
 7azkmE7n7RQb:
   en: Streamer Mode
-  zh-cn: 流媒体模式
+  fr: Mode streamer
+  es: Modo streamer
+  de: Streamer-Modus
+  it: Modalità streamer
+  ja: ストリーモード
+  pt: Modo streamer
+  nl: Streamer-modus
+  ru: Режим стримера
+  # ar: وضع البث المباشر
+  vi: Chế độ phát trực tiếp
+  zh: 直播模式
+  pl: Tryb streamera
 'AV:':
   en: 'AV:'
-  zh-cn: '行动值:'
+  fr: 'AV:'
+  es: 'AV:'
+  de: 'AV:'
+  it: 'AV:'
+  ja: 'AV:'
+  nl: 'AV:'
+  pt: 'AV:'
+  ru: 'AV:'
+  # ar: 'AV:'
+  vi: 'AV:'
+  zh: 'AV:'
+  pl: 'WA:'
+Close:
+  en: Close
+  fr: Fermer
+  es: Cerrar
+  de: Schließen
+  it: Chiudi
+  ja: 閉じる
+  nl: Sluiten
+  pt: Fechar
+  ru: Закрыть
+  # ar: إغلاق
+  vi: Đóng
+  zh: 关闭
+  pl: Zamknij
 Damage:
   en: Damage
-  zh-cn: 伤害
+  fr: Dégâts
+  es: Daño
+  de: Schaden
+  it: Danno
+  ja: ダメージ
+  nl: Schade
+  pt: Dano
+  ru: Урон
+  # ar: ضرر
+  vi: Sát thương
+  zh: 伤害
+  pl: Obrażenia
 'DpAV:':
   en: 'DpAV:'
-  zh-cn: '损伤/行动值:'
+  fr: 'DpAV:'
+  es: 'DpAV:'
+  de: 'DpAV:'
+  it: 'DpAV:'
+  ja: 'DpAV:'
+  nl: 'DpAV:'
+  pt: 'DpAV:'
+  ru: 'DpAV:'
+  # ar: 'DpAV:'
+  vi: 'DpAV:'
+  zh: 'DpAV:'
+  pl: 'DpWA:'
+HP:
+  en: HP
+  fr: HP
+  es: HP
+  de: HP
+  it: HP
+  ja: HP
+  nl: HP
+  pt: HP
+  ru: HP
+  # ar: HP
+  vi: HP
+  zh: HP
+  pl: PK
 Log:
   en: Log
-  zh-cn: 日志
+  fr: Journal
+  es: Registro
+  de: Logbuch
+  it: Registro
+  ja: ログ
+  nl: Logboek
+  pt: Registro
+  ru: Журнал
+  # ar: سجل
+  vi: Nhật ký
+  zh: 日志
+  pl: Dziennik
+Menu:
+  en: Menu
+  fr: Menu
+  es: Menú
+  de: Menü
+  it: Menu
+  ja: メニュー
+  nl: Menu
+  pt: Menu
+  ru: Меню
+  # ar: قائمة
+  vi: Menu
+  zh: 菜单
+  pl: Menu
 Turn:
   en: Turn
-  zh-cn: 回合
+  fr: Tour
+  es: Turno
+  de: Zug
+  it: Turno
+  ja: ターン
+  nl: Beurt
+  pt: Turno
+  ru: Ход
+  # ar: دور
+  vi: Lượt
+  zh: 回合
+  pl: Turka
+Language:
+  # ar: اللغة
+  de: Sprache
+  en: Language
+  es: Idioma
+  fr: Langue
+  it: Lingua
+  ja: 言語
+  nl: Taal
+  pl: Język
+  pt: Idioma
+  ru: Язык
+  vi: Ngôn ngữ
+  zh: 语言
 _version: 2

@@ -3,7 +3,6 @@ use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Label;
 use egui::Modifiers;
-use egui::ScrollArea;
 use egui::Stroke;
 use egui::TextEdit;
 use egui::{
@@ -14,6 +13,10 @@ use windows::Win32::{
     Foundation::{LPARAM, WPARAM},
     UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::WM_KEYDOWN},
 };
+
+use crate::LOCALES;
+
+use super::config::Config;
 
 #[derive(Default, PartialEq)]
 pub enum GraphUnit {
@@ -29,12 +32,14 @@ pub struct App {
     show_damage_distribution: bool,
     show_damage_bars: bool,
     show_real_time_damage: bool,
+    show_enemy_stats: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
     pub graph_x_unit: GraphUnit,
     pub should_hide: bool,
     streamer_mode: bool,
-    streamer_msg: String
+    streamer_msg: String,
+    config: Config
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
@@ -45,6 +50,22 @@ impl Overlay for App {
         if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
             self.should_hide = !self.should_hide;
         }
+
+        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+            egui::menu::bar(ui, |ui| {
+                ui.menu_button(t!("Language"), |ui| {
+                    for locale_code in rust_i18n::available_locales!() {
+                        if let Some(locale) = LOCALES.get(locale_code) {
+                            if ui.button(*locale).clicked() {
+                                self.config.set_locale(locale_code.to_string());
+                                rust_i18n::set_locale(locale_code);
+                                ui.close_menu();
+                            }
+                        }
+                    }
+                });
+            });
+        });
 
         if self.streamer_mode {
             egui::TopBottomPanel::bottom("statusbar")
@@ -67,7 +88,7 @@ impl Overlay for App {
                         ..Default::default()
                     })
                     .show(ctx, |_ui: &mut egui::Ui| {
-                        Window::new(t!("Overlay Menu"))
+                        Window::new(t!("Menu"))
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .resizable(false)
                             .show(ctx, |ui| {
@@ -85,6 +106,11 @@ impl Overlay for App {
                                         &mut self.show_real_time_damage,
                                         t!("Show Real-Time Damage"),
                                     );
+                                    // ui.checkbox(
+                                    //     &mut self.show_enemy_stats,
+                                    //     t!("Show Enemy Stats"),
+                                    // );
+
                                     ui.checkbox(&mut self.show_av_metrics, t!("Show AV Metrics"));
 
                                     ui.separator();
@@ -100,7 +126,7 @@ impl Overlay for App {
                                     );
 
                                     ui.separator();
-                                    if ui.button(t!("Close Menu")).clicked() {
+                                    if ui.button(t!("Close")).clicked() {
                                         self.show_menu = false;
                                     }
                                 });
@@ -138,7 +164,9 @@ impl Overlay for App {
 
             if self.show_damage_distribution {
                 egui::containers::Window::new("")
-                    .frame(transparent_frame)
+                    .id("Damage Distribution".into())
+                    .frame(if self.show_menu { window_frame } else { transparent_frame })
+                    .collapsible(false)
                     .resizable(true)
                     .min_width(200.0)
                     .min_height(200.0)
@@ -179,6 +207,18 @@ impl Overlay for App {
                         self.show_av_metrics(ui);
                     });
             }
+
+            // if self.show_enemy_stats {
+            //     egui::containers::Window::new(t!("Enemy Stats"))
+            //         .frame(window_frame)
+            //         .resizable(true)
+            //         .min_width(200.0)
+            //         .min_height(150.0)
+            //         .show(ctx, |ui| {
+            //             self.show_enemy_stats(ui);
+            //         });
+            // }
+
         }
     }
 
@@ -264,9 +304,12 @@ impl App {
             style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
         });
 
+        let config = Config::new().unwrap();
+        config.initialize_settings();;
         Self {
             widget_opacity: 0.15,
             streamer_mode: true,
+            config,
             ..Default::default()
         }
     }
