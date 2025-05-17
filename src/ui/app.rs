@@ -14,6 +14,7 @@ use windows::Win32::{
     UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::WM_KEYDOWN},
 };
 
+use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 use crate::LOCALES;
 
 use super::config::Config;
@@ -39,6 +40,7 @@ pub struct App {
     pub should_hide: bool,
     streamer_mode: bool,
     streamer_msg: String,
+    fps: i32,
     config: Config
 }
 
@@ -122,6 +124,15 @@ impl Overlay for App {
                                     ui.add(
                                         Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""),
                                     );
+
+                                    ui.separator();
+                                    ui.label(t!("FPS"));
+                                    if ui.add(
+                                        Slider::new(&mut self.fps, 0..=500).text("")
+                                    ).changed() {
+                                        self.config.set_fps(self.fps);
+                                        Application_set_targetFrameRate(self.fps);
+                                    }
 
                                     ui.separator();
                                     ui.label(t!("Streamer Message"));
@@ -308,12 +319,22 @@ impl App {
         });
 
         let config = Config::new().unwrap();
-        config.initialize_settings();;
-        Self {
+        let fps = config.get_fps().clone();
+
+        let app = Self {
             widget_opacity: 0.15,
             streamer_mode: true,
             config,
+            fps,
             ..Default::default()
-        }
+        };
+
+        app.initialize_settings();
+        app
+    }
+
+    fn initialize_settings(&self) {
+        rust_i18n::set_locale(&self.config.get_locale());
+        Application_set_targetFrameRate(*self.config.get_fps());
     }
 }

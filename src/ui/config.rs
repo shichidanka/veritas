@@ -1,11 +1,14 @@
 use std::{
     fs::File,
     io::{BufReader, BufWriter, Write},
+    path::PathBuf,
 };
 
 use anyhow::Result;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
+
+use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 
 const CONFIG_FILENAME: &'static str = "config.json";
 
@@ -23,10 +26,10 @@ macro_rules! config {
                 $(
                     pub fn [<set_ $field>] (&mut self, value: $field_type) {
                         self. $field = value;
-                        self.write();
+                        self.write().unwrap();
                     }
 
-                    pub fn [<get_ $field>] (&mut self, value: $field_type) -> & $field_type {
+                    pub fn [<get_ $field>] (&self) -> & $field_type {
                         & self. $field
                     }
 
@@ -37,13 +40,15 @@ macro_rules! config {
 }
 
 config!(
-    locale: String
+    locale: String,
+    fps: i32
 );
 
 impl Default for Config {
     fn default() -> Self {
         Self {
             locale: rust_i18n::locale().to_string(),
+            fps: 60,
         }
     }
 }
@@ -54,30 +59,34 @@ impl Config {
             Some(proj_dirs) => {
                 let config_local_dir = proj_dirs.config_local_dir();
                 let config_path = config_local_dir.join(CONFIG_FILENAME);
-                
+
                 if !config_local_dir.exists() {
                     std::fs::create_dir_all(config_local_dir)?;
                 }
 
                 if !config_path.exists() {
-                    let config = Self::default();
-                    let file = File::create(config_path)?;
-                    let mut writer = BufWriter::new(file);
-                    serde_json::to_writer(&mut writer, &config)?;
-                    writer.flush()?;
-                    Ok(config)
+                    Self::initialize(&config_path)
                 } else {
-                    let file = File::open(config_path)?;
-                    let reader = BufReader::new(file);
-                    Ok(serde_json::from_reader(reader)?)
+                    let mut file = File::open(&config_path)?;
+                    match serde_json::from_reader(&file) {
+                        Ok(v) => Ok(v),
+                        Err(_) => {
+                            file.flush()?;
+                            Self::initialize(&config_path)
+                        }
+                    }
                 }
             }
             None => todo!(),
         }
     }
 
-    pub fn initialize_settings(&self) {
-        rust_i18n::set_locale(&self.locale);
+    fn initialize(config_path: &PathBuf) -> Result<Self> {
+        let config = Self::default();
+        let mut file = File::create(config_path)?;
+        serde_json::to_writer(&mut file, &config)?;
+        file.flush()?;
+        Ok(config)
     }
 
     fn write(&self) -> Result<()> {
@@ -87,18 +96,15 @@ impl Config {
                 let config_path = config_local_dir.join(CONFIG_FILENAME);
 
                 if !config_path.exists() {
-                    todo!()
+                    std::fs::create_dir_all(config_local_dir)?;
                 }
-                else {
-                    let file = File::create(config_path)?;
-                    let mut writer = BufWriter::new(file);
-                    serde_json::to_writer(&mut writer, self)?;
-                    writer.flush()?;
-                    Ok(())
-                }
+
+                let mut file = File::create(config_path)?;
+                serde_json::to_writer(&mut file, self)?;
+                file.flush()?;
+                Ok(())
             }
             None => todo!(),
         }
     }
-
 }
