@@ -162,7 +162,6 @@ impl Overlay for App {
                 .corner_radius(10.0);
 
             let transparent_frame = egui::Frame::new()
-                .stroke(Stroke::new(0.5, Color32::WHITE))
                 .inner_margin(8.0)
                 .corner_radius(10.0);
 
