@@ -128,7 +128,7 @@ impl Overlay for App {
                                     ui.separator();
                                     ui.label(t!("FPS"));
                                     if ui.add(
-                                        Slider::new(&mut self.fps, 0..=500).text("")
+                                        Slider::new(&mut self.fps, 1..=500).text("")
                                     ).changed() {
                                         self.config.set_fps(self.fps);
                                         Application_set_targetFrameRate(self.fps);
