@@ -10,14 +10,15 @@ jobs:
     permissions:
       contents: write  # Required to create GitHub releases
 
-    env:
-      CARGO_TERM_COLOR: always
-      CARGO_INCREMENTAL: 0 # Disable incremental compilation for faster from-scratch builds
-
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly-2025-05-17
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2025-05-17
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "shared"
+          save-if: "false"
       - run: cargo build --release
 
       - name: Format Release Name
