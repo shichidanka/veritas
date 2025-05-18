@@ -75,7 +75,7 @@ def commit_and_tag(patch, region, is_beta, hotfix, is_nightly):
         tag = f"{region}-prod"
 
     if is_nightly:
-        tag = f"{region}-nightly"
+        tag = f"{tag}-nightly"
 
     tag = f"{tag}-{patch}-{hotfix}"
 
@@ -120,6 +120,7 @@ def main():
     metadata = read_cargo_toml()
     region = metadata.get('region', 'unknown')
     is_nightly = is_nightly_branch()
+    print(is_nightly)
     is_beta = metadata.get('is_beta', False)
     patch = metadata.get('patch', '0.0.0')
     hotfix = metadata.get('hotfix', '0.0')
