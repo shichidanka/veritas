@@ -1,3 +1,5 @@
+name: Publish Release
+
 on:
   push:
     tags:
@@ -66,7 +68,7 @@ jobs:
         with:
           name: ${{ steps.format_name.outputs.release_name }}
           generate_release_notes: true
-          target_commitish: ${{ steps.branch_name.outputs.branch }}
+          target_commitish: ${{ github.sha }}
           files: target/release/veritas.dll
           prerelease: ${{ steps.release_flags.outputs.prerelease }}
           make_latest: ${{ steps.release_flags.outputs.make_latest }}
