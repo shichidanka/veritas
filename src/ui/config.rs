@@ -8,8 +8,6 @@ use anyhow::Result;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
-use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
-
 const CONFIG_FILENAME: &'static str = "config.json";
 
 macro_rules! config {
