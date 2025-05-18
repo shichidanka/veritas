@@ -94,7 +94,7 @@ def is_nightly_branch():
         check=True
     )
     branch_name = result.stdout.strip()
-    return "-nightly-" in branch_name.lower()
+    return "nightly" in branch_name.lower()
 
 def main():
     # Prompt for update type
