@@ -15,20 +15,10 @@ jobs:
       CARGO_INCREMENTAL: 0 # Disable incremental compilation for faster from-scratch builds
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        run: rustup toolchain install nightly --profile minimal --no-self-update
-
-      - name: Cache Cargo Registry, Toolchain, and Builds
-        uses: Swatinem/rust-cache@v2
-        with:
-          cache-on-failure: true
-
-
-      - name: Build the project (release)
-        run: cargo build --release
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly-2025-05-17
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release
 
       - name: Format Release Name
         id: format_name
