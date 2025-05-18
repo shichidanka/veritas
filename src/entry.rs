@@ -8,7 +8,7 @@ use std::time::Duration;
 fn entry() {
     thread::spawn(|| unsafe {
         #[cfg(debug_assertions)]
-        windows::Win32::System::Console::AllocConsole();    
+        windows::Win32::System::Console::AllocConsole();
         logging::MultiLogger::init();
         while GetModuleHandleW(windows::core::w!("GameAssembly")).is_err() ||
             GetModuleHandleW(windows::core::w!("UnityPlayer")).is_err() {
