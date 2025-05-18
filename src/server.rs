@@ -1,5 +1,4 @@
 use std::{net::SocketAddr, str::FromStr, sync::{LazyLock, OnceLock}};
-use anyhow::{Context, Ok};
 use axum::{response::Redirect, routing::get, Router};
 use socketioxide::{extract::SocketRef, SocketIo};
 use tokio::runtime::Runtime;

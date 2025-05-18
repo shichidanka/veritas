@@ -5,17 +5,10 @@ use crate::kreide::types::*;
 use crate::kreide::*;
 // use crate::kreide::types::rpg::client::*;
 use crate::kreide::functions::rpg::gamecore::*;
-use crate::kreide::functions::rpg::client::*;
+// use crate::kreide::functions::rpg::client::*;
 use crate::kreide::helpers::*;
 
-use crate::models::events::OnBattleBeginEvent;
-use crate::models::events::Event;
-use crate::models::events::OnDamageEvent;
-use crate::models::events::OnUpdateCycleEvent;
-use crate::models::events::OnUpdateWaveEvent;
-use crate::models::events::OnUseSkillEvent;
-use crate::models::events::OnSetLineupEvent;
-use crate::models::events::OnTurnBeginEvent;
+use crate::models::events::*;
 use crate::models::misc::Avatar;
 use crate::GAMEASSEMBLY_HANDLE;
 
@@ -52,7 +45,9 @@ static_detour! {
 #[named]
 unsafe fn get_elapsed_av(game_mode: *const TurnBasedGameMode) -> f64 {
     log::debug!(function_name!());
-    fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64
+    unsafe {
+        fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64
+    }
 }
 
 // Called on any instance of damage

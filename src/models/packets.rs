@@ -1,9 +1,8 @@
 use serde::Serialize;
 
-use super::{
-    events::Event,
-    misc::{Avatar, Skill, TurnInfo},
-};
+use super::
+    misc::{Avatar, Skill, TurnInfo}
+;
 
 macro_rules! packet {
     ($(
@@ -71,10 +70,6 @@ packet!(
         avatars: Vec<Avatar>,
         turn_info: TurnInfo
     }
-
-    // OnKill {
-    //     attacker: Avatar
-    // }
 
     OnUseSkill {
         avatar: Avatar,

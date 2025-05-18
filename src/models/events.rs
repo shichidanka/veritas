@@ -7,7 +7,6 @@ pub enum Event {
     OnDamage(OnDamageEvent),
     OnTurnBegin(OnTurnBeginEvent),
     OnTurnEnd,
-    OnKill(OnKillEvent),
     OnUseSkill(OnUseSkillEvent),
     OnBattleEnd,
     OnUpdateWave(OnUpdateWaveEvent),
@@ -46,8 +45,4 @@ pub struct OnDamageEvent {
     pub attacker: Avatar,
     pub damage: f64,
     pub damage_type: isize
-}
-
-pub struct OnKillEvent {
-    pub attacker: Avatar,
 }
