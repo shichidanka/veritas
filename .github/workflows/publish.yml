@@ -10,25 +10,16 @@ jobs:
     permissions:
       contents: write  # Required to create GitHub releases
 
-    env:
-      CARGO_TERM_COLOR: always
-      CARGO_INCREMENTAL: 0 # Disable incremental compilation for faster from-scratch builds
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        run: rustup toolchain install nightly --profile minimal --no-self-update
-
-      - name: Cache Cargo Registry, Toolchain, and Builds
-        uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
         with:
-          cache-on-failure: true
-
-
-      - name: Build the project (release)
-        run: cargo build --release
+          toolchain: nightly-2025-05-17
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "shared"
+          save-if: "false"
+      - run: cargo build --release
 
       - name: Format Release Name
         id: format_name
@@ -54,4 +45,3 @@ jobs:
           target_commitish: cn-beta-nightly
           files: target/release/veritas.dll
           prerelease: true
-        

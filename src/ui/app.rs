@@ -2,9 +2,7 @@ use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
 use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Label;
-use egui::Layout;
 use egui::Modifiers;
-use egui::ScrollArea;
 use egui::Stroke;
 use egui::TextEdit;
 use egui::{
@@ -16,40 +14,63 @@ use windows::Win32::{
     UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::WM_KEYDOWN},
 };
 
+use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
+use crate::LOCALES;
+
+use super::config::Config;
+
 #[derive(Default, PartialEq)]
-pub enum Unit {
+pub enum GraphUnit {
     #[default]
     Turn,
     ActionValue,
 }
 
-pub struct Keybind {
-    pub key: egui::Key,
-    pub modifiers: Option<egui::Modifiers>,
-}
-
 #[derive(Default)]
 pub struct App {
-    pub menu_keybind: Option<Keybind>,
     pub show_menu: bool,
     pub show_console: bool,
     show_damage_distribution: bool,
     show_damage_bars: bool,
     show_real_time_damage: bool,
+    show_enemy_stats: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
-    pub graph_x_unit: Unit,
+    pub graph_x_unit: GraphUnit,
     pub should_hide: bool,
     streamer_mode: bool,
-    streamer_msg: String
+    streamer_msg: String,
+    fps: i32,
+    config: Config
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
+pub const SHOW_MENU: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
 
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
         if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
             self.should_hide = !self.should_hide;
+        }
+
+        if !self.should_hide {
+            if self.show_menu {
+                egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+                    egui::menu::bar(ui, |ui| {
+                        ui.menu_button(t!("Language"), |ui| {
+                            for locale_code in rust_i18n::available_locales!() {
+                                if let Some(locale) = LOCALES.get(locale_code) {
+                                    if ui.button(*locale).clicked() {
+                                        self.config.set_locale(locale_code.to_string());
+                                        rust_i18n::set_locale(locale_code);
+                                        ui.close_menu();
+                                    }
+                                }
+                            }
+                        });
+                    });
+                });
+            }
         }
 
         if self.streamer_mode {
@@ -73,40 +94,54 @@ impl Overlay for App {
                         ..Default::default()
                     })
                     .show(ctx, |_ui: &mut egui::Ui| {
-                        Window::new("Overlay Menu")
+                        Window::new(t!("Menu"))
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .resizable(false)
                             .show(ctx, |ui| {
                                 ui.vertical_centered(|ui| {
-                                    ui.heading("Widget Controls");
+                                    ui.heading(t!("Widget Controls"));
 
-                                    ui.checkbox(&mut self.streamer_mode, "Streamer Mode");
-                                    ui.checkbox(&mut self.show_console, "Show Logs");
+                                    ui.checkbox(&mut self.streamer_mode, t!("Streamer Mode"));
+                                    ui.checkbox(&mut self.show_console, t!("Show Logs"));
                                     ui.checkbox(
                                         &mut self.show_damage_distribution,
-                                        "Show Damage Distribution",
+                                        t!("Show Damage Distribution"),
                                     );
-                                    ui.checkbox(&mut self.show_damage_bars, "Show Damage Bars");
+                                    ui.checkbox(&mut self.show_damage_bars, t!("Show Damage Bars"));
                                     ui.checkbox(
                                         &mut self.show_real_time_damage,
-                                        "Show Real-Time Damage",
+                                        t!("Show Real-Time Damage"),
                                     );
-                                    ui.checkbox(&mut self.show_av_metrics, "Show AV Metrics");
+                                    // ui.checkbox(
+                                    //     &mut self.show_enemy_stats,
+                                    //     t!("Show Enemy Stats"),
+                                    // );
+
+                                    ui.checkbox(&mut self.show_av_metrics, t!("Show AV Metrics"));
 
                                     ui.separator();
-                                    ui.label("Window Opacity");
+                                    ui.label(t!("Window Opacity"));
                                     ui.add(
                                         Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""),
                                     );
 
                                     ui.separator();
-                                    ui.label("Streamer Message");
+                                    ui.label(t!("FPS"));
+                                    if ui.add(
+                                        Slider::new(&mut self.fps, 1..=500).text("")
+                                    ).changed() {
+                                        self.config.set_fps(self.fps);
+                                        Application_set_targetFrameRate(self.fps);
+                                    }
+
+                                    ui.separator();
+                                    ui.label(t!("Streamer Message"));
                                     ui.add(
                                         TextEdit::singleline(&mut self.streamer_msg),
                                     );
 
                                     ui.separator();
-                                    if ui.button("Close Menu").clicked() {
+                                    if ui.button(t!("Close")).clicked() {
                                         self.show_menu = false;
                                     }
                                 });
@@ -115,7 +150,7 @@ impl Overlay for App {
             }
 
             if self.show_console {
-                egui::Window::new("Log")
+                egui::Window::new(t!("Log"))
                     .resizable(true)
                     .default_height(300.0)
                     .default_width(400.0)
@@ -138,13 +173,14 @@ impl Overlay for App {
                 .corner_radius(10.0);
 
             let transparent_frame = egui::Frame::new()
-                .stroke(Stroke::new(0.5, Color32::WHITE))
                 .inner_margin(8.0)
                 .corner_radius(10.0);
 
             if self.show_damage_distribution {
                 egui::containers::Window::new("")
-                    .frame(transparent_frame)
+                    .id("Damage Distribution".into())
+                    .frame(if self.show_menu { window_frame } else { transparent_frame })
+                    .collapsible(false)
                     .resizable(true)
                     .min_width(200.0)
                     .min_height(200.0)
@@ -154,7 +190,7 @@ impl Overlay for App {
             }
 
             if self.show_damage_bars {
-                egui::containers::Window::new("Damage by Character")
+                egui::containers::Window::new(t!("Damage by Character"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -165,7 +201,7 @@ impl Overlay for App {
             }
 
             if self.show_real_time_damage {
-                egui::containers::Window::new("Real-Time Damage")
+                egui::containers::Window::new(t!("Real-Time Damage"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -176,7 +212,7 @@ impl Overlay for App {
             }
 
             if self.show_av_metrics {
-                egui::containers::Window::new("Action Value Metrics")
+                egui::containers::Window::new(t!("Action Value Metrics"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -185,6 +221,18 @@ impl Overlay for App {
                         self.show_av_metrics(ui);
                     });
             }
+
+            // if self.show_enemy_stats {
+            //     egui::containers::Window::new(t!("Enemy Stats"))
+            //         .frame(window_frame)
+            //         .resizable(true)
+            //         .min_width(200.0)
+            //         .min_height(150.0)
+            //         .show(ctx, |ui| {
+            //             self.show_enemy_stats(ui);
+            //         });
+            // }
+
         }
     }
 
@@ -205,24 +253,18 @@ impl Overlay for App {
                             repeat: _,
                             modifiers,
                         } => {
-                            if let Some(menu_keybind) = &self.menu_keybind {
-                                if *key == menu_keybind.key && *pressed {
-                                    if let Some(keybind_modifiers) = menu_keybind.modifiers {
-                                        if modifiers.matches_exact(keybind_modifiers) {
-                                            self.show_menu = !self.show_menu;
+                            if modifiers.matches_exact(SHOW_MENU.modifiers) && *key == SHOW_MENU.logical_key && *pressed {
+                                self.show_menu = !self.show_menu;
 
-                                            return Some(WindowProcessOptions {
-                                                // Simulate alt to get cursor
-                                                window_message: Some(WindowMessage {
-                                                    msg: WM_KEYDOWN,
-                                                    wparam: WPARAM(VK_MENU.0 as _),
-                                                    lparam: LPARAM(0),
-                                                }),
-                                                ..Default::default()
-                                            });
-                                        }
-                                    }
-                                }
+                                return Some(WindowProcessOptions {
+                                    // Simulate alt to get cursor
+                                    window_message: Some(WindowMessage {
+                                        msg: WM_KEYDOWN,
+                                        wparam: WPARAM(VK_MENU.0 as _),
+                                        lparam: LPARAM(0),
+                                    }),
+                                    ..Default::default()
+                                });
                             }
                         }
                         _ => {}
@@ -276,15 +318,23 @@ impl App {
             style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
         });
 
-        Self {
+        let config = Config::new().unwrap();
+        let fps = config.get_fps().clone();
+
+        let app = Self {
             widget_opacity: 0.15,
             streamer_mode: true,
-            streamer_msg: String::new(),
+            config,
+            fps,
             ..Default::default()
-        }
+        };
+
+        app.initialize_settings();
+        app
     }
 
-    pub fn set_menu_keybind(&mut self, key: egui::Key, modifiers: Option<egui::Modifiers>) {
-        self.menu_keybind = Some(Keybind { key, modifiers });
+    fn initialize_settings(&self) {
+        rust_i18n::set_locale(&self.config.get_locale());
+        Application_set_targetFrameRate(*self.config.get_fps());
     }
 }

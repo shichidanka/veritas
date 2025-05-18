@@ -465,7 +465,7 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
                 .collect::<String>();
             Err(anyhow!(errors))
         } else {
-            Ok(Event::OnSetLineup(OnSetLineupEvent { avatars }))
+            Ok(Event::OnSetBattleLineup(OnSetLineupEvent { avatars }))
         };
         BattleContext::handle_event(event);
     }
