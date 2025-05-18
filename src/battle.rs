@@ -4,9 +4,7 @@ use anyhow::{Context, Result};
 
 use crate::{
     models::{
-        events::{
-            Event, OnBattleBeginEvent, OnDamageEvent, OnKillEvent, OnSetLineupEvent, OnTurnBeginEvent, OnUpdateCycleEvent, OnUpdateWaveEvent, OnUseSkillEvent
-        },
+        events::*,
         misc::{Avatar, TurnInfo},
         packets::Packet,
     },
@@ -24,10 +22,10 @@ pub enum BattleState {
 
 // Data that aren't meant to be exposed in the API
 // And is only for the overlay frontend
-#[derive(Default)]
-pub struct BattleContextInternal {
-    pub relative_action_value: f64
-}
+// #[derive(Default)]
+// pub struct BattleContextInternal {
+//     pub relative_action_value: f64
+// }
 
 #[derive(Default)]
 pub struct BattleContext {
@@ -49,15 +47,15 @@ pub struct BattleContext {
     pub stage_id: u32,
 
     // Not meant to be exposed in the API
-    pub internal: BattleContextInternal
+    // pub internal: BattleContextInternal
 }
 
-enum BattleMode {
-    MOC,
-    PF,
-    AS,
-    Other
-}
+// enum BattleMode {
+//     MOC,
+//     PF,
+//     AS,
+//     Other
+// }
 
 static BATTLE_CONTEXT: LazyLock<Mutex<BattleContext>> =
     LazyLock::new(|| Mutex::new(BattleContext::default()));
@@ -228,21 +226,6 @@ impl BattleContext {
         })
     }
 
-    fn handle_on_kill_event(
-        e: OnKillEvent,
-        mut _battle_context: MutexGuard<'static, BattleContext>,
-    ) -> Result<Packet> {
-        todo!()
-        // log::info!("{} has killed", e.attacker);
-
-        // let packet_body = EventPacket::OnKill {
-        //     attacker: e.attacker,
-        // };
-        // let packet_name = packet_body.name();
-        // Packet::from_event_packet(packet_body)
-        //     .with_context(|| format!("Failed to create {}", packet_name))
-    }
-
     fn handle_on_battle_end_event(
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
@@ -307,7 +290,6 @@ impl BattleContext {
                     Event::OnDamage(e) => Self::handle_on_damage_event(e, battle_context),
                     Event::OnTurnBegin(e) => Self::handle_on_turn_begin_event(e, battle_context),
                     Event::OnTurnEnd => Self::handle_on_turn_end_event(battle_context),
-                    Event::OnKill(e) => Self::handle_on_kill_event(e, battle_context),
                     Event::OnBattleEnd => Self::handle_on_battle_end_event(battle_context),
                     Event::OnUseSkill(e) => Self::handle_on_use_skill_event(e, battle_context),
                     Event::OnUpdateWave(e) => Self::handle_on_update_wave_event(e, battle_context),
