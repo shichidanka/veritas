@@ -75,7 +75,7 @@ def commit_and_tag(patch, region, is_beta, hotfix, is_nightly):
         tag = f"{region}-prod"
 
     if is_nightly:
-        tag = f"{region}-nightly"
+        tag = f"{tag}-nightly"
 
     tag = f"{tag}-{patch}-{hotfix}"
 
