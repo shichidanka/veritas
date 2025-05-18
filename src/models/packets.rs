@@ -1,9 +1,6 @@
 use serde::Serialize;
 
-use super::{
-    events::Event,
-    misc::{Avatar, Enemy, Entity, Skill, Stat, Team, TurnInfo},
-};
+use super::misc::{Avatar, Enemy, Entity, Skill, Stat, Team, TurnInfo};
 
 macro_rules! packet {
     ($(

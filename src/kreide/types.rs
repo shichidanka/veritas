@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use crate::kreide::client::*;
 use crate::kreide::gamecore::*;
 use crate::kreide::native_types::*;

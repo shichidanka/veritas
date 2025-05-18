@@ -131,7 +131,7 @@ impl Overlay for App {
                                         Slider::new(&mut self.fps, 1..=500).text("")
                                     ).changed() {
                                         self.config.set_fps(self.fps);
-                                        Application_set_targetFrameRate(self.fps);
+                                        unsafe { Application_set_targetFrameRate(self.fps) };
                                     }
 
                                     ui.separator();
@@ -335,6 +335,6 @@ impl App {
 
     fn initialize_settings(&self) {
         rust_i18n::set_locale(&self.config.get_locale());
-        Application_set_targetFrameRate(*self.config.get_fps());
+        unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
     }
 }
