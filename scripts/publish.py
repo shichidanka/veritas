@@ -1,10 +1,8 @@
 import subprocess
 import toml
 import os
-
-import os
 import re
-from tomlkit import parse, dumps, value
+from tomlkit import parse, dumps
 
 class Patch:
     def __init__(self, major, minor, revision):
@@ -52,15 +50,12 @@ def update_cargo_toml(update: str):
         with open(cargo_toml_path, "w") as f:
             f.write(dumps(doc))
 
-# Run cargo build --release
 def build_with_cargo():
     print("Building the project with cargo...")
     subprocess.run(['cargo', 'build', '--release'], check=True)
     print("Build successful.")
 
-# Read Cargo.toml
 def read_cargo_toml():
-    # Load Cargo.toml file using toml library
     try:
         with open('Cargo.toml', 'r') as file:
             config = toml.load(file)
@@ -70,43 +65,66 @@ def read_cargo_toml():
         print("Error: Cargo.toml not found.")
         exit(1)
 
-# Commit and tag the changes in git
-def commit_and_tag(patch, region, is_beta, hotfix):
-    # Git commit with the message
+def commit_and_tag(patch, region, is_beta, hotfix, is_nightly):
     commit_message = f"Update to {patch}"
     subprocess.run(['git', 'commit', '-am', commit_message], check=True)
 
-    # Construct the tag
     if is_beta:
-        tag = f"{region}-beta-{patch}-{hotfix}"
+        tag = f"{region}-beta"
     else:
-        tag = f"{region}-prod-{patch}-{hotfix}"
+        tag = f"{region}-prod"
 
-    # Git tag the commit
+    if is_nightly:
+        tag = f"{region}-nightly"
+
+    tag = f"{tag}-{patch}-{hotfix}"
+
     subprocess.run(['git', 'tag', tag], check=True)
-
     print(f"Committed and tagged as {tag}")
 
-    # Push the commit and tags to the remote repository
-    subprocess.run(['git', 'push', 'origin', 'HEAD'], check=True)  # Push the commit
-    subprocess.run(['git', 'push', 'origin', '--tags'], check=True)  # Push the tags
+    subprocess.run(['git', 'push', 'origin', 'HEAD'], check=True)
+    subprocess.run(['git', 'push', 'origin', '--tags'], check=True)
     print("Pushed the commit and tags to the remote repository.")
 
+def is_nightly_branch():
+    result = subprocess.run(
+        ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    branch_name = result.stdout.strip()
+    return "-nightly-" in branch_name.lower()
+
 def main():
-    # Step 1: Set the UPDATE environment variable and build with cargo
-    update_cargo_toml("HOTFIX_PATCH")
+    # Prompt for update type
+    patch_map = {
+        "major": "MAJOR_PATCH",
+        "minor": "MINOR_PATCH",
+        "rev": "REVISION_PATCH",
+        "hotfix": "HOTFIX_PATCH"
+    }
+
+    while True:
+        patch_input = input("What kind of update? (major/minor/rev/hotfix): ").strip().lower()
+        if patch_input in patch_map:
+            patch_type = patch_map[patch_input]
+            break
+        else:
+            print("Invalid input. Please enter 'major', 'minor', 'rev', or 'hotfix'.")
+
+    # Apply version patch and build
+    update_cargo_toml(patch_type)
     build_with_cargo()
 
-    # Step 2: Read Cargo.toml and extract metadata
     metadata = read_cargo_toml()
-
     region = metadata.get('region', 'unknown')
+    is_nightly = is_nightly_branch()
     is_beta = metadata.get('is_beta', False)
     patch = metadata.get('patch', '0.0.0')
     hotfix = metadata.get('hotfix', '0.0')
 
-    # Step 3: Commit and tag the changes
-    commit_and_tag(patch, region, is_beta, hotfix)
+    commit_and_tag(patch, region, is_beta, hotfix, is_nightly)
 
 if __name__ == "__main__":
     main()
