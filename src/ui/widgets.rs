@@ -13,8 +13,8 @@ pub struct PieSegment {
 
 impl App {
     pub fn show_damage_distribution_widget(&mut self, ui: &mut Ui) {
-        let battle_context = BattleContext::get_instance();
         let available = ui.available_size();
+        
         Plot::new("damage_pie")
             .legend(Legend::default()
                 .position(egui_plot::Corner::RightTop)
@@ -30,6 +30,8 @@ impl App {
             .allow_zoom(false)
             .allow_scroll(false)
             .show(ui, |plot_ui: &mut egui_plot::PlotUi<'_>| {
+                let battle_context = BattleContext::get_instance();
+
                 let total_damage = battle_context.total_damage as f64;
                 if total_damage > 0.0 {
                     let segments =
@@ -41,6 +43,7 @@ impl App {
                         let plot_points = PlotPoints::new(segment.points);
                         let polygon = Polygon::new("Damage Pie", plot_points)
                             .stroke(Stroke::new(1.5, color))
+                            .id(avatar.name.clone())
                             .name(format!(
                                 "{}: {:.1}% ({} dmg)",
                                 avatar.name,
@@ -195,7 +198,32 @@ impl App {
             }
         });
     }
-    
+
+    // pub fn show_enemy_stats(&mut self, ui: &mut Ui) {
+    //     let battle_context = BattleContext::get_instance();
+    //     let enemy_lineup = battle_context.enemy_lineup.clone();
+
+    //     ui.vertical(|ui| {
+    //         for enemy in &enemy_lineup {
+    //             if let Some(i) = battle_context
+    //                 .battle_enemies
+    //                 .iter()
+    //                 .enumerate()
+    //                 .find(|(_, x)| x.entity == *enemy)
+    //                 .map(|(i, _)| i)
+    //             {
+    //                 ui.horizontal(|ui| {
+    //                     ui.label(format!("{}: ", &battle_context.enemies[i].name));
+    //                     ui.label(format!(
+    //                         "{:.2} {}",
+    //                         battle_context.battle_enemies[i].battle_stats.hp,
+    //                         t!("HP")
+    //                     ));
+    //                 });
+    //             }
+    //         }
+    //     });
+    // }
 }
 
 fn create_bar_data(real_time_damages: &Vec<f64>, avatars: &Vec<Avatar>) -> Vec<(Avatar, f64, usize)> {        

@@ -1,4 +1,4 @@
-use std::{ffi::c_void, mem, sync::LazyLock};
+use std::{ffi::c_void, mem, ptr::null, sync::LazyLock};
 
 use super::{
     functions::rpg::{
@@ -13,7 +13,7 @@ use super::{
             ServantSkillRowData_get_AttackType, ServantSkillRowData_get_SkillName,
         },
     },
-    statics::{MODULEMANAGER_FIELD_OFFSET, TEXTID_TYPE_PTR_OFFSET},
+    statics::MODULEMANAGER_FIELD_OFFSET,
     types::rpg::{
         client::{AvatarData, ModuleManager, TextID},
         gamecore::{AttackType, FixPoint, GameEntity, SkillData},
@@ -108,9 +108,7 @@ pub unsafe fn get_skill_from_skilldata(
             if !row_data.is_null() {
                 let mut text_id: TextID = mem::zeroed::<TextID>();
                 get_skill_name_callback(&mut text_id, row_data);
-                let textid_type_ptr =
-                    *(*TEXTID_TYPE_PTR_OFFSET as *const *const NativeArray<NativeObject>);
-                let skill_name = TextmapStatic_GetText(&text_id, textid_type_ptr);
+                let skill_name = TextmapStatic_GetText(&text_id, null());
 
                 let skill_type = get_skill_type_callback(row_data);
 
