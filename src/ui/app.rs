@@ -33,7 +33,7 @@ pub struct App {
     show_damage_distribution: bool,
     show_damage_bars: bool,
     show_real_time_damage: bool,
-    show_enemy_stats: bool,
+    // show_enemy_stats: bool,
     show_av_metrics: bool,
     widget_opacity: f32,
     pub graph_x_unit: GraphUnit,
@@ -131,7 +131,7 @@ impl Overlay for App {
                                         Slider::new(&mut self.fps, 1..=500).text("")
                                     ).changed() {
                                         self.config.set_fps(self.fps);
-                                        Application_set_targetFrameRate(self.fps);
+                                        unsafe { Application_set_targetFrameRate(self.fps) };
                                     }
 
                                     ui.separator();
@@ -335,6 +335,6 @@ impl App {
 
     fn initialize_settings(&self) {
         rust_i18n::set_locale(&self.config.get_locale());
-        Application_set_targetFrameRate(*self.config.get_fps());
+        unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
     }
 }

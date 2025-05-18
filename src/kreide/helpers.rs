@@ -20,17 +20,14 @@ use super::{
     },
 };
 use crate::{
-    kreide::{
-        native_types::{NativeArray, NativeObject},
-        statics::MODULES_PTR_OFFSET,
-    },
+    kreide::statics::MODULES_PTR_OFFSET,
     models::misc::{Avatar, Skill},
 };
-use anyhow::{anyhow, Ok, Result};
+use anyhow::{Ok, Result, anyhow};
 use function_name::named;
 
 #[named]
-pub fn get_module_manager() -> *const c_void {
+pub unsafe fn get_module_manager() -> *const c_void {
     log::debug!(function_name!());
     unsafe {
         let modules_ptr = *(*MODULES_PTR_OFFSET as *const *const c_void);
@@ -39,60 +36,70 @@ pub fn get_module_manager() -> *const c_void {
 }
 
 #[named]
-fn get_avatar_data_from_id(avatar_id: u32) -> *const AvatarData {
+unsafe fn get_avatar_data_from_id(avatar_id: u32) -> *const AvatarData {
     log::debug!(function_name!());
-    let s_module_manager = get_module_manager() as *const ModuleManager;
-    let avatar_module = unsafe { (*s_module_manager).AvatarModule };
-    AvatarModule_GetAvatar(avatar_module, avatar_id)
+    unsafe {
+        let s_module_manager = get_module_manager() as *const ModuleManager;
+        let avatar_module = (*s_module_manager).AvatarModule;
+        AvatarModule_GetAvatar(avatar_module, avatar_id)
+    }
 }
 
 #[named]
 pub unsafe fn get_avatar_from_id(avatar_id: u32) -> Result<Avatar> {
     log::debug!(function_name!());
-    let avatar_data = get_avatar_data_from_id(avatar_id);
-    if !avatar_data.is_null() {
-        let avatar_name = AvatarData_get_AvatarName(avatar_data);
-        if !avatar_name.is_null() {
-            Ok(Avatar {
-                id: avatar_id,
-                name: (*avatar_name).to_string(),
-            })
+    unsafe {
+        let avatar_data = get_avatar_data_from_id(avatar_id);
+        if !avatar_data.is_null() {
+            let avatar_name = AvatarData_get_AvatarName(avatar_data);
+            if !avatar_name.is_null() {
+                Ok(Avatar {
+                    id: avatar_id,
+                    name: (*avatar_name).to_string(),
+                })
+            } else {
+                Err(anyhow!("AvatarData {} name was null", avatar_id))
+            }
         } else {
-            Err(anyhow!("AvatarData {} name was null", avatar_id))
+            Err(anyhow!("AvatarData {} was null", avatar_id))
         }
-    } else {
-        Err(anyhow!("AvatarData {} was null", avatar_id))
     }
 }
 
 #[named]
 pub unsafe fn get_avatar_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
     log::debug!(function_name!());
-    get_skill_from_skilldata(
-        skill_data,
-        mem::transmute(*AvatarSkillRowData_get_SkillName),
-        mem::transmute(*AvatarSkillRowData_get_AttackType),
-    )
+    unsafe {
+        get_skill_from_skilldata(
+            skill_data,
+            mem::transmute(*AvatarSkillRowData_get_SkillName),
+            mem::transmute(*AvatarSkillRowData_get_AttackType),
+        )
+    }
 }
 
 #[named]
 pub unsafe fn get_servant_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
     log::debug!(function_name!());
-    get_skill_from_skilldata(
-        skill_data,
-        mem::transmute(*ServantSkillRowData_get_SkillName),
-        mem::transmute(*ServantSkillRowData_get_AttackType),
-    )
+    unsafe {
+        get_skill_from_skilldata(
+            skill_data,
+            mem::transmute(*ServantSkillRowData_get_SkillName),
+            mem::transmute(*ServantSkillRowData_get_AttackType),
+        )
+    }
 }
 
 #[named]
 pub unsafe fn get_battle_event_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
     log::debug!(function_name!());
-    get_skill_from_skilldata(
-        skill_data,
-        mem::transmute(*BattleEventSkillRowData_get_SkillName),
-        mem::transmute(*BattleEventSkillRowData_get_AttackType),
-    )
+    unsafe {
+        get_skill_from_skilldata(
+            skill_data,
+            mem::transmute(*BattleEventSkillRowData_get_SkillName),
+            mem::transmute(*BattleEventSkillRowData_get_AttackType),
+        )
+    }
 }
 
 #[named]
@@ -101,8 +108,8 @@ pub unsafe fn get_skill_from_skilldata(
     get_skill_name_callback: fn(*mut TextID, *const c_void) -> *const TextID,
     get_skill_type_callback: fn(*const c_void) -> AttackType,
 ) -> Result<Skill> {
+    log::debug!(function_name!());
     unsafe {
-        log::debug!(function_name!());
         if !skill_data.is_null() {
             let row_data = (*skill_data).RowData as *const c_void;
             if !row_data.is_null() {
@@ -133,20 +140,22 @@ pub unsafe fn get_skill_from_skilldata(
 pub unsafe fn get_avatar_from_entity(entity: *const GameEntity) -> Result<Avatar> {
     log::debug!(function_name!());
     if !entity.is_null() {
-        let id = UIGameEntityUtils_GetAvatarID(entity);
-        let avatar_data = get_avatar_data_from_id(id);
-        if !avatar_data.is_null() {
-            let name = AvatarData_get_AvatarName(avatar_data);
-            if !name.is_null() {
-                Ok(Avatar {
-                    id,
-                    name: (*name).to_string(),
-                })
+        unsafe {
+            let id = UIGameEntityUtils_GetAvatarID(entity);
+            let avatar_data = get_avatar_data_from_id(id);
+            if !avatar_data.is_null() {
+                let name = AvatarData_get_AvatarName(avatar_data);
+                if !name.is_null() {
+                    Ok(Avatar {
+                        id,
+                        name: (*name).to_string(),
+                    })
+                } else {
+                    Err(anyhow!("AvatarData {} name was null", id))
+                }
             } else {
-                Err(anyhow!("AvatarData {} name was null", id))
+                Err(anyhow!("AvatarData {} was null", id))
             }
-        } else {
-            Err(anyhow!("AvatarData {} was null", id))
         }
     } else {
         Err(anyhow!("Avatar Entity was null"))
@@ -157,10 +166,11 @@ pub unsafe fn get_avatar_from_entity(entity: *const GameEntity) -> Result<Avatar
 pub unsafe fn get_avatar_from_servant_entity(entity: *const GameEntity) -> Result<Avatar> {
     log::debug!(function_name!());
     if !entity.is_null() {
-        // can actually just save ref of battle and access this member thru battleinstance worldinstance
-        let entity_manager = GamePlayStatic_GetEntityManager();
-        let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, entity);
-        get_avatar_from_entity(avatar_entity)
+        unsafe {
+            let entity_manager = GamePlayStatic_GetEntityManager();
+            let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, entity);
+            get_avatar_from_entity(avatar_entity)
+        }
     } else {
         Err(anyhow!("Servant Entity was null"))
     }
