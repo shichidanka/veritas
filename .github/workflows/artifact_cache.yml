@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - global-beta  # Replace with your default branch if needed
-    tags-ignore:
-      - '**'
+    paths:
+      - '**/Cargo.lock'
+      - '**/Cargo.toml'
+      - 'rust-toolchain.toml'
 
 jobs:
   cache:
