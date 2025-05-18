@@ -17,7 +17,7 @@ Veritas, the magnum opus, of a mundane-chalk-throwing pillar man. Long-lost bret
 - `Ctrl` + `H` to hide the UI
 - `Ctrl` + `+` to zoom in
 - `Ctrl` + `-` to zoom out
-- `Ctrl` + `0` to rest zoom
+- `Ctrl` + `0` to reset zoom
 
 # Troubleshooting
 - **The in-game overlay is not showing.**

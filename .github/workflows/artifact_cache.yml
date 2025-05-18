@@ -1,0 +1,23 @@
+name: Artifact Cache
+
+on:
+  push:
+    branches:
+      - global-beta  # Replace with your default branch if needed
+    tags-ignore:
+      - '**'
+
+jobs:
+  cache:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2025-05-17
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "shared"
+          save-if: ${{ github.ref == 'refs/heads/global-beta' }}
+      - run: cargo build --release
