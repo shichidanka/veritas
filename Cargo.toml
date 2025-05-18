@@ -71,6 +71,4 @@ features = [
 
 [build-dependencies]
 cargo_metadata = "0.19.2"
-regex = "1.11.1"
-toml_edit = "0.22.25"
 winres = "0.1.12"
