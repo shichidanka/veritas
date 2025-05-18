@@ -2,11 +2,55 @@ import subprocess
 import toml
 import os
 
-# Set the UPDATE variable
-def set_update_variable():
-    update_value = "MINOR_PATCH"
-    os.environ["UPDATE"] = update_value
-    print(f"Set UPDATE={update_value}")
+import os
+import re
+from tomlkit import parse, dumps, value
+
+class Patch:
+    def __init__(self, major, minor, revision):
+        self.major = major
+        self.minor = minor
+        self.revision = revision
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.revision}"
+
+def update_cargo_toml(update: str):
+    patch_re = re.compile(r"(\d+)\.(\d+)\.(\d+)")
+
+    cargo_toml_path = "Cargo.toml"
+    with open(cargo_toml_path, "r") as f:
+        toml_str = f.read()
+
+    doc = parse(toml_str)
+    metadata = doc.get("package", {}).get("metadata")
+    if metadata and "patch" in metadata:
+        patch_str = metadata["patch"]
+        match = patch_re.match(patch_str)
+        if match:
+            major_patch, minor_patch, revision_patch = map(int, match.groups())
+            patch = Patch(major_patch, minor_patch, revision_patch)
+
+            if update == "MAJOR_PATCH":
+                patch.major += 1
+                patch.minor = 0
+                patch.revision = 0
+                metadata["hotfix"] = "0.1"
+            elif update == "MINOR_PATCH":
+                patch.minor += 1
+                patch.revision = 0
+                metadata["hotfix"] = "0.1"
+            elif update == "REVISION_PATCH":
+                patch.revision += 1
+                metadata["hotfix"] = "0.1"
+            elif update == "HOTFIX_PATCH":
+                hotfix = str(float(metadata.get("hotfix", "0.0")) + 0.1)
+                metadata["hotfix"] = hotfix
+
+            metadata["patch"] = str(patch)
+
+        with open(cargo_toml_path, "w") as f:
+            f.write(dumps(doc))
 
 # Run cargo build --release
 def build_with_cargo():
@@ -48,10 +92,9 @@ def commit_and_tag(patch, region, is_beta, hotfix):
     subprocess.run(['git', 'push', 'origin', '--tags'], check=True)  # Push the tags
     print("Pushed the commit and tags to the remote repository.")
 
-
 def main():
     # Step 1: Set the UPDATE environment variable and build with cargo
-    set_update_variable()
+    update_cargo_toml("MINOR_PATCH")
     build_with_cargo()
 
     # Step 2: Read Cargo.toml and extract metadata
