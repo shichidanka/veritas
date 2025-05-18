@@ -12,13 +12,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2025-05-17
+      
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: "shared"
           save-if: "false"
+
       - run: cargo build --release
 
       - name: Format Release Name
@@ -37,11 +40,33 @@ jobs:
           echo "Formatted release name: $FORMATTED_NAME"
           echo "release_name=$FORMATTED_NAME" >> "$GITHUB_OUTPUT"
 
+      - name: Release Flags
+        id: release_flags
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "Tag is: $TAG"
+
+          # Set prerelease flag
+          if [[ "$TAG" == *"nightly"* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Set make_latest flag (only if global-beta and not nightly)
+          if [[ "$TAG" == *"global-beta"* && "$TAG" != *"nightly"* ]]; then
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.format_name.outputs.release_name }}
           generate_release_notes: true
-          target_commitish: cn-beta-nightly
+          target_commitish: ${{ steps.branch_name.outputs.branch }}
           files: target/release/veritas.dll
-          prerelease: true
+          prerelease: ${{ steps.release_flags.outputs.prerelease }}
+          make_latest: ${{ steps.release_flags.outputs.make_latest }}
