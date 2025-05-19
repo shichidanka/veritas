@@ -29,7 +29,7 @@ edio11 = { git = "https://github.com/hessiser/edio11-rs.git", rev = "c9f509f" }
 
 # Logging
 log = "0.4"
-slog = "2.7.0"
+slog = { version = "2.7.0", features = ["max_level_trace", "release_max_level_trace"] }
 slog-term = "2.9.1"
 egui_logger = "0.6.3"
 
