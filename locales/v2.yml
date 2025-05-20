@@ -166,20 +166,6 @@
   vi: Sát thương theo nhân vật
   zh: 角色伤害
   pl: Obrżenia według postaci
-4fO2Pqxp9TxK:
-  en: Current Turn
-  fr: Tour actuel
-  es: Turno actual
-  de: Aktueller Zug
-  it: Turno corrente
-  ja: 現在のターン
-  pt: Turno atual
-  nl: Huidige beurt
-  ru: Текущий ход
-  # ar: الدور الحالي
-  vi: Vòng hiện tại
-  zh: 当前回合
-  pl: Bieżąca turka
 6Bzv9dbJvO1b:
   en: 'Total Elapsed AV:'
   fr: 'AV total écoulé:'
@@ -440,4 +426,30 @@ FPS:
   ru: FPS
   vi: FPS
   zh: FPS
+1ccDoNOMfkMc:
+  de: Spielfiguren
+  en: Characters
+  es: Personajes
+  fr: Personnages
+  it: Personaggi
+  ja: キャラクター
+  nl: Personages
+  pl: Postacie
+  pt: Personagens
+  ru: Персонажи
+  vi: Nhân vật
+  zh: 角色
+AV:
+  de: AV
+  en: AV
+  es: AV
+  fr: AV
+  it: AV
+  ja: AV
+  nl: AV
+  pl: WA
+  pt: AV
+  ru: AV
+  vi: AV
+  zh: AV
 _version: 2

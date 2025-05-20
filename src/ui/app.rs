@@ -383,7 +383,7 @@ impl Overlay for App {
                     .min_width(200.0)
                     .min_height(150.0)
                     .show(ctx, |ui| {
-                        self.show_enemy_stats(ui);
+                        self.show_enemy_stats_widget(ui);
                     });
             }
 

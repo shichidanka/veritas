@@ -1,4 +1,5 @@
 use crate::battle::BattleContext;
+use crate::kreide::types::rpg::client::TextID;
 // use crate::kreide::native_types::*;
 use crate::kreide::types::rpg::gamecore::*;
 use crate::kreide::types::*;
@@ -469,7 +470,6 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
         for character_ptr in (*light_team).to_slice() {
             let character = *character_ptr;
             let avatar_id = (*character).CharacterID;
-            log::debug!("{}", format!("AVATAR ID: {}", avatar_id));
             match helpers::get_avatar_from_id(avatar_id) {
                 Ok(avatar) => avatars.push(avatar),
                 Err(e) => {
@@ -483,7 +483,6 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
         for character_ptr in (*extra_team).to_slice() {
             let character = *character_ptr;
             let avatar_id = (*character).CharacterID;
-            log::debug!("{}", format!("AVATAR ID: {}", avatar_id));
             match helpers::get_avatar_from_id(avatar_id) {
                 Ok(avatar) => avatars.push(avatar),
                 Err(e) => {
@@ -781,14 +780,14 @@ pub fn on_initialize_enemy(
     ON_INITIALIZE_ENEMY_Detour.call(instance, turn_based_ability_component);
     unsafe {
         let row_data = (*instance)._MonsterRowData;
-        let row = (*row_data)._Row;
         let monster_id = MonsterDataComponent_GetMonsterID(instance as _);
         let base_stats = Stats {
             level: MonsterRowData_get_Level(row_data),
             hp: fixpoint_to_raw(&(*(instance))._DefaultMaxHP),
         };
 
-        let name_id = (*row).MonsterName;
+        let name_id = std::mem::zeroed::<TextID>();
+        MonsterRowData_get_CharacterName(&name_id, row_data);
 
         let monster_name = TextmapStatic_GetText(&name_id, null());
 
