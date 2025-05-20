@@ -173,27 +173,23 @@ impl App {
                 }
             });
     }
-
-    pub fn show_real_time_damage_graph(&mut self, ui: &mut Ui) {
+    
+    pub fn show_real_time_damage_graph_widget(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                ui.radio_value(&mut self.graph_x_unit, GraphUnit::Turn, t!("Turn"));
-                ui.radio_value(
-                    &mut self.graph_x_unit,
-                    GraphUnit::ActionValue,
-                    t!("Action Value"),
-                );
+                ui.radio_value(&mut self.state.graph_x_unit, GraphUnit::Turn, t!("Turn"));
+                ui.radio_value(&mut self.state.graph_x_unit, GraphUnit::ActionValue, t!("Action Value"));
             });
             ui.add_space(8.0);
-
-            match self.graph_x_unit {
+            
+            match self.state.graph_x_unit {
                 GraphUnit::Turn => self.show_turn_damage_plot(ui),
                 GraphUnit::ActionValue => self.show_av_damage_plot(ui),
             }
         });
     }
-
-    pub fn show_av_metrics(&mut self, ui: &mut Ui) {
+    
+    pub fn show_av_metrics_widget(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
         ui.horizontal(|ui| {
             ui.label(t!("Total Elapsed AV:"));

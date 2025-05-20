@@ -1,12 +1,10 @@
-use std::{
-    fs::File,
-    io::Write,
-    path::PathBuf,
-};
+use std::{fs::File, io::Write, path::PathBuf};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
+
+use super::themes::EGUI_THEME;
 
 const CONFIG_FILENAME: &'static str = "config.json";
 
@@ -39,7 +37,12 @@ macro_rules! config {
 
 config!(
     locale: String,
-    fps: i32
+    fps: i32,
+    widget_opacity: f32,
+    streamer_mode: bool,
+    streamer_msg: String,
+    theme: egui_colors::Theme,
+    theme_mode: egui::Theme
 );
 
 impl Default for Config {
@@ -47,12 +50,17 @@ impl Default for Config {
         Self {
             locale: rust_i18n::locale().to_string(),
             fps: 60,
+            widget_opacity: 0.16,
+            streamer_mode: true,
+            streamer_msg: String::new(),
+            theme: EGUI_THEME,
+            theme_mode: egui::Theme::Dark,
         }
     }
 }
 
 impl Config {
-    pub fn new() -> Result<Self> {
+    pub fn new(ctx: &egui::Context) -> Result<Self> {
         match ProjectDirs::from("", "", "veritas") {
             Some(proj_dirs) => {
                 let config_local_dir = proj_dirs.config_local_dir();
@@ -63,24 +71,27 @@ impl Config {
                 }
 
                 if !config_path.exists() {
-                    Self::initialize(&config_path)
+                    Self::initialize(&config_path, ctx)
                 } else {
                     let mut file = File::open(&config_path)?;
                     match serde_json::from_reader(&file) {
                         Ok(v) => Ok(v),
                         Err(_) => {
                             file.flush()?;
-                            Self::initialize(&config_path)
+                            Self::initialize(&config_path, ctx)
                         }
                     }
                 }
             }
-            None => todo!(),
+            None => Err(anyhow!("Failed to load/create config.")),
         }
     }
 
-    fn initialize(config_path: &PathBuf) -> Result<Self> {
-        let config = Self::default();
+    fn initialize(config_path: &PathBuf, ctx: &egui::Context) -> Result<Self> {
+        let config: Config = Config {
+            theme_mode: ctx.theme(),
+            ..Default::default()
+        };
         let mut file = File::create(config_path)?;
         serde_json::to_writer(&mut file, &config)?;
         file.flush()?;
@@ -102,7 +113,7 @@ impl Config {
                 file.flush()?;
                 Ok(())
             }
-            None => todo!(),
+            None => Err(anyhow!("Failed to write config.")),
         }
     }
 }
