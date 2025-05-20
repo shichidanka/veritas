@@ -110,20 +110,6 @@
   vi: Tin nhắn của người phát trực tiếp
   zh: 直播消息
   pl: Wiadomość streamera
-3vmghpOiotac:
-  en: Widget Controls
-  fr: Contrôles du widget
-  es: Controles del widget
-  de: Widget-Steuerelemente
-  it: Controlli widget
-  ja: ウィジェットコントロール
-  pt: Controles do widget
-  nl: Widget-besturingselementen
-  ru: Элементы управления виджетом
-  # ar: عناصر تحكم الواجهة
-  vi: Điều khiển trình đơn
-  zh: 小工具控制
-  pl: Narzędzia widżetów
 42SBVEsAhN12:
   en: 'Total Damage:'
   fr: 'Dommages totaux:'
@@ -376,4 +362,82 @@ Language:
   ru: Язык
   vi: Ngôn ngữ
   zh: 语言
+2XYLA4lq9ByQ:
+  de: Benutzerdefinierte Farbe
+  en: Custom color
+  es: Color personalizado
+  fr: Couleur personnalisée
+  it: Colore personalizzato
+  ja: カスタムカラー
+  nl: Aangepaste kleur
+  pl: Niestandardowy kolor
+  pt: Cor personalizada
+  ru: Пользовательский цвет
+  vi: Màu tùy chỉnh
+  zh: 自定义颜色
+36924knYADMN:
+  de: Design zurücksetzen
+  en: Revert theme
+  es: Restablecer tema
+  fr: Réinitialiser le thème
+  it: Ripristina tema
+  ja: テーマを元に戻す
+  nl: Thema terugzetten
+  pl: Przywróć motyw
+  pt: Reverter tema
+  ru: Отменить тему
+  vi: Khôi phục giao diện
+  zh: 恢复主题
+7IGKB9PY3wWR:
+  de: Design speichern
+  en: Save theme
+  es: Guardar tema
+  fr: Enregistrer le thème
+  it: Salva tema
+  ja: テーマを保存
+  nl: Thema opslaan
+  pl: Zapisz motyw
+  pt: Salvar tema
+  ru: Сохранить тему
+  vi: Lưu giao diện
+  zh: 保存主题
+File:
+  de: Datei
+  en: File
+  es: Archivo
+  fr: Fichier
+  it: File
+  ja: ファイル
+  nl: Bestand
+  pl: Plik
+  pt: Arquivo
+  ru: Файл
+  vi: Tệp
+  zh: 文件
+Settings:
+  de: Einstellungen
+  en: Settings
+  es: Configuración
+  fr: Paramètres
+  it: Impostazioni
+  ja: 設定
+  nl: Instellingen
+  pl: Ustawienia
+  pt: Configurações
+  ru: Настройки
+  vi: Cài đặt
+  zh: 设置
+FPS:
+  de: FPS
+  en: FPS
+  es: FPS
+  fr: FPS
+  it: FPS
+  ja: FPS
+  nl: FPS
+  pl: FPS
+  pt: FPS
+  ru: FPS
+  vi: FPS
+  zh: FPS
 _version: 2

@@ -1,23 +1,28 @@
-use edio11::{input::InputResult, Overlay, WindowMessage, WindowProcessOptions};
+use edio11::{Overlay, WindowMessage, WindowProcessOptions, input::InputResult};
 use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Label;
 use egui::Modifiers;
+use egui::RichText;
 use egui::Stroke;
 use egui::TextEdit;
+use egui::Ui;
+use egui::UiBuilder;
 use egui::{
-    epaint::text::{FontInsert, InsertFontFamily},
     CentralPanel, Color32, Context, Frame, Slider, Window,
+    epaint::text::{FontInsert, InsertFontFamily},
 };
+use egui_colors::Colorix;
 use windows::Win32::{
     Foundation::{LPARAM, WPARAM},
     UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::WM_KEYDOWN},
 };
 
-use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 use crate::LOCALES;
+use crate::kreide::functions::unityengine::Application_set_targetFrameRate;
 
 use super::config::Config;
+use super::themes;
 
 #[derive(Default, PartialEq)]
 pub enum GraphUnit {
@@ -27,21 +32,33 @@ pub enum GraphUnit {
 }
 
 #[derive(Default)]
-pub struct App {
+pub struct AppState {
     pub show_menu: bool,
+    pub show_settings: bool,
     pub show_console: bool,
-    show_damage_distribution: bool,
-    show_damage_bars: bool,
-    show_real_time_damage: bool,
+    pub show_damage_distribution: bool,
+    pub show_damage_bars: bool,
+    pub show_real_time_damage: bool,
     // show_enemy_stats: bool,
-    show_av_metrics: bool,
-    widget_opacity: f32,
-    pub graph_x_unit: GraphUnit,
+    pub show_av_metrics: bool,
     pub should_hide: bool,
-    streamer_mode: bool,
-    streamer_msg: String,
-    fps: i32,
-    config: Config
+    pub graph_x_unit: GraphUnit,
+    pub use_custom_color: bool
+}
+
+#[derive(Default)]
+pub struct Settings {
+    pub widget_opacity: f32,
+    pub streamer_mode: bool,
+    pub streamer_msg: String,
+    pub fps: i32,
+    pub colorix: Colorix,
+}
+
+pub struct App {
+    pub state: AppState,
+    settings: Settings,
+    config: Config,
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
@@ -50,44 +67,21 @@ pub const SHOW_MENU: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
         if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
-            self.should_hide = !self.should_hide;
+            self.state.should_hide = !self.state.should_hide;
         }
 
-        if !self.should_hide {
-            if self.show_menu {
-                egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
-                    egui::menu::bar(ui, |ui| {
-                        ui.menu_button(t!("Language"), |ui| {
-                            for locale_code in rust_i18n::available_locales!() {
-                                if let Some(locale) = LOCALES.get(locale_code) {
-                                    if ui.button(*locale).clicked() {
-                                        self.config.set_locale(locale_code.to_string());
-                                        rust_i18n::set_locale(locale_code);
-                                        ui.close_menu();
-                                    }
-                                }
-                            }
-                        });
-                    });
-                });
-            }
-        }
-
-        if self.streamer_mode {
+        if self.settings.streamer_mode {
             egui::TopBottomPanel::bottom("statusbar")
                 .resizable(true)
                 .show(ctx, |ui| {
-                    let label = Label::new(
-                        &self.streamer_msg
-                    ).selectable(false);
-                    
+                    let label = Label::new(&self.settings.streamer_msg).selectable(false);
                     ui.add(label);
                     ui.allocate_space(ui.available_size())
-            });
+                });
         }
 
-        if !self.should_hide {
-            if self.show_menu {
+        if !self.state.should_hide {
+            if self.state.show_menu {
                 CentralPanel::default()
                     .frame(Frame {
                         fill: Color32::GRAY.gamma_multiply(0.25),
@@ -96,20 +90,192 @@ impl Overlay for App {
                     .show(ctx, |_ui: &mut egui::Ui| {
                         Window::new(t!("Menu"))
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                            .collapsible(false)
                             .resizable(false)
                             .show(ctx, |ui| {
-                                ui.vertical_centered(|ui| {
-                                    ui.heading(t!("Widget Controls"));
+                                // Settings
+                                egui::Frame::default().inner_margin(5.0).show(ui, |ui| {
+                                    egui::menu::bar(ui, |ui| {
+                                        ui.menu_button(
+                                            RichText::new(format!(
+                                                "{} {}",
+                                                egui_phosphor::regular::GEAR,
+                                                t!("Settings")
+                                            )),
+                                            |ui| {
+                                                self.state.show_settings = !self.state.show_settings;
+                                                ui.close_menu();
+                                            },
+                                        );
+                                    });
+                                });
 
-                                    ui.checkbox(&mut self.streamer_mode, t!("Streamer Mode"));
-                                    ui.checkbox(&mut self.show_console, t!("Show Logs"));
+                                ui.separator();
+
+                                egui::Window::new(t!("Settings"))
+                                    .open(&mut self.state.show_settings)
+                                    .show(ctx, |ui| {
+                                        egui::menu::bar(ui, |ui| {
+                                            let style = ctx.style(); // `ctx` is of type `&egui::Context`
+                                            let font_id = &style.text_styles[&egui::TextStyle::Button];
+                                            let font_size = font_id.size;
+                                            self.settings
+                                                .colorix
+                                                .light_dark_toggle_button(ui, font_size);
+
+                                            ui.separator();
+
+
+                                            ui.menu_button(
+                                                RichText::new(format!(
+                                                    "{} {}",
+                                                    egui_phosphor::regular::FILE,
+                                                    t!("File")
+                                                )),
+                                                |ui| {
+                                                    if ui.button(t!("Save theme")).clicked() {
+                                                        self.config.set_theme(*self.settings.colorix.theme());
+                                                        if self.settings.colorix.dark_mode() {
+                                                            self.config.set_theme_mode(egui::Theme::Dark);
+                                                        }
+                                                        else {
+                                                            self.config.set_theme_mode(egui::Theme::Light);
+                                                        }
+                                                        ui.close_menu();
+                                                    }
+
+                                                    if ui.button(t!("Revert theme")).clicked() {
+                                                        match self.config.get_theme_mode() {
+                                                            egui::Theme::Dark => self.settings.colorix.set_dark(ui),
+                                                            egui::Theme::Light => self.settings.colorix.set_light(ui),
+                                                        }
+                                                        self.settings.colorix.update_theme(ctx, *self.config.get_theme());
+                                                        ui.close_menu();
+                                                    }
+                                                },
+                                            );
+
+                                            ui.menu_button(
+                                                RichText::new(format!(
+                                                    "{} {}",
+                                                    egui_phosphor::regular::GLOBE,
+                                                    t!("Language")
+                                                )),
+                                                |ui| {
+                                                    for locale_code in
+                                                        rust_i18n::available_locales!()
+                                                    {
+                                                        if let Some(locale) =
+                                                            LOCALES.get(locale_code)
+                                                        {
+                                                            if ui.button(*locale).clicked() {
+                                                                self.config.set_locale(
+                                                                    locale_code.to_string(),
+                                                                );
+                                                                rust_i18n::set_locale(locale_code);
+                                                                ui.close_menu();
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                            );
+
+                                            if ui
+                                                .toggle_value(
+                                                    &mut self.settings.streamer_mode,
+                                                    RichText::new(format!(
+                                                        "{} {}",
+                                                        egui_phosphor::regular::VIDEO_CAMERA,
+                                                        t!("Streamer Mode")
+                                                    )),
+                                                )
+                                                .changed()
+                                            {
+                                                self.config
+                                                    .set_streamer_mode(self.settings.streamer_mode);
+                                            }
+
+                                        });
+
+                                        ui.separator();
+
+                                        ui.with_layout(
+                                            egui::Layout::top_down_justified(egui::Align::LEFT),
+                                            |ui| {
+                                                ui.add_space(5.);
+                                                if self.state.use_custom_color {
+                                                    self.settings.colorix.twelve_from_custom(ui);
+                                                };
+
+                                                ui.horizontal(|ui| {
+                                                    self.settings.colorix.custom_picker(ui);
+                                                    ui.toggle_value(&mut self.state.use_custom_color, t!("Custom color"));
+                                                });
+                                                self.settings
+                                                    .colorix
+                                                    .themes_dropdown(ui, Some((themes::THEME_NAMES.to_vec(), themes::THEMES.to_vec())), true);
+
+                                                self.settings.colorix.ui_combo_12(ui, false);
+
+
+                                                if ui
+                                                    .add(
+                                                        Slider::new(
+                                                            &mut self.settings.widget_opacity,
+                                                            0.0..=1.0,
+                                                        )
+                                                        .text(t!("Window Opacity")),
+                                                    )
+                                                    .changed()
+                                                {
+                                                    self.config.set_widget_opacity(
+                                                        self.settings.widget_opacity,
+                                                    );
+                                                };
+
+                                                if ui
+                                                    .add(
+                                                        Slider::new(
+                                                            &mut self.settings.fps,
+                                                            1..=500,
+                                                        )
+                                                        .text(t!("FPS")),
+                                                    )
+                                                    .changed()
+                                                {
+                                                    self.config.set_fps(self.settings.fps);
+                                                    unsafe {
+                                                        Application_set_targetFrameRate(
+                                                            self.settings.fps,
+                                                        )
+                                                    };
+                                                }
+
+                                                if ui.add(
+                                                    TextEdit::singleline(
+                                                        &mut self.settings.streamer_msg,
+                                                    )
+                                                    .hint_text(t!("Streamer Message")),
+                                                ).changed() {
+                                                    self.config.set_streamer_msg(self.settings.streamer_msg.clone());
+                                                };
+                                            },
+                                        );
+                                    });
+
+                                ui.vertical_centered(|ui| {
+                                    ui.add_space(5.);
+                                    ui.checkbox(&mut self.state.show_console, t!("Show Logs"));
                                     ui.checkbox(
-                                        &mut self.show_damage_distribution,
+                                        &mut self.state.show_damage_distribution,
                                         t!("Show Damage Distribution"),
                                     );
-                                    ui.checkbox(&mut self.show_damage_bars, t!("Show Damage Bars"));
                                     ui.checkbox(
-                                        &mut self.show_real_time_damage,
+                                        &mut self.state.show_damage_bars,
+                                        t!("Show Damage Bars"),
+                                    );
+                                    ui.checkbox(
+                                        &mut self.state.show_real_time_damage,
                                         t!("Show Real-Time Damage"),
                                     );
                                     // ui.checkbox(
@@ -117,39 +283,24 @@ impl Overlay for App {
                                     //     t!("Show Enemy Stats"),
                                     // );
 
-                                    ui.checkbox(&mut self.show_av_metrics, t!("Show AV Metrics"));
-
-                                    ui.separator();
-                                    ui.label(t!("Window Opacity"));
-                                    ui.add(
-                                        Slider::new(&mut self.widget_opacity, 0.0..=1.0).text(""),
+                                    ui.checkbox(
+                                        &mut self.state.show_av_metrics,
+                                        t!("Show AV Metrics"),
                                     );
 
-                                    ui.separator();
-                                    ui.label(t!("FPS"));
-                                    if ui.add(
-                                        Slider::new(&mut self.fps, 1..=500).text("")
-                                    ).changed() {
-                                        self.config.set_fps(self.fps);
-                                        unsafe { Application_set_targetFrameRate(self.fps) };
-                                    }
+                                    ui.add_space(5.);
 
-                                    ui.separator();
-                                    ui.label(t!("Streamer Message"));
-                                    ui.add(
-                                        TextEdit::singleline(&mut self.streamer_msg),
-                                    );
 
                                     ui.separator();
                                     if ui.button(t!("Close")).clicked() {
-                                        self.show_menu = false;
+                                        self.state.show_menu = false;
                                     }
                                 });
                             });
                     });
             }
 
-            if self.show_console {
+            if self.state.show_console {
                 egui::Window::new(t!("Log"))
                     .resizable(true)
                     .default_height(300.0)
@@ -165,21 +316,24 @@ impl Overlay for App {
                     });
             }
 
-            let opacity = self.widget_opacity.clamp(0.0, 1.0);
+            let opacity = self.settings.widget_opacity.clamp(0.0, 1.0);
+            let color = ctx.style().visuals.extreme_bg_color.gamma_multiply(opacity);
             let window_frame = egui::Frame::new()
-                .fill(Color32::from_black_alpha((255.0 * opacity) as u8))
+                .fill(color)
                 .stroke(Stroke::new(0.5, Color32::WHITE))
                 .inner_margin(8.0)
                 .corner_radius(10.0);
 
-            let transparent_frame = egui::Frame::new()
-                .inner_margin(8.0)
-                .corner_radius(10.0);
+            let transparent_frame = egui::Frame::new().inner_margin(8.0).corner_radius(10.0);
 
-            if self.show_damage_distribution {
+            if self.state.show_damage_distribution {
                 egui::containers::Window::new("")
                     .id("Damage Distribution".into())
-                    .frame(if self.show_menu { window_frame } else { transparent_frame })
+                    .frame(if self.state.show_menu {
+                        window_frame
+                    } else {
+                        transparent_frame
+                    })
                     .collapsible(false)
                     .resizable(true)
                     .min_width(200.0)
@@ -189,7 +343,7 @@ impl Overlay for App {
                     });
             }
 
-            if self.show_damage_bars {
+            if self.state.show_damage_bars {
                 egui::containers::Window::new(t!("Damage by Character"))
                     .frame(window_frame)
                     .resizable(true)
@@ -200,25 +354,25 @@ impl Overlay for App {
                     });
             }
 
-            if self.show_real_time_damage {
+            if self.state.show_real_time_damage {
                 egui::containers::Window::new(t!("Real-Time Damage"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
                     .min_height(200.0)
                     .show(ctx, |ui| {
-                        self.show_real_time_damage_graph(ui);
+                        self.show_real_time_damage_graph_widget(ui);
                     });
             }
 
-            if self.show_av_metrics {
+            if self.state.show_av_metrics {
                 egui::containers::Window::new(t!("Action Value Metrics"))
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
                     .min_height(150.0)
                     .show(ctx, |ui| {
-                        self.show_av_metrics(ui);
+                        self.show_av_metrics_widget(ui);
                     });
             }
 
@@ -232,7 +386,6 @@ impl Overlay for App {
             //             self.show_enemy_stats(ui);
             //         });
             // }
-
         }
     }
 
@@ -253,8 +406,11 @@ impl Overlay for App {
                             repeat: _,
                             modifiers,
                         } => {
-                            if modifiers.matches_exact(SHOW_MENU.modifiers) && *key == SHOW_MENU.logical_key && *pressed {
-                                self.show_menu = !self.show_menu;
+                            if modifiers.matches_exact(SHOW_MENU.modifiers)
+                                && *key == SHOW_MENU.logical_key
+                                && *pressed
+                            {
+                                self.state.show_menu = !self.state.show_menu;
 
                                 return Some(WindowProcessOptions {
                                     // Simulate alt to get cursor
@@ -274,13 +430,12 @@ impl Overlay for App {
             _ => {}
         };
 
-        if self.show_menu {
+        if self.state.show_menu {
             Some(WindowProcessOptions {
                 should_capture_all_input: true,
                 ..Default::default()
             })
-        }
-        else {
+        } else {
             Some(WindowProcessOptions::default())
         }
     }
@@ -314,27 +469,34 @@ impl App {
             ),
         }
 
-        ctx.style_mut(|style| {
-            style.visuals.widgets.noninteractive.fg_stroke.color = Color32::WHITE;
-        });
+        let mut fonts = egui::FontDefinitions::default();
+        egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
+        ctx.set_fonts(fonts);
 
-        let config = Config::new().unwrap();
-        let fps = config.get_fps().clone();
+        let config = Config::new(&ctx).unwrap();
 
-        let app = Self {
-            widget_opacity: 0.15,
-            streamer_mode: true,
+        let mut app = Self {
+            settings: Settings {
+                widget_opacity: *config.get_widget_opacity(),
+                streamer_mode: *config.get_streamer_mode(),
+                streamer_msg: config.get_streamer_msg().to_owned(),
+                fps: *config.get_fps(),
+                colorix: Colorix::global(&ctx, *config.get_theme()),
+            },
             config,
-            fps,
-            ..Default::default()
+            state: AppState::default(),
         };
 
-        app.initialize_settings();
+        app.initialize_settings(&ctx);
         app
     }
 
-    fn initialize_settings(&self) {
+    fn initialize_settings(&mut self, ctx: &Context) {
         rust_i18n::set_locale(&self.config.get_locale());
+        match self.config.get_theme_mode() {
+            egui::Theme::Dark => self.settings.colorix.set_dark(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
+            egui::Theme::Light => self.settings.colorix.set_light(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
+        }
         unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
     }
 }
