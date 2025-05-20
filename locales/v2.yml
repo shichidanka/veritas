@@ -96,20 +96,19 @@
   vi: Giá trị Hành động
   zh: 行动值
   pl: Wartość akcji
-3B7dFIywsIA4:
-  en: Streamer Message
-  fr: Message du streamer
-  es: Mensaje del streamer
-  de: Streamer-Nachricht
-  it: Messaggio streamer
-  ja: ストリーマーメッセージ
-  pt: Mensagem do streamer
-  nl: Streamer-bericht
-  ru: Сообщение стримера
-  # ar: رسالة البث المباشر
-  vi: Tin nhắn của người phát trực tiếp
-  zh: 直播消息
-  pl: Wiadomość streamera
+5GO7e8eMF5Et:
+  de: Nachricht des Streamers. Kann auch Phosphor-Symbole verwenden!
+  en: Streamer Message. Can also use Phosphor Icons!
+  es: Mensaje del streamer. ¡También se pueden usar iconos de Phosphor!
+  fr: Message du streamer. Peut également utiliser des icônes Phosphor !
+  it: Messaggio del streamer. È possibile utilizzare anche le icone Phosphor!
+  ja: ストリーマーメッセージ。フォスフォールアイコンも使用可能！
+  nl: Streamerbericht. Kan ook Phosphor-iconen gebruiken!
+  pl: Wiadomość streamera. Można również używać ikon Phosphor!
+  pt: Mensagem do streamer. Também pode usar ícones Phosphor!
+  ru: Сообщение стримера. Можно также использовать иконки Phosphor!
+  vi: Thông báo của người phát trực tuyến. Cũng có thể sử dụng biểu tượng Phosphor!
+  zh: 直播消息。也可以使用磷符号！
 42SBVEsAhN12:
   en: 'Total Damage:'
   fr: 'Dommages totaux:'
@@ -452,4 +451,17 @@ AV:
   ru: AV
   vi: AV
   zh: AV
+2ewErlXDA0ed:
+  de: Streamer-Nachrichten-Schriftgröße%
+  en: Streamer Message Font Size%
+  es: Tamaño de fuente de mensaje de streamer%
+  fr: Taille de la police des messages du streamer%
+  it: Dimensione carattere messaggio streamer%
+  ja: ストリーマーメッセージフォントサイズ%
+  nl: Streamer-bericht lettertypegrootte%
+  pl: Rozmiar czcionki wiadomości streamera%
+  pt: Tamanho da fonte da mensagem do streamer%
+  ru: Размер шрифта сообщения стримера%
+  vi: Kích thước phông chữ tin nhắn của người phát trực tuyến%
+  zh: 直播消息字体大小%
 _version: 2
