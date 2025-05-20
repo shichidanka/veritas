@@ -20,6 +20,9 @@ fn entry() {
         overlay::initialize().unwrap();
         subscribers::battle::subscribe().unwrap();
         log::info!("Finished setup.");
+    });
+
+    thread::spawn(||{
         server::start_server();
     });
 }
