@@ -102,17 +102,13 @@ impl Overlay for App {
                                 // Settings
                                 egui::Frame::default().inner_margin(5.0).show(ui, |ui| {
                                     egui::menu::bar(ui, |ui| {
-                                        ui.menu_button(
+                                        ui.toggle_value(
+                                            &mut self.state.show_settings,
                                             RichText::new(format!(
                                                 "{} {}",
                                                 egui_phosphor::regular::GEAR,
                                                 t!("Settings")
-                                            )),
-                                            |ui| {
-                                                self.state.show_settings = !self.state.show_settings;
-                                                ui.close_menu();
-                                            },
-                                        );
+                                            )));
                                     });
                                 });
 
