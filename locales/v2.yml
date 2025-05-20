@@ -464,4 +464,30 @@ AV:
   ru: Размер шрифта сообщения стримера%
   vi: Kích thước phông chữ tin nhắn của người phát trực tuyến%
   zh: 直播消息字体大小%
+1ccDoNOMfkMc:
+  de: Spielfiguren
+  en: Characters
+  es: Personajes
+  fr: Personnages
+  it: Personaggi
+  ja: キャラクター
+  nl: Personages
+  pl: Postacie
+  pt: Personagens
+  ru: Персонажи
+  vi: Nhân vật
+  zh: 角色
+AV:
+  de: AV
+  en: AV
+  es: AV
+  fr: AV
+  it: AV
+  ja: AV
+  nl: AV
+  pl: WA
+  pt: AV
+  ru: AV
+  vi: AV
+  zh: AV
 _version: 2
