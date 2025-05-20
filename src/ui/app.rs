@@ -1,4 +1,5 @@
 use edio11::{Overlay, WindowMessage, WindowProcessOptions, input::InputResult};
+use egui::CollapsingHeader;
 use egui::Key;
 use egui::KeyboardShortcut;
 use egui::Label;
@@ -50,6 +51,7 @@ pub struct AppState {
 pub struct Settings {
     pub widget_opacity: f32,
     pub streamer_mode: bool,
+    pub streamer_msg_size_pt: f32,
     pub streamer_msg: String,
     pub fps: i32,
     pub colorix: Colorix,
@@ -74,6 +76,10 @@ impl Overlay for App {
             egui::TopBottomPanel::bottom("statusbar")
                 .resizable(true)
                 .show(ctx, |ui| {
+                    for (_text_style, font_id) in ui.style_mut().text_styles.iter_mut() {
+                        font_id.size *= self.settings.streamer_msg_size_pt;
+                    }
+
                     let label = Label::new(&self.settings.streamer_msg).selectable(false);
                     ui.add(label);
                     ui.allocate_space(ui.available_size())
@@ -203,20 +209,23 @@ impl Overlay for App {
                                             egui::Layout::top_down_justified(egui::Align::LEFT),
                                             |ui| {
                                                 ui.add_space(5.);
-                                                if self.state.use_custom_color {
-                                                    self.settings.colorix.twelve_from_custom(ui);
-                                                };
 
-                                                ui.horizontal(|ui| {
-                                                    self.settings.colorix.custom_picker(ui);
-                                                    ui.toggle_value(&mut self.state.use_custom_color, t!("Custom color"));
-                                                });
-                                                self.settings
-                                                    .colorix
-                                                    .themes_dropdown(ui, Some((themes::THEME_NAMES.to_vec(), themes::THEMES.to_vec())), true);
+                                                CollapsingHeader::new("Theme")
+                                                    .show(ui, |ui| {
+                                                        if self.state.use_custom_color {
+                                                            self.settings.colorix.twelve_from_custom(ui);
+                                                        };
 
-                                                self.settings.colorix.ui_combo_12(ui, false);
+                                                        ui.horizontal(|ui| {
+                                                            self.settings.colorix.custom_picker(ui);
+                                                            ui.toggle_value(&mut self.state.use_custom_color, t!("Custom color"));
+                                                        });
+                                                        self.settings
+                                                            .colorix
+                                                            .themes_dropdown(ui, Some((themes::THEME_NAMES.to_vec(), themes::THEMES.to_vec())), true);
 
+                                                        self.settings.colorix.ui_combo_12(ui, false);
+                                                    });
 
                                                 if ui
                                                     .add(
@@ -237,7 +246,7 @@ impl Overlay for App {
                                                     .add(
                                                         Slider::new(
                                                             &mut self.settings.fps,
-                                                            1..=500,
+                                                            10..=120,
                                                         )
                                                         .text(t!("FPS")),
                                                     )
@@ -251,11 +260,26 @@ impl Overlay for App {
                                                     };
                                                 }
 
+                                                if ui
+                                                    .add(
+                                                        Slider::new(
+                                                            &mut self.settings.streamer_msg_size_pt,
+                                                            0.5..=2.0,
+                                                        )
+                                                        .text(t!("Streamer Message Font Size%")),
+                                                    )
+                                                    .changed()
+                                                {
+                                                    self.config.set_streamer_msg_size_pt(self.settings.streamer_msg_size_pt);
+                                                }
+
+
+
                                                 if ui.add(
                                                     TextEdit::singleline(
                                                         &mut self.settings.streamer_msg,
                                                     )
-                                                    .hint_text(t!("Streamer Message")),
+                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::regular::RAINBOW))),
                                                 ).changed() {
                                                     self.config.set_streamer_msg(self.settings.streamer_msg.clone());
                                                 };
@@ -411,6 +435,9 @@ impl Overlay for App {
                                 && *pressed
                             {
                                 self.state.show_menu = !self.state.show_menu;
+                        
+                                // Add here because the game changes the FPS once the enter screen shows
+                                unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
 
                                 return Some(WindowProcessOptions {
                                     // Simulate alt to get cursor
@@ -479,6 +506,7 @@ impl App {
             settings: Settings {
                 widget_opacity: *config.get_widget_opacity(),
                 streamer_mode: *config.get_streamer_mode(),
+                streamer_msg_size_pt: *config.get_streamer_msg_size_pt(),
                 streamer_msg: config.get_streamer_msg().to_owned(),
                 fps: *config.get_fps(),
                 colorix: Colorix::global(&ctx, *config.get_theme()),
@@ -497,6 +525,5 @@ impl App {
             egui::Theme::Dark => self.settings.colorix.set_dark(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
             egui::Theme::Light => self.settings.colorix.set_light(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
         }
-        unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
     }
 }
