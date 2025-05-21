@@ -110,7 +110,7 @@ impl Overlay for App {
                                                 "{} {}",
                                                 egui_phosphor::bold::GEAR,
                                                 t!("Settings")
-                                            )).strong());
+                                            )));
 
                                         // ui.menu_button(RichText::new(format!(
                                         //         "{} {}",
@@ -146,7 +146,7 @@ impl Overlay for App {
                                                     "{} {}",
                                                     egui_phosphor::bold::FILE,
                                                     t!("File")
-                                                )).strong(),
+                                                )),
                                                 |ui| {
                                                     if ui.button(t!("Save theme")).clicked() {
                                                         self.config.set_theme(*self.settings.colorix.theme());
@@ -175,7 +175,7 @@ impl Overlay for App {
                                                     "{} {}",
                                                     egui_phosphor::bold::GLOBE,
                                                     t!("Language")
-                                                )).strong(),
+                                                )),
                                                 |ui| {
                                                     for locale_code in
                                                         rust_i18n::available_locales!()
@@ -202,7 +202,7 @@ impl Overlay for App {
                                                         "{} {}",
                                                         egui_phosphor::bold::VIDEO_CAMERA,
                                                         t!("Streamer Mode")
-                                                    )).strong(),
+                                                    )),
                                                 )
                                                 .changed()
                                             {
@@ -289,7 +289,7 @@ impl Overlay for App {
                                                     TextEdit::singleline(
                                                         &mut self.settings.streamer_msg,
                                                     )
-                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::bold::RAINBOW)).strong()),
+                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::bold::RAINBOW))),
                                                 ).changed() {
                                                     self.config.set_streamer_msg(self.settings.streamer_msg.clone());
                                                 };
