@@ -1,4 +1,5 @@
 use edio11::{Overlay, WindowMessage, WindowProcessOptions, input::InputResult};
+use egui::Button;
 use egui::CollapsingHeader;
 use egui::Key;
 use egui::KeyboardShortcut;
@@ -44,7 +45,7 @@ pub struct AppState {
     pub show_av_metrics: bool,
     pub should_hide: bool,
     pub graph_x_unit: GraphUnit,
-    pub use_custom_color: bool
+    pub use_custom_color: bool,
 }
 
 #[derive(Default)]
@@ -64,7 +65,7 @@ pub struct App {
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
-pub const SHOW_MENU: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
+pub const SHOW_MENU_SHORTCUT: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
 
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
@@ -79,8 +80,8 @@ impl Overlay for App {
                     for (_text_style, font_id) in ui.style_mut().text_styles.iter_mut() {
                         font_id.size *= self.settings.streamer_msg_size_pt;
                     }
-
-                    let label = Label::new(&self.settings.streamer_msg).selectable(false);
+                    let label = Label::new(RichText::new(&self.settings.streamer_msg).strong())
+                        .selectable(false);
                     ui.add(label);
                     ui.allocate_space(ui.available_size())
                 });
@@ -107,9 +108,20 @@ impl Overlay for App {
                                             &mut self.state.show_settings,
                                             RichText::new(format!(
                                                 "{} {}",
-                                                egui_phosphor::regular::GEAR,
+                                                egui_phosphor::bold::GEAR,
                                                 t!("Settings")
-                                            )));
+                                            )).strong());
+
+                                        // ui.menu_button(RichText::new(format!(
+                                        //         "{} {}",
+                                        //         egui_phosphor::bold::COMMAND,
+                                        //         t!("Shortcuts")
+                                        //     )).strong(), |ui| {
+                                        //         let button = Button::new(RichText::new(t!("Show menu"))).shortcut_text(ctx.format_shortcut(&SHOW_MENU_SHORTCUT));
+                                        //         if ui.add(button).changed() {
+                                                    
+                                        //         };
+                                        //     });
                                     });
                                 });
 
@@ -129,13 +141,12 @@ impl Overlay for App {
 
                                             ui.separator();
 
-
                                             ui.menu_button(
                                                 RichText::new(format!(
                                                     "{} {}",
-                                                    egui_phosphor::regular::FILE,
+                                                    egui_phosphor::bold::FILE,
                                                     t!("File")
-                                                )),
+                                                )).strong(),
                                                 |ui| {
                                                     if ui.button(t!("Save theme")).clicked() {
                                                         self.config.set_theme(*self.settings.colorix.theme());
@@ -162,9 +173,9 @@ impl Overlay for App {
                                             ui.menu_button(
                                                 RichText::new(format!(
                                                     "{} {}",
-                                                    egui_phosphor::regular::GLOBE,
+                                                    egui_phosphor::bold::GLOBE,
                                                     t!("Language")
-                                                )),
+                                                )).strong(),
                                                 |ui| {
                                                     for locale_code in
                                                         rust_i18n::available_locales!()
@@ -189,9 +200,9 @@ impl Overlay for App {
                                                     &mut self.settings.streamer_mode,
                                                     RichText::new(format!(
                                                         "{} {}",
-                                                        egui_phosphor::regular::VIDEO_CAMERA,
+                                                        egui_phosphor::bold::VIDEO_CAMERA,
                                                         t!("Streamer Mode")
-                                                    )),
+                                                    )).strong(),
                                                 )
                                                 .changed()
                                             {
@@ -278,7 +289,7 @@ impl Overlay for App {
                                                     TextEdit::singleline(
                                                         &mut self.settings.streamer_msg,
                                                     )
-                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::regular::RAINBOW))),
+                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::bold::RAINBOW)).strong()),
                                                 ).changed() {
                                                     self.config.set_streamer_msg(self.settings.streamer_msg.clone());
                                                 };
@@ -439,12 +450,12 @@ impl Overlay for App {
                             repeat: _,
                             modifiers,
                         } => {
-                            if modifiers.matches_exact(SHOW_MENU.modifiers)
-                                && *key == SHOW_MENU.logical_key
+                            if modifiers.matches_exact(SHOW_MENU_SHORTCUT.modifiers)
+                                && *key == SHOW_MENU_SHORTCUT.logical_key
                                 && *pressed
                             {
                                 self.state.show_menu = !self.state.show_menu;
-                        
+
                                 // Add here because the game changes the FPS once the enter screen shows
                                 unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
 
@@ -507,6 +518,8 @@ impl App {
 
         let mut fonts = egui::FontDefinitions::default();
         egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
+        egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Bold);
+
         ctx.set_fonts(fonts);
 
         let config = Config::new(&ctx).unwrap();
@@ -531,8 +544,16 @@ impl App {
     fn initialize_settings(&mut self, ctx: &Context) {
         rust_i18n::set_locale(&self.config.get_locale());
         match self.config.get_theme_mode() {
-            egui::Theme::Dark => self.settings.colorix.set_dark(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
-            egui::Theme::Light => self.settings.colorix.set_light(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
+            egui::Theme::Dark => self.settings.colorix.set_dark(&mut Ui::new(
+                ctx.clone(),
+                "".into(),
+                UiBuilder::new(),
+            )),
+            egui::Theme::Light => self.settings.colorix.set_light(&mut Ui::new(
+                ctx.clone(),
+                "".into(),
+                UiBuilder::new(),
+            )),
         }
     }
 }
