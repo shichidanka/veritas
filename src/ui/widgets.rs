@@ -97,8 +97,8 @@ impl App {
                             .width(0.7)
                     })
                     .collect();
-
-                plot_ui.bar_chart(BarChart::new("", bars));
+    
+                plot_ui.bar_chart(BarChart::new("", bars).id("bar_chart"));
             });
     }
 
