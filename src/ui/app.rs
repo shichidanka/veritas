@@ -95,6 +95,7 @@ impl Overlay for App {
                     })
                     .show(ctx, |_ui: &mut egui::Ui| {
                         Window::new(t!("Menu"))
+                            .id("menu_window".into())
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .collapsible(false)
                             .resizable(false)
@@ -115,6 +116,7 @@ impl Overlay for App {
                                 ui.separator();
 
                                 egui::Window::new(t!("Settings"))
+                                    .id("settings_window".into())
                                     .open(&mut self.state.show_settings)
                                     .show(ctx, |ui| {
                                         egui::menu::bar(ui, |ui| {
@@ -206,7 +208,8 @@ impl Overlay for App {
                                             |ui| {
                                                 ui.add_space(5.);
 
-                                                CollapsingHeader::new("Theme")
+                                                CollapsingHeader::new(t!("Theme"))
+                                                    .id_salt("theme_header")
                                                     .show(ui, |ui| {
                                                         if self.state.use_custom_color {
                                                             self.settings.colorix.twelve_from_custom(ui);
@@ -322,6 +325,7 @@ impl Overlay for App {
 
             if self.state.show_console {
                 egui::Window::new(t!("Log"))
+                    .id("log_window".into())
                     .resizable(true)
                     .default_height(300.0)
                     .default_width(400.0)
@@ -346,9 +350,14 @@ impl Overlay for App {
 
             let transparent_frame = egui::Frame::new().inner_margin(8.0).corner_radius(10.0);
 
+            let damage_distribution_window_title = if self.state.show_menu {
+                t!("Damage Distribution").into_owned()
+            } else {
+                String::new()
+            };
             if self.state.show_damage_distribution {
-                egui::containers::Window::new("")
-                    .id("Damage Distribution".into())
+                egui::containers::Window::new(damage_distribution_window_title)
+                    .id("damage_distribution_window".into())
                     .frame(if self.state.show_menu {
                         window_frame
                     } else {
@@ -365,6 +374,7 @@ impl Overlay for App {
 
             if self.state.show_damage_bars {
                 egui::containers::Window::new(t!("Damage by Character"))
+                    .id("damage_by_character_window".into())
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -376,6 +386,7 @@ impl Overlay for App {
 
             if self.state.show_real_time_damage {
                 egui::containers::Window::new(t!("Real-Time Damage"))
+                    .id("realt_time_damage_window".into())
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -387,6 +398,7 @@ impl Overlay for App {
 
             if self.state.show_av_metrics {
                 egui::containers::Window::new(t!("Action Value Metrics"))
+                    .id("action_value_metrics_window".into())
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -398,6 +410,7 @@ impl Overlay for App {
 
             // if self.show_enemy_stats {
             //     egui::containers::Window::new(t!("Enemy Stats"))
+            //         .id("enemy_stats_window")
             //         .frame(window_frame)
             //         .resizable(true)
             //         .min_width(200.0)
