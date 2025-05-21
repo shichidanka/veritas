@@ -89,7 +89,7 @@ impl App {
                     })
                     .collect();
     
-                plot_ui.bar_chart(BarChart::new("", bars));
+                plot_ui.bar_chart(BarChart::new("", bars).id("bar_chart"));
             });
     }
     
@@ -182,22 +182,22 @@ impl App {
     pub fn show_av_metrics_widget(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
         ui.horizontal(|ui| {
-            ui.label(t!("Total Elapsed AV:"));
+            ui.label(format!("{}:", t!("Total Elapsed AV")));
             ui.label(format!("{:.2}", battle_context.action_value));
         });
         ui.horizontal(|ui| {
-            ui.label(t!("AV:"));
+            ui.label(format!("{}:", t!("AV")));
             ui.label(format!(
                 "{:.2}",
                 battle_context.action_value - battle_context.last_wave_action_value
             ));
         });
         ui.horizontal(|ui| {
-            ui.label(t!("Total Damage:"));
+            ui.label(format!("{}:", t!("Total Damage")));
             ui.label(helpers::format_damage(battle_context.total_damage));
         });
         ui.horizontal(|ui| {
-            ui.label(t!("DpAV:"));
+            ui.label(format!("{}:", t!("DpAV")));
             if battle_context.action_value > 0.0 {
                 ui.label(format!("{:.2}", battle_context.total_damage / battle_context.action_value));
             } else {

@@ -1,4 +1,5 @@
 use edio11::{Overlay, WindowMessage, WindowProcessOptions, input::InputResult};
+use egui::Button;
 use egui::CollapsingHeader;
 use egui::Key;
 use egui::KeyboardShortcut;
@@ -44,7 +45,7 @@ pub struct AppState {
     pub show_av_metrics: bool,
     pub should_hide: bool,
     pub graph_x_unit: GraphUnit,
-    pub use_custom_color: bool
+    pub use_custom_color: bool,
 }
 
 #[derive(Default)]
@@ -64,7 +65,7 @@ pub struct App {
 }
 
 pub const HIDE_UI: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::H);
-pub const SHOW_MENU: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
+pub const SHOW_MENU_SHORTCUT: KeyboardShortcut = KeyboardShortcut::new(Modifiers::COMMAND, Key::M);
 
 impl Overlay for App {
     fn update(&mut self, ctx: &egui::Context) {
@@ -79,8 +80,8 @@ impl Overlay for App {
                     for (_text_style, font_id) in ui.style_mut().text_styles.iter_mut() {
                         font_id.size *= self.settings.streamer_msg_size_pt;
                     }
-
-                    let label = Label::new(&self.settings.streamer_msg).selectable(false);
+                    let label = Label::new(RichText::new(&self.settings.streamer_msg).strong())
+                        .selectable(false);
                     ui.add(label);
                     ui.allocate_space(ui.available_size())
                 });
@@ -95,6 +96,7 @@ impl Overlay for App {
                     })
                     .show(ctx, |_ui: &mut egui::Ui| {
                         Window::new(t!("Menu"))
+                            .id("menu_window".into())
                             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
                             .collapsible(false)
                             .resizable(false)
@@ -106,15 +108,27 @@ impl Overlay for App {
                                             &mut self.state.show_settings,
                                             RichText::new(format!(
                                                 "{} {}",
-                                                egui_phosphor::regular::GEAR,
+                                                egui_phosphor::bold::GEAR,
                                                 t!("Settings")
                                             )));
+
+                                        // ui.menu_button(RichText::new(format!(
+                                        //         "{} {}",
+                                        //         egui_phosphor::bold::COMMAND,
+                                        //         t!("Shortcuts")
+                                        //     )).strong(), |ui| {
+                                        //         let button = Button::new(RichText::new(t!("Show menu"))).shortcut_text(ctx.format_shortcut(&SHOW_MENU_SHORTCUT));
+                                        //         if ui.add(button).changed() {
+                                                    
+                                        //         };
+                                        //     });
                                     });
                                 });
 
                                 ui.separator();
 
                                 egui::Window::new(t!("Settings"))
+                                    .id("settings_window".into())
                                     .open(&mut self.state.show_settings)
                                     .show(ctx, |ui| {
                                         egui::menu::bar(ui, |ui| {
@@ -127,11 +141,10 @@ impl Overlay for App {
 
                                             ui.separator();
 
-
                                             ui.menu_button(
                                                 RichText::new(format!(
                                                     "{} {}",
-                                                    egui_phosphor::regular::FILE,
+                                                    egui_phosphor::bold::FILE,
                                                     t!("File")
                                                 )),
                                                 |ui| {
@@ -160,7 +173,7 @@ impl Overlay for App {
                                             ui.menu_button(
                                                 RichText::new(format!(
                                                     "{} {}",
-                                                    egui_phosphor::regular::GLOBE,
+                                                    egui_phosphor::bold::GLOBE,
                                                     t!("Language")
                                                 )),
                                                 |ui| {
@@ -187,7 +200,7 @@ impl Overlay for App {
                                                     &mut self.settings.streamer_mode,
                                                     RichText::new(format!(
                                                         "{} {}",
-                                                        egui_phosphor::regular::VIDEO_CAMERA,
+                                                        egui_phosphor::bold::VIDEO_CAMERA,
                                                         t!("Streamer Mode")
                                                     )),
                                                 )
@@ -206,7 +219,8 @@ impl Overlay for App {
                                             |ui| {
                                                 ui.add_space(5.);
 
-                                                CollapsingHeader::new("Theme")
+                                                CollapsingHeader::new(t!("Theme"))
+                                                    .id_salt("theme_header")
                                                     .show(ui, |ui| {
                                                         if self.state.use_custom_color {
                                                             self.settings.colorix.twelve_from_custom(ui);
@@ -275,7 +289,7 @@ impl Overlay for App {
                                                     TextEdit::singleline(
                                                         &mut self.settings.streamer_msg,
                                                     )
-                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::regular::RAINBOW))),
+                                                    .hint_text(RichText::new(format!("{} {}", t!("Streamer Message. Can also use Phosphor Icons!"), egui_phosphor::bold::RAINBOW))),
                                                 ).changed() {
                                                     self.config.set_streamer_msg(self.settings.streamer_msg.clone());
                                                 };
@@ -322,6 +336,7 @@ impl Overlay for App {
 
             if self.state.show_console {
                 egui::Window::new(t!("Log"))
+                    .id("log_window".into())
                     .resizable(true)
                     .default_height(300.0)
                     .default_width(400.0)
@@ -346,9 +361,14 @@ impl Overlay for App {
 
             let transparent_frame = egui::Frame::new().inner_margin(8.0).corner_radius(10.0);
 
+            let damage_distribution_window_title = if self.state.show_menu {
+                t!("Damage Distribution").into_owned()
+            } else {
+                String::new()
+            };
             if self.state.show_damage_distribution {
-                egui::containers::Window::new("")
-                    .id("Damage Distribution".into())
+                egui::containers::Window::new(damage_distribution_window_title)
+                    .id("damage_distribution_window".into())
                     .frame(if self.state.show_menu {
                         window_frame
                     } else {
@@ -365,6 +385,7 @@ impl Overlay for App {
 
             if self.state.show_damage_bars {
                 egui::containers::Window::new(t!("Damage by Character"))
+                    .id("damage_by_character_window".into())
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -376,6 +397,7 @@ impl Overlay for App {
 
             if self.state.show_real_time_damage {
                 egui::containers::Window::new(t!("Real-Time Damage"))
+                    .id("realt_time_damage_window".into())
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -387,6 +409,7 @@ impl Overlay for App {
 
             if self.state.show_av_metrics {
                 egui::containers::Window::new(t!("Action Value Metrics"))
+                    .id("action_value_metrics_window".into())
                     .frame(window_frame)
                     .resizable(true)
                     .min_width(200.0)
@@ -398,6 +421,7 @@ impl Overlay for App {
 
             // if self.show_enemy_stats {
             //     egui::containers::Window::new(t!("Enemy Stats"))
+            //         .id("enemy_stats_window")
             //         .frame(window_frame)
             //         .resizable(true)
             //         .min_width(200.0)
@@ -426,12 +450,12 @@ impl Overlay for App {
                             repeat: _,
                             modifiers,
                         } => {
-                            if modifiers.matches_exact(SHOW_MENU.modifiers)
-                                && *key == SHOW_MENU.logical_key
+                            if modifiers.matches_exact(SHOW_MENU_SHORTCUT.modifiers)
+                                && *key == SHOW_MENU_SHORTCUT.logical_key
                                 && *pressed
                             {
                                 self.state.show_menu = !self.state.show_menu;
-                        
+
                                 // Add here because the game changes the FPS once the enter screen shows
                                 unsafe { Application_set_targetFrameRate(*self.config.get_fps()) };
 
@@ -494,6 +518,8 @@ impl App {
 
         let mut fonts = egui::FontDefinitions::default();
         egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
+        egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Bold);
+
         ctx.set_fonts(fonts);
 
         let config = Config::new(&ctx).unwrap();
@@ -518,8 +544,16 @@ impl App {
     fn initialize_settings(&mut self, ctx: &Context) {
         rust_i18n::set_locale(&self.config.get_locale());
         match self.config.get_theme_mode() {
-            egui::Theme::Dark => self.settings.colorix.set_dark(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
-            egui::Theme::Light => self.settings.colorix.set_light(&mut Ui::new(ctx.clone(), "".into(), UiBuilder::new())),
+            egui::Theme::Dark => self.settings.colorix.set_dark(&mut Ui::new(
+                ctx.clone(),
+                "".into(),
+                UiBuilder::new(),
+            )),
+            egui::Theme::Light => self.settings.colorix.set_light(&mut Ui::new(
+                ctx.clone(),
+                "".into(),
+                UiBuilder::new(),
+            )),
         }
     }
 }
