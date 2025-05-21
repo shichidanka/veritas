@@ -196,48 +196,80 @@ impl App {
 
     pub fn show_av_metrics_widget(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
-        ui.horizontal(|ui| {
-            ui.label(t!("Total Elapsed AV:"));
-            ui.label(format!("{:.2}", battle_context.action_value));
-        });
-        ui.horizontal(|ui| {
-            ui.label(t!("AV:"));
-            ui.label(format!(
-                "{:.2}",
-                battle_context.action_value - battle_context.last_wave_action_value
-            ));
-        });
-        ui.horizontal(|ui| {
-            ui.label(t!("Total Damage:"));
-            ui.label(helpers::format_damage(battle_context.total_damage));
-        });
-        ui.horizontal(|ui| {
-            ui.label(t!("DpAV:"));
-            if battle_context.action_value > 0.0 {
-                ui.label(format!(
-                    "{:.2}",
-                    battle_context.total_damage / battle_context.action_value
-                ));
-            } else {
-                ui.label(format!("{:.2}", battle_context.total_damage / 1.0));
-            }
-        });
 
-        egui::CollapsingHeader::new(t!("Characters")).show(ui, |ui| {
+        egui::CollapsingHeader::new(format!(
+            "{}: {:.2}",
+            t!("Total Damage"),
+            battle_context.total_damage
+        ))
+        .id_salt("total_damage_header")
+        .show(ui, |ui| {
             ui.vertical(|ui| {
                 for (i, avatar) in battle_context.avatar_lineup.iter().enumerate() {
                     ui.horizontal(|ui| {
-                        ui.label(format!("{}:", avatar.name));
+                        ui.label(format!("{}", avatar.name));
+
                         ui.label(format!(
                             "{:.2} {}",
-                            battle_context.battle_avatars[i].battle_stats.av
-                                + battle_context.action_value - battle_context.last_wave_action_value,
-                            t!("AV")
+                            battle_context.real_time_damages[i],
+                            t!("DMG")
                         ));
+
                     });
                 }
             });
         });
+
+        let current_action_value =
+            battle_context.action_value - battle_context.last_wave_action_value;
+
+        egui::CollapsingHeader::new(format!("{}: {:.2}", t!("AV"), current_action_value))
+            .id_salt("action_value_header")
+            .show(ui, |ui| {
+                ui.label(format!(
+                    "{}: {:.2}",
+                    t!("Total Elapsed AV"),
+                    battle_context.action_value
+                ));
+                ui.vertical(|ui| {
+                    for (i, avatar) in battle_context.avatar_lineup.iter().enumerate() {
+                        ui.horizontal(|ui| {
+                            ui.label(format!("{}", avatar.name,));
+
+                            ui.label(format!(
+                                "{:.2} {}",
+                                battle_context.battle_avatars[i].battle_stats.av
+                                    + current_action_value,
+                                t!("AV")
+                            ));
+                        });
+                    }
+                });
+            });
+
+        let dpav = if battle_context.action_value > 0.0 {
+            battle_context.total_damage / battle_context.action_value
+        } else {
+            battle_context.total_damage
+        };
+        egui::CollapsingHeader::new(format!("{}: {:.2}", t!("DpAV"), dpav))
+            .id_salt("dpav_header")
+            .show(ui, |ui| {
+                ui.vertical(|ui| {
+                    for (i, avatar) in battle_context.avatar_lineup.iter().enumerate() {
+                        let dpav = if battle_context.action_value > 0.0 {
+                            battle_context.real_time_damages[i] / battle_context.action_value
+                        } else {
+                            battle_context.real_time_damages[i]
+                        };
+                        ui.horizontal(|ui| {
+                            ui.label(format!("{}", avatar.name));
+                            ui.label(format!("{:.2} {}", dpav, t!("DpAV")));
+                        });
+                    }
+                });
+            });
+
     }
 
     pub fn show_enemy_stats_widget(&mut self, ui: &mut Ui) {
