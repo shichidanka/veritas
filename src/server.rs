@@ -49,7 +49,8 @@ fn on_connect(socket: SocketRef) {
 
 pub fn broadcast(packet: Packet) {
     RUNTIME.spawn(async move {
-        let io = SOCKET_IO.get().unwrap();
-        io.broadcast().emit(&packet.name(), &packet.payload()).await.unwrap();
+        if let Some(io) = SOCKET_IO.get() {
+            io.broadcast().emit(&packet.name(), &packet.payload()).await.unwrap();
+        }
     });
 }
