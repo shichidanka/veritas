@@ -14,7 +14,7 @@ pub struct PieSegment {
 impl App {
     pub fn show_damage_distribution_widget(&mut self, ui: &mut Ui) {
         let available = ui.available_size();
-        
+
         Plot::new("damage_pie")
             .legend(Legend::default()
                 .position(egui_plot::Corner::RightTop)
@@ -45,10 +45,11 @@ impl App {
                             .stroke(Stroke::new(1.5, color))
                             .id(avatar.name.clone())
                             .name(format!(
-                                "{}: {:.1}% ({} dmg)",
+                                "{}: {:.1}%, {} DMG, {:.0} DpAV",
                                 avatar.name,
                                 percentage,
-                                helpers::format_damage(segment.value)
+                                helpers::format_damage(segment.value),
+                                segment.value / battle_context.action_value
                             ));
     
                         plot_ui.polygon(polygon);
@@ -88,7 +89,7 @@ impl App {
                     })
                     .collect();
     
-                plot_ui.bar_chart(BarChart::new("", bars));
+                plot_ui.bar_chart(BarChart::new("", bars).id("bar_chart"));
             });
     }
     
@@ -158,39 +159,45 @@ impl App {
                 }
             });
     }
-    
+
     pub fn show_real_time_damage_graph_widget(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
                 ui.radio_value(&mut self.state.graph_x_unit, GraphUnit::Turn, t!("Turn"));
-                ui.radio_value(&mut self.state.graph_x_unit, GraphUnit::ActionValue, t!("Action Value"));
+                ui.radio_value(
+                    &mut self.state.graph_x_unit,
+                    GraphUnit::ActionValue,
+                    t!("Action Value"),
+                );
             });
             ui.add_space(8.0);
-            
+
             match self.state.graph_x_unit {
                 GraphUnit::Turn => self.show_turn_damage_plot(ui),
                 GraphUnit::ActionValue => self.show_av_damage_plot(ui),
             }
         });
     }
-    
+
     pub fn show_av_metrics_widget(&mut self, ui: &mut Ui) {
         let battle_context = BattleContext::get_instance();
         ui.horizontal(|ui| {
-            ui.label(t!("Total Elapsed AV:"));
-            ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
-        });
-        ui.label(t!("Current Turn"));
-        ui.horizontal(|ui| {
-            ui.label(t!("AV:"));
-            ui.label(format!("{:.2}", battle_context.current_turn_info.action_value));
+            ui.label(format!("{}:", t!("Total Elapsed AV")));
+            ui.label(format!("{:.2}", battle_context.action_value));
         });
         ui.horizontal(|ui| {
-            ui.label(t!("Total Damage:"));
+            ui.label(format!("{}:", t!("AV")));
+            ui.label(format!(
+                "{:.2}",
+                battle_context.action_value - battle_context.last_wave_action_value
+            ));
+        });
+        ui.horizontal(|ui| {
+            ui.label(format!("{}:", t!("Total Damage")));
             ui.label(helpers::format_damage(battle_context.total_damage));
         });
         ui.horizontal(|ui| {
-            ui.label(t!("DpAV:"));
+            ui.label(format!("{}:", t!("DpAV")));
             if battle_context.action_value > 0.0 {
                 ui.label(format!("{:.2}", battle_context.total_damage / battle_context.action_value));
             } else {

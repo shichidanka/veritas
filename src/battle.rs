@@ -33,6 +33,8 @@ pub struct BattleContext {
     pub lineup: Vec<Avatar>,
     pub turn_history: Vec<TurnInfo>,
     pub av_history: Vec<TurnInfo>,
+    // This is really only relevant for MOC and 
+    // is the relative AV
     pub last_wave_action_value: f64,
     pub action_value: f64,
     pub current_turn_info: TurnInfo,
@@ -45,17 +47,20 @@ pub struct BattleContext {
     pub wave: u32,
     pub cycle: u32,
     pub stage_id: u32,
+    pub battle_mode: BattleMode,
 
-    // Not meant to be exposed in the API
-    // pub internal: BattleContextInternal
+    // TODO: Move everything not meant to be exposed in the API here
+    // pub internal: BattleContextInternal,
 }
 
-// enum BattleMode {
-//     MOC,
-//     PF,
-//     AS,
-//     Other
-// }
+#[derive(Default, Clone, Copy, PartialEq)]
+pub enum BattleMode {
+    MOC,
+    PF,
+    AS,
+    #[default]
+    Other,
+}
 
 static BATTLE_CONTEXT: LazyLock<Mutex<BattleContext>> =
     LazyLock::new(|| Mutex::new(BattleContext::default()));
@@ -93,6 +98,20 @@ impl BattleContext {
         battle_context.stage_id = 0;
     }
 
+    fn get_battle_mode(stage_id: u32) -> BattleMode {
+        match stage_id {
+            30010000..=31000000 => {
+                match stage_id % 100 {
+                    21 | 22 => BattleMode::MOC,
+                    41 | 42 => BattleMode::PF,
+                    _ => BattleMode::Other,
+                }
+            }
+            420101..=420999 => BattleMode::AS,
+            _ => BattleMode::Other,
+        }
+    }
+
     // A word of caution:
     // The lineup is setup first 
     fn handle_on_battle_begin_event(
@@ -104,8 +123,7 @@ impl BattleContext {
         log::info!("Max Waves: {}", e.max_waves);
         battle_context.max_waves = e.max_waves;
 
-        // let 
-        // e.stage_id.to_string().char_indices().nth_back(2).unwrap().0
+        battle_context.battle_mode = BattleContext::get_battle_mode(e.stage_id);
 
         Ok(Packet::OnBattleBegin {
             max_waves: e.max_waves,
@@ -261,6 +279,10 @@ impl BattleContext {
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         log::info!("Wave: {}", e.wave);
+
+        if battle_context.battle_mode == BattleMode::MOC {
+            battle_context.last_wave_action_value = battle_context.action_value;
+        }
 
         battle_context.wave = e.wave;
         Ok(Packet::OnUpdateWave { 

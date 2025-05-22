@@ -1,4 +1,5 @@
 use crate::battle::BattleContext;
+use crate::kreide::types::rpg::client::TextID;
 // use crate::kreide::native_types::*;
 use crate::kreide::types::rpg::gamecore::*;
 use crate::kreide::types::*;
@@ -444,7 +445,6 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
         for character_ptr in (*light_team).to_slice() {
             let character = *character_ptr;
             let avatar_id = (*character).CharacterID;
-            log::debug!("{}", format!("AVATAR ID: {}", avatar_id));
             match helpers::get_avatar_from_id(avatar_id) {
                 Ok(avatar) => avatars.push(avatar),
                 Err(e) => {
@@ -453,6 +453,20 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
                 }
             }
         }
+
+        // Unsure if you can have more than one support char
+        let extra_team = (*battle_lineup_data).ExtraTeam;
+        for character_ptr in (*extra_team).to_slice() {
+            let character = *character_ptr;
+            let avatar_id = (*character).CharacterID;
+            match helpers::get_avatar_from_id(avatar_id) {
+                Ok(avatar) => avatars.push(avatar),
+                Err(e) => {
+                    errors.push(e);
+                }
+            }
+        }
+
         let event = if !errors.is_empty() {
             let errors = errors
                 .iter()

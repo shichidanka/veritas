@@ -11,7 +11,7 @@ pub const VERMILLION: Theme = [
     ThemeColor::Cyan,
     ThemeColor::Custom([232, 67, 0]),
     ThemeColor::Custom([232, 67, 0]),
-    ThemeColor::Gray,
+    ThemeColor::Custom([255, 255, 255]),
     ThemeColor::Cyan,
 ];
 
@@ -56,7 +56,7 @@ pub const INDIGO_JADE: Theme = [
     ThemeColor::Jade,
     ThemeColor::Jade,
     ThemeColor::Jade,
-    ThemeColor::Gray,
+    ThemeColor::Custom([255, 255, 255]),
     ThemeColor::Gray,
 ];
 
@@ -71,7 +71,7 @@ pub const GRASS_BRONZE: Theme = [
     ThemeColor::Green,
     ThemeColor::Bronze,
     ThemeColor::Bronze,
-    ThemeColor::Gray,
+    ThemeColor::Custom([255, 255, 255]),
     ThemeColor::Gray,
 ];
 
@@ -86,7 +86,7 @@ pub const WARM: Theme = [
     ThemeColor::Red,
     ThemeColor::Gold,
     ThemeColor::Gold,
-    ThemeColor::Gray,
+    ThemeColor::Custom([255, 255, 255]),
     ThemeColor::Teal,
 ];
 
@@ -116,7 +116,7 @@ pub const SEVENTIES: Theme = [
     ThemeColor::Custom([95, 78, 163]),
     ThemeColor::Custom([254, 180, 0]),
     ThemeColor::Custom([254, 180, 0]),
-    ThemeColor::Gray,
+    ThemeColor::Custom([255, 255, 255]),
     ThemeColor::Gray,
 ];
 
