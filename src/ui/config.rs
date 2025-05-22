@@ -21,8 +21,10 @@ macro_rules! config {
             paste::item! {
                 $(
                     pub fn [<set_ $field>] (&mut self, value: $field_type) {
-                        self. $field = value;
-                        self.write().unwrap();
+                        if self. $field != value {
+                            self. $field = value;
+                            self.write().unwrap();
+                        }
                     }
 
                     pub fn [<get_ $field>] (&self) -> & $field_type {
@@ -41,6 +43,7 @@ config!(
     widget_opacity: f32,
     streamer_mode: bool,
     streamer_msg: String,
+    streamer_msg_size_pt: f32,
     theme: egui_colors::Theme,
     theme_mode: egui::Theme
 );
@@ -50,11 +53,12 @@ impl Default for Config {
         Self {
             locale: rust_i18n::locale().to_string(),
             fps: 60,
-            widget_opacity: 0.16,
+            widget_opacity: 0.15,
             streamer_mode: true,
             streamer_msg: String::new(),
             theme: EGUI_THEME,
             theme_mode: egui::Theme::Dark,
+            streamer_msg_size_pt: 1.0
         }
     }
 }

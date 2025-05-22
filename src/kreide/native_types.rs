@@ -47,3 +47,23 @@ impl<T> NativeArray<T> {
         }
     }
 }
+
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct NativeList<T> {
+    pub obj: NativeObject,
+    pub _items: *const NativeArray<T>,
+    pub _size: i32,
+    pub _version: i32,
+    pub _syncRoot: *const std::ffi::c_void
+}
+
+impl<T> NativeList<T> {
+    pub fn to_slice(&self) -> &[*const T] {
+        unsafe {
+            let ptr = &(*self._items).vector;
+            slice::from_raw_parts(ptr, self._size as usize)
+        }
+    }
+}

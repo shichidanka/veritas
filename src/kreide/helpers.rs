@@ -70,10 +70,13 @@ pub unsafe fn get_avatar_from_id(avatar_id: u32) -> Result<Avatar> {
 pub unsafe fn get_avatar_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
     log::debug!(function_name!());
     unsafe {
+        let get_skill_name_callback: unsafe fn(_, _) -> _ = AvatarSkillRowData_get_SkillName;
+        let get_skill_type_callback: unsafe fn(_) -> _ = AvatarSkillRowData_get_AttackType;
+
         get_skill_from_skilldata(
             skill_data,
-            mem::transmute(*AvatarSkillRowData_get_SkillName),
-            mem::transmute(*AvatarSkillRowData_get_AttackType),
+            mem::transmute(get_skill_name_callback),
+            mem::transmute(get_skill_type_callback),
         )
     }
 }
@@ -82,10 +85,13 @@ pub unsafe fn get_avatar_skill_from_skilldata(skill_data: *const SkillData) -> R
 pub unsafe fn get_servant_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
     log::debug!(function_name!());
     unsafe {
+        let get_skill_name_callback: unsafe fn(_, _) -> _ = ServantSkillRowData_get_SkillName;
+        let get_skill_type_callback: unsafe fn(_) -> _ = ServantSkillRowData_get_AttackType;
+
         get_skill_from_skilldata(
             skill_data,
-            mem::transmute(*ServantSkillRowData_get_SkillName),
-            mem::transmute(*ServantSkillRowData_get_AttackType),
+            mem::transmute(get_skill_name_callback),
+            mem::transmute(get_skill_type_callback),
         )
     }
 }
@@ -94,10 +100,13 @@ pub unsafe fn get_servant_skill_from_skilldata(skill_data: *const SkillData) -> 
 pub unsafe fn get_battle_event_skill_from_skilldata(skill_data: *const SkillData) -> Result<Skill> {
     log::debug!(function_name!());
     unsafe {
+        let get_skill_name_callback: unsafe fn(_, _) -> _ = BattleEventSkillRowData_get_SkillName;
+        let get_skill_type_callback: unsafe fn(_) -> _ = BattleEventSkillRowData_get_AttackType;
+
         get_skill_from_skilldata(
             skill_data,
-            mem::transmute(*BattleEventSkillRowData_get_SkillName),
-            mem::transmute(*BattleEventSkillRowData_get_AttackType),
+            mem::transmute(get_skill_name_callback),
+            mem::transmute(get_skill_type_callback),
         )
     }
 }
@@ -167,6 +176,7 @@ pub unsafe fn get_avatar_from_servant_entity(entity: *const GameEntity) -> Resul
     log::debug!(function_name!());
     if !entity.is_null() {
         unsafe {
+            // Remove EntityManager
             let entity_manager = GamePlayStatic_GetEntityManager();
             let avatar_entity = EntityManager__GetEntitySummoner(entity_manager, entity);
             get_avatar_from_entity(avatar_entity)
