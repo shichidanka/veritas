@@ -8,6 +8,7 @@ use crate::kreide::*;
 use crate::kreide::functions::rpg::client::*;
 use crate::kreide::functions::rpg::gamecore::*;
 use crate::kreide::helpers::*;
+use crate::kreide::types::rpg::client::BattleAssetPreload;
 
 use crate::GAMEASSEMBLY_HANDLE;
 use crate::models::events::*;
@@ -40,7 +41,7 @@ static_detour! {
     ) -> bool;
     static ON_COMBO_Detour: fn(*const MMNDIEBMDNL);
     static ON_USE_SKILL_Detour: fn(*const SkillCharacterComponent, i32, *const c_void, bool, i32);
-    static ON_SET_LINEUP_Detour: fn(*const c_void, *const BattleLineupData);
+    static ON_SET_LINEUP_Detour: fn(*const BattleAssetPreload, bool, *const c_void);
     static ON_BATTLE_BEGIN_Detour: fn(*const TurnBasedGameMode);
     static ON_BATTLE_END_Detour: fn(*const TurnBasedGameMode);
     static ON_TURN_BEGIN_Detour: fn(*const TurnBasedGameMode);
@@ -489,9 +490,11 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
 }
 
 #[named]
-fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineupData) {
+fn on_set_lineup(instance: *const BattleAssetPreload, a1: bool, a2: *const c_void) {
     log::debug!(function_name!());
     unsafe {
+        let battle_lineup_data = (*instance)._LineupData;
+
         let light_team = (*battle_lineup_data).LightTeam;
         let mut avatars = Vec::<Avatar>::new();
         let mut errors = Vec::<Error>::new();
@@ -530,7 +533,7 @@ fn on_set_lineup(instance: *const c_void, battle_lineup_data: *const BattleLineu
         };
         BattleContext::handle_event(event);
     }
-    ON_SET_LINEUP_Detour.call(instance, battle_lineup_data);
+    ON_SET_LINEUP_Detour.call(instance, a1, a2);
 }
 
 #[named]
@@ -854,34 +857,57 @@ pub fn on_initialize_enemy(
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
-            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x6641110, on_damage
+            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x748e5f0, on_damage
         );
         subscribe_function!(
-            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0x6336860, on_combo
+            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0xc52d0b0, on_combo
         );
         subscribe_function!(
-            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x588d8c0, on_use_skill
+            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x7051f60, on_use_skill
         );
         subscribe_function!(
-            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0x9be60f0, on_set_lineup
+            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0xcb4e000, on_set_lineup
         );
         subscribe_function!(
-            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x81ed7e0, on_battle_begin
+            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x7120490, on_battle_begin
         );
         subscribe_function!(
-            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x81ed900, on_battle_end
+            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x7120670, on_battle_end
         );
         subscribe_function!(
-            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x81e7990, on_turn_begin
+            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x7119730, on_turn_begin
         );
         subscribe_function!(
-            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x58df950, on_turn_end
+            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x70ff5e0, on_turn_end
         );
         subscribe_function!(
-            ON_UPDATE_WAVE_Detour, * GAMEASSEMBLY_HANDLE + 0x81ecbf0, on_update_wave
+            ON_UPDATE_WAVE_Detour, * GAMEASSEMBLY_HANDLE + 0x711f6d0, on_update_wave
         );
         subscribe_function!(
-            ON_UPDATE_CYCLE_Detour, * GAMEASSEMBLY_HANDLE + 0x81f39f0, on_update_cycle
+            ON_UPDATE_CYCLE_Detour, * GAMEASSEMBLY_HANDLE + 0x71282e0, on_update_cycle
+        );
+        subscribe_function!(
+            ON_DIRECT_CHANGE_HP_Detour, * GAMEASSEMBLY_HANDLE + 0x70a6700,
+            on_direct_change_hp
+        );
+        subscribe_function!(
+            ON_DIRECT_DAMAGE_HP_Detour, * GAMEASSEMBLY_HANDLE + 0x70a5c70,
+            on_direct_damage_hp
+        );
+        subscribe_function!(
+            ON_STAT_CHANGE_Detour, * GAMEASSEMBLY_HANDLE + 0x705aed0, on_stat_change
+        );
+        subscribe_function!(
+            ON_ENTITY_DEFEATED_Detour, * GAMEASSEMBLY_HANDLE + 0x7104df0,
+            on_entity_defeated
+        );
+        subscribe_function!(
+            ON_UPDATE_TEAM_FORMATION_Detour, * GAMEASSEMBLY_HANDLE + 0x7082820,
+            on_update_team_formation
+        );
+        subscribe_function!(
+            ON_INITIALIZE_ENEMY_Detour, * GAMEASSEMBLY_HANDLE + 0x70161f0,
+            on_initialize_enemy
         );
         Ok(())
     }
