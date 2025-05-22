@@ -52,7 +52,7 @@ static_detour! {
     static ON_DIRECT_CHANGE_HP_Detour: fn (*const TurnBasedAbilityComponent, i32, FixPoint, *const c_void);
     static ON_DIRECT_DAMAGE_HP_Detour: fn (*const TurnBasedAbilityComponent, FixPoint, i32, *const c_void, *const c_void);
     static ON_STAT_CHANGE_Detour: fn (*const TurnBasedAbilityComponent, AbilityProperty, i32, FixPoint, *const c_void);
-    static ON_KILL_ENEMY_Detour: fn(*const TurnBasedAbilityComponent, *const GameEntity);
+    static ON_ENTITY_DEFEATED_Detour: fn(*const TurnBasedAbilityComponent, *const GameEntity);
     static ON_UPDATE_TEAM_FORMATION_Detour: fn(*const TeamFormationComponent);
     static ON_INITIALIZE_ENEMY_Detour: fn(*const MonsterDataComponent, *const TurnBasedAbilityComponent);
 
@@ -758,7 +758,7 @@ pub fn on_stat_change(
 #[named]
 pub fn on_entity_defeated(instance: *const TurnBasedAbilityComponent, entity: *const GameEntity) {
     log::debug!(function_name!());
-    ON_KILL_ENEMY_Detour.call(instance, entity);
+    ON_ENTITY_DEFEATED_Detour.call(instance, entity);
     unsafe {
         if !TurnBasedAbilityComponent_TryCheckLimboWaitHeal(
             instance,
