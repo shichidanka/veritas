@@ -5,10 +5,11 @@ use crate::kreide::types::rpg::gamecore::*;
 use crate::kreide::types::*;
 use crate::kreide::*;
 // use crate::kreide::types::rpg::client::*;
-use crate::kreide::functions::rpg::gamecore::*;
 use crate::kreide::functions::rpg::client::*;
+use crate::kreide::functions::rpg::gamecore::*;
 use crate::kreide::helpers::*;
 
+use crate::GAMEASSEMBLY_HANDLE;
 use crate::models::events::*;
 use crate::models::misc::Avatar;
 use crate::models::misc::Enemy;
@@ -16,10 +17,9 @@ use crate::models::misc::Entity;
 use crate::models::misc::Stat;
 use crate::models::misc::Stats;
 use crate::models::misc::Team;
-use crate::GAMEASSEMBLY_HANDLE;
 
 use anyhow::Result;
-use anyhow::{anyhow, Error};
+use anyhow::{Error, anyhow};
 use function_name::named;
 use retour::static_detour;
 use std::ffi::c_void;
@@ -60,9 +60,7 @@ static_detour! {
 #[named]
 unsafe fn get_elapsed_av(game_mode: *const TurnBasedGameMode) -> f64 {
     log::debug!(function_name!());
-    unsafe {
-        fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64
-    }
+    unsafe { fixpoint_to_raw(&(*game_mode).ElapsedActionDelay__BackingField) * 10f64 }
 }
 
 // Called on any instance of damage
@@ -120,6 +118,7 @@ fn on_damage(
                                 damage_type: damage_type as isize,
                             })),
                             Err(e) => {
+                                log::error!("Avatar Event Error: {}", e);
                                 Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
                             }
                         };
@@ -136,6 +135,7 @@ fn on_damage(
                                 damage_type: damage_type as isize,
                             })),
                             Err(e) => {
+                                log::error!("Servant Event Error: {}", e);
                                 Err(anyhow!("{} Servant Event Error: {}", function_name!(), e))
                             }
                         };
@@ -155,6 +155,7 @@ fn on_damage(
                                 damage_type: damage_type as isize,
                             })),
                             Err(e) => {
+                                log::error!("Snapshot Event Error: {}", e);
                                 Err(anyhow!("{} Snapshot Event Error: {}", function_name!(), e))
                             }
                         };
@@ -236,17 +237,24 @@ fn on_use_skill(
                                             skill,
                                         }))
                                     }
-                                    Err(e) => Err(anyhow!(
-                                        "{} Avatar Event Error: {}",
+                                    Err(e) => {
+                                        log::error!("Avatar Event Error: {}", e);
+
+                                        Err(anyhow!(
+                                            "{} Avatar Event Error: {}",
+                                            function_name!(),
+                                            e
+                                        ))
+                                    }
+                                },
+                                Err(e) => {
+                                    log::error!("Avatar Event Error: {}", e);
+                                    Err(anyhow!(
+                                        "{} Avatar Skill Event Error: {}",
                                         function_name!(),
                                         e
-                                    )),
-                                },
-                                Err(e) => Err(anyhow!(
-                                    "{} Avatar Skill Event Error: {}",
-                                    function_name!(),
-                                    e
-                                )),
+                                    ))
+                                }
                             };
                             event = Some(e)
                         }
@@ -260,17 +268,21 @@ fn on_use_skill(
                                         },
                                         skill,
                                     })),
-                                    Err(e) => Err(anyhow!(
+                                    Err(e) => {
+                                log::error!("Servant Event Error: {}", e);
+                                        Err(anyhow!(
                                         "{} Servant Event Error: {}",
                                         function_name!(),
                                         e
-                                    )),
+                                    ))},
                                 },
-                                Err(e) => Err(anyhow!(
+                                Err(e) => {
+                                log::error!("Servant Skill Error: {}", e);
+                                    Err(anyhow!(
                                     "{} Servant Skill Event Error: {}",
                                     function_name!(),
                                     e
-                                )),
+                                ))},
                             };
                             event = Some(e);
                         }
@@ -289,17 +301,21 @@ fn on_use_skill(
                                         },
                                         skill,
                                     })),
-                                    Err(e) => Err(anyhow!(
+                                    Err(e) => {
+                                log::error!("Summon Event Error: {}", e);
+                                        Err(anyhow!(
                                         "{} Summon Event Error: {}",
                                         function_name!(),
                                         e
-                                    )),
+                                    ))},
                                 },
-                                Err(e) => Err(anyhow!(
+                                Err(e) => {
+                                log::error!("Summon Skill Event Error: {}", e);
+                                    Err(anyhow!(
                                     "{} Summon Skill Event Error: {}",
                                     function_name!(),
                                     e
-                                )),
+                                ))},
                             };
                             event = Some(e);
                         }
@@ -377,17 +393,21 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                                                 skill,
                                             }))
                                         }
-                                        Err(e) => Err(anyhow!(
+                                        Err(e) => {
+                                log::error!("Avatar Event Error: {}", e);
+                                            Err(anyhow!(
                                             "{} Avatar Event Error: {}",
                                             function_name!(),
                                             e
-                                        )),
+                                        ))},
                                     },
-                                    Err(e) => Err(anyhow!(
+                                    Err(e) => {
+                                log::error!("Avatar Combo Skill Event Error: {}", e);
+                                        Err(anyhow!(
                                         "{} Avatar Combo Skill Event Error: {}",
                                         function_name!(),
                                         e
-                                    )),
+                                    ))},
                                 };
                             event = Some(e);
                         }
@@ -401,17 +421,21 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                                         },
                                         skill,
                                     })),
-                                    Err(e) => Err(anyhow!(
+                                    Err(e) => {
+                                log::error!("Servant Event Error: {}", e);
+                                        Err(anyhow!(
                                         "{} Servant Event Error: {}",
                                         function_name!(),
                                         e
-                                    )),
+                                    ))},
                                 },
-                                Err(e) => Err(anyhow!(
+                                Err(e) => {
+                                log::error!("Servant Skill Event Error: {}", e);
+                                    Err(anyhow!(
                                     "{} Servant Skill Event Error: {}",
                                     function_name!(),
                                     e
-                                )),
+                                ))},
                             };
                             event = Some(e);
                         }
@@ -431,17 +455,21 @@ fn on_combo(instance: *const MMNDIEBMDNL) {
                                         },
                                         skill,
                                     })),
-                                    Err(e) => Err(anyhow!(
+                                    Err(e) => {
+                                log::error!("Summon Event Error: {}", e);
+                                        Err(anyhow!(
                                         "{} Summon Event Error: {}",
                                         function_name!(),
                                         e
-                                    )),
+                                    ))},
                                 },
-                                Err(e) => Err(anyhow!(
+                                Err(e) => {
+                                log::error!("Summon Skill Error: {}", e);
+                                    Err(anyhow!(
                                     "{} Summon Skill Event Error: {}",
                                     function_name!(),
                                     e
-                                )),
+                                ))},
                             };
                             event = Some(e);
                         }
@@ -543,7 +571,10 @@ fn on_turn_begin(instance: *const TurnBasedGameMode) {
                             team: Team::Player,
                         }),
                     })),
-                    Err(e) => Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e)),
+                    Err(e) => {
+                                log::error!("Avatar Event Error: {}", e);
+                        Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))}
+                        ,
                 };
 
                 BattleContext::handle_event(e);
@@ -617,7 +648,11 @@ fn handle_hp_change(turn_based_ability_component: *const TurnBasedAbilityCompone
                         },
                         stat: Stat::HP(hp),
                     })),
-                    Err(e) => Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e)),
+                    Err(e) => {
+                                                        log::error!("Avatar Event Error: {}", e);
+
+                        Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+                    }
                 };
                 BattleContext::handle_event(e);
             }
@@ -693,7 +728,12 @@ pub fn on_stat_change(
                             },
                             stat,
                         })),
-                        Err(e) => Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e)),
+                        Err(e) => {
+                                                         log::error!("Avatar Event Error: {}", e);
+
+                            Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+                            
+                        }
                     };
                     BattleContext::handle_event(e);
                 }
@@ -733,7 +773,11 @@ pub fn on_entity_defeated(instance: *const TurnBasedAbilityComponent, entity: *c
                             team: Team::Enemy,
                         },
                     })),
-                    Err(e) => Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e)),
+                    Err(e) => {
+                                                        log::error!("Avatar Event Error: {}", e);
+
+Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+                    } ,
                 };
                 BattleContext::handle_event(e);
             };
@@ -801,7 +845,7 @@ pub fn on_initialize_enemy(
                 id: monster_id,
                 uid: (*entity).RuntimeID__BackingField,
                 name: (*monster_name).to_string(),
-                base_stats
+                base_stats,
             },
         })));
     }
