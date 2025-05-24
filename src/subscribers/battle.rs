@@ -868,87 +868,58 @@ pub fn on_initialize_enemy(
 pub fn subscribe() -> Result<()> {
     unsafe {
         subscribe_function!(
-            ON_DAMAGE_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x748e5f0,
-            on_damage
-        );
-        subscribe_function!(ON_COMBO_Detour, *GAMEASSEMBLY_HANDLE + 0xc52d0b0, on_combo);
-        subscribe_function!(
-            ON_USE_SKILL_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7051f60,
-            on_use_skill
+            ON_DAMAGE_Detour, * GAMEASSEMBLY_HANDLE + 0x748a9f0, on_damage
         );
         subscribe_function!(
-            ON_SET_LINEUP_Detour,
-            *GAMEASSEMBLY_HANDLE + 0xcb4e000,
-            on_set_lineup
+            ON_COMBO_Detour, * GAMEASSEMBLY_HANDLE + 0xc52aac0, on_combo
         );
         subscribe_function!(
-            ON_BATTLE_BEGIN_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7120490,
-            on_battle_begin
+            ON_USE_SKILL_Detour, * GAMEASSEMBLY_HANDLE + 0x70528d0, on_use_skill
         );
         subscribe_function!(
-            ON_BATTLE_END_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7120670,
-            on_battle_end
+            ON_SET_LINEUP_Detour, * GAMEASSEMBLY_HANDLE + 0xcb50040, on_set_lineup
         );
         subscribe_function!(
-            ON_TURN_BEGIN_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7119730,
-            on_turn_begin
+            ON_BATTLE_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x7121440, on_battle_begin
         );
         subscribe_function!(
-            ON_TURN_END_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x70ff5e0,
-            on_turn_end
+            ON_BATTLE_END_Detour, * GAMEASSEMBLY_HANDLE + 0x7121620, on_battle_end
         );
         subscribe_function!(
-            ON_UPDATE_WAVE_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x711f6d0,
-            on_update_wave
+            ON_TURN_BEGIN_Detour, * GAMEASSEMBLY_HANDLE + 0x711a720, on_turn_begin
         );
         subscribe_function!(
-            ON_UPDATE_CYCLE_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x71282e0,
-            on_update_cycle
+            ON_TURN_END_Detour, * GAMEASSEMBLY_HANDLE + 0x7100750, on_turn_end
         );
         subscribe_function!(
-            ON_DIRECT_CHANGE_HP_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x70a6700,
+            ON_UPDATE_WAVE_Detour, * GAMEASSEMBLY_HANDLE + 0x71207b0, on_update_wave
+        );
+        subscribe_function!(
+            ON_UPDATE_CYCLE_Detour, * GAMEASSEMBLY_HANDLE + 0x71291a0, on_update_cycle
+        );
+        subscribe_function!(
+            ON_DIRECT_CHANGE_HP_Detour, * GAMEASSEMBLY_HANDLE + 0x70eef80,
             on_direct_change_hp
         );
         subscribe_function!(
-            ON_DIRECT_DAMAGE_HP_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x70a5c70,
+            ON_DIRECT_DAMAGE_HP_Detour, * GAMEASSEMBLY_HANDLE + 0x70ee310,
             on_direct_damage_hp
         );
         subscribe_function!(
-            ON_STAT_CHANGE_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x705aed0,
-            on_stat_change
+            ON_STAT_CHANGE_Detour, * GAMEASSEMBLY_HANDLE + 0x70ea1c0, on_stat_change
         );
         subscribe_function!(
-            ON_ENTITY_DEFEATED_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7104df0,
+            ON_ENTITY_DEFEATED_Detour, * GAMEASSEMBLY_HANDLE + 0x7105f00,
             on_entity_defeated
         );
         subscribe_function!(
-            ON_UPDATE_TEAM_FORMATION_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x7082820,
+            ON_UPDATE_TEAM_FORMATION_Detour, * GAMEASSEMBLY_HANDLE + 0x7081e90,
             on_update_team_formation
         );
         subscribe_function!(
-            ON_INITIALIZE_ENEMY_Detour,
-            *GAMEASSEMBLY_HANDLE + 0x70161f0,
+            ON_INITIALIZE_ENEMY_Detour, * GAMEASSEMBLY_HANDLE + 0x7016ba0,
             on_initialize_enemy
         );
         Ok(())
     }
 }
-
-// Interesting hierarchy
-// GameEntity -> _OwnerWorldRef -> BattleInstanceRef
-
-// Hmm is this good for hovering HP bar?
-// 	public UnityEngine.Transform TryGetSelectPointFromHitBoxGroup(RPG.GameCore.GameEntity) { }
