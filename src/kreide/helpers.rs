@@ -132,6 +132,7 @@ pub unsafe fn get_skill_from_skilldata(
                     Ok(Skill {
                         name: (*skill_name).to_string(),
                         skill_type: skill_type as isize,
+                        skill_config_id: (*skill_data).SkillConfigID as isize
                     })
                 } else {
                     Err(anyhow!("SkillData type was null"))

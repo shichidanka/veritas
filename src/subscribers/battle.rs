@@ -214,6 +214,7 @@ fn on_use_skill(
                     skill_extra_use_param,
                 );
 
+
                 if !skill_data.is_null() {
                     match (*skill_owner)._EntityType {
                         EntityType::Avatar => {
@@ -769,6 +770,7 @@ pub fn on_entity_defeated(instance: *const TurnBasedAbilityComponent, entity: *c
     log::debug!(function_name!());
     ON_ENTITY_DEFEATED_Detour.call(instance, entity);
     unsafe {
+        let defeated_entity = (*instance)._parent_object._OwnerRef;
         if !TurnBasedAbilityComponent_TryCheckLimboWaitHeal(
             instance,
             (*instance)._parent_object._OwnerRef,
@@ -781,7 +783,7 @@ pub fn on_entity_defeated(instance: *const TurnBasedAbilityComponent, entity: *c
                             team: Team::Player,
                         },
                         entity_defeated: Entity {
-                            uid: (*entity).RuntimeID__BackingField,
+                            uid: (*defeated_entity).RuntimeID__BackingField,
                             team: Team::Enemy,
                         },
                     })),

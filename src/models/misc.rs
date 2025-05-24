@@ -76,6 +76,7 @@ pub struct Skill {
     pub name: String,
     #[serde(rename = "type")]
     pub skill_type: isize,
+    pub skill_config_id: isize
 }
 
 impl fmt::Display for Skill {
