@@ -1,5 +1,5 @@
 
-use super::misc::{Avatar, Skill};
+use super::misc::{Avatar, Enemy, Entity, Skill, Stat, Team};
 
 pub enum Event {
     OnBattleBegin(OnBattleBeginEvent),
@@ -11,6 +11,10 @@ pub enum Event {
     OnBattleEnd,
     OnUpdateWave(OnUpdateWaveEvent),
     OnUpdateCycle(OnUpdateCycleEvent),
+    OnStatChange(OnStatChangeEvent),
+    OnEntityDefeated(OnEntityDefeatedEvent),
+    OnUpdateTeamFormation(OnUpdateTeamFormationEvent),
+    OnInitializeEnemy(OnInitializeEnemyEvent)
 }
 
 pub struct OnBattleBeginEvent {
@@ -29,11 +33,11 @@ pub struct OnUpdateCycleEvent {
 
 pub struct OnTurnBeginEvent {
     pub action_value: f64,
-    pub turn_owner: Option<Avatar>
+    pub turn_owner: Option<Entity>
 }
 
 pub struct OnUseSkillEvent {
-    pub avatar: Avatar,
+    pub avatar: Entity,
     pub skill: Skill
 }
 
@@ -42,7 +46,32 @@ pub struct OnSetLineupEvent {
 }
 
 pub struct OnDamageEvent {
-    pub attacker: Avatar,
+    pub attacker: Entity,
     pub damage: f64,
     pub damage_type: isize
+}
+
+pub struct OnEntityDefeatedEvent {
+    pub killer: Entity,
+    pub entity_defeated: Entity
+}
+
+pub struct OnStatChangeEvent {
+    pub entity: Entity,
+    pub stat: Stat
+}
+
+pub struct OnUpdateTeamFormationEvent {
+    pub entities: Vec<Entity>,
+    pub team: Team
+}
+
+pub struct OnInitializeEnemyEvent {
+    pub enemy: Enemy
+}
+
+impl PartialEq for Entity {
+    fn eq(&self, other: &Self) -> bool {
+        self.uid == other.uid
+    }
 }

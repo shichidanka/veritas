@@ -96,34 +96,33 @@
   vi: Giá trị Hành động
   zh: 行动值
   pl: Wartość akcji
-3B7dFIywsIA4:
-  en: Streamer Message
-  fr: Message du streamer
-  es: Mensaje del streamer
-  de: Streamer-Nachricht
-  it: Messaggio streamer
-  ja: ストリーマーメッセージ
-  pt: Mensagem do streamer
-  nl: Streamer-bericht
-  ru: Сообщение стримера
-  # ar: رسالة البث المباشر
-  vi: Tin nhắn của người phát trực tiếp
-  zh: 直播消息
-  pl: Wiadomość streamera
-42SBVEsAhN12:
-  en: 'Total Damage:'
-  fr: 'Dommages totaux:'
-  es: 'Daño total:'
-  de: 'Gesamtschaden:'
-  it: 'Danni totali:'
-  ja: '総ダメージ:'
-  nl: 'Totale schade:'
-  pt: 'Dano total:'
-  ru: 'Общий урон:'
-  # ar: 'الضرر الإجمالي:'
-  vi: 'Tổng sát thương:'
-  zh: '总伤害:'
-  pl: 'Całkowite obrażenia:'
+5GO7e8eMF5Et:
+  de: Nachricht des Streamers. Kann auch Phosphor-Symbole verwenden!
+  en: Streamer Message. Can also use Phosphor Icons!
+  es: Mensaje del streamer. ¡También se pueden usar iconos de Phosphor!
+  fr: Message du streamer. Peut également utiliser des icônes Phosphor !
+  it: Messaggio del streamer. È possibile utilizzare anche le icone Phosphor!
+  ja: ストリーマーメッセージ。フォスフォールアイコンも使用可能！
+  nl: Streamerbericht. Kan ook Phosphor-iconen gebruiken!
+  pl: Wiadomość streamera. Można również używać ikon Phosphor!
+  pt: Mensagem do streamer. Também pode usar ícones Phosphor!
+  ru: Сообщение стримера. Можно также использовать иконки Phosphor!
+  vi: Thông báo của người phát trực tuyến. Cũng có thể sử dụng biểu tượng Phosphor!
+  zh: 直播消息。也可以使用磷符号！
+5zdr2cUtiZxG:
+  en: Total Damage
+  fr: Dommages totaux
+  es: Daño total
+  de: Gesamtschaden
+  it: Danni totali
+  ja: 総ダメージ
+  nl: Totale schade
+  pt: Dano total
+  ru: Общий урон
+  # ar: الضرر الإجمالي
+  vi: Tổng sát thương
+  zh: 总伤害
+  pl: Całkowite obrażenia
 42qqOY5a5AQ1:
   en: Window Opacity
   fr: Opacité de la fenêtre
@@ -166,34 +165,20 @@
   vi: Sát thương theo nhân vật
   zh: 角色伤害
   pl: Obrżenia według postaci
-4fO2Pqxp9TxK:
-  en: Current Turn
-  fr: Tour actuel
-  es: Turno actual
-  de: Aktueller Zug
-  it: Turno corrente
-  ja: 現在のターン
-  pt: Turno atual
-  nl: Huidige beurt
-  ru: Текущий ход
-  # ar: الدور الحالي
-  vi: Vòng hiện tại
-  zh: 当前回合
-  pl: Bieżąca turka
-6Bzv9dbJvO1b:
-  en: 'Total Elapsed AV:'
-  fr: 'AV total écoulé:'
-  es: 'AV total transcurrido:'
-  de: 'Gesamter abgelaufener AV:'
-  it: 'AV totale trascorso:'
-  ja: '経過AV合計:'
-  nl: 'Totaal verstreken AV:'
-  pt: 'AV total decorrido:'
-  ru: 'Общее значение прошедшего AV:'
-  # ar: 'إجمالي قيمة الإجراء المنقضية:'
-  vi: 'Tổng AV đã trôi qua:'
-  zh: '总经过行动值:'
-  pl: 'Całkowity upływający czas WA:'
+6HKhJownFyls:
+  en: Total Elapsed AV
+  fr: AV total écoulé
+  es: AV total transcurrido
+  de: Gesamter abgelaufener AV
+  it: AV totale trascorso
+  ja: 経過AV合計
+  nl: Totaal verstreken AV
+  pt: AV total decorrido
+  ru: Общее значение прошедшего AV
+  # ar: إجمالي قيمة الإجراء المنقضية
+  vi: Tổng AV đã trôi qua
+  zh: 总经过行动值
+  pl: Całkowity upływający czas WA
 6vLZL7YqEuRH:
   en: Real-Time Damage
   fr: Dégâts en temps réel
@@ -236,20 +221,6 @@
   vi: Chế độ phát trực tiếp
   zh: 直播模式
   pl: Tryb streamera
-'AV:':
-  en: 'AV:'
-  fr: 'AV:'
-  es: 'AV:'
-  de: 'AV:'
-  it: 'AV:'
-  ja: 'AV:'
-  nl: 'AV:'
-  pt: 'AV:'
-  ru: 'AV:'
-  # ar: 'AV:'
-  vi: 'AV:'
-  zh: 'AV:'
-  pl: 'WA:'
 Close:
   en: Close
   fr: Fermer
@@ -278,20 +249,20 @@ Damage:
   vi: Sát thương
   zh: 伤害
   pl: Obrażenia
-'DpAV:':
-  en: 'DpAV:'
-  fr: 'DpAV:'
-  es: 'DpAV:'
-  de: 'DpAV:'
-  it: 'DpAV:'
-  ja: 'DpAV:'
-  nl: 'DpAV:'
-  pt: 'DpAV:'
-  ru: 'DpAV:'
-  # ar: 'DpAV:'
-  vi: 'DpAV:'
-  zh: 'DpAV:'
-  pl: 'DpWA:'
+DpAV:
+  en: DpAV
+  fr: DpAV
+  es: DpAV
+  de: DpAV
+  it: DpAV
+  ja: DpAV
+  nl: DpAV
+  pt: DpAV
+  ru: DpAV
+  # ar: DpAV
+  vi: DpAV
+  zh: DpAV
+  pl: DpWA
 HP:
   en: HP
   fr: HP
@@ -440,4 +411,69 @@ FPS:
   ru: FPS
   vi: FPS
   zh: FPS
+AV:
+  de: AV
+  en: AV
+  es: AV
+  fr: AV
+  it: AV
+  ja: AV
+  nl: AV
+  pl: WA
+  pt: AV
+  ru: AV
+  vi: AV
+  zh: AV
+2ewErlXDA0ed:
+  de: Streamer-Nachrichten-Schriftgröße%
+  en: Streamer Message Font Size%
+  es: Tamaño de fuente de mensaje de streamer%
+  fr: Taille de la police des messages du streamer%
+  it: Dimensione carattere messaggio streamer%
+  ja: ストリーマーメッセージフォントサイズ%
+  nl: Streamer-bericht lettertypegrootte%
+  pl: Rozmiar czcionki wiadomości streamera%
+  pt: Tamanho da fonte da mensagem do streamer%
+  ru: Размер шрифта сообщения стримера%
+  vi: Kích thước phông chữ tin nhắn của người phát trực tuyến%
+  zh: 直播消息字体大小%
+DMG:
+  de: DMG
+  en: DMG
+  es: DMG
+  fr: DMG
+  it: DMG
+  ja: DMG
+  nl: DMG
+  pl: DMG
+  pt: DMG
+  ru: DMG
+  vi: DMG
+  zh: DMG
+Theme:
+  de: Thema
+  en: Theme
+  es: Tema
+  fr: Thème
+  it: Tema
+  ja: テーマ
+  nl: Thema
+  pl: Motyw
+  pt: Tema
+  ru: Тема
+  vi: Chủ đề
+  zh: 主题
+5xjLbllQ4x3O:
+  de: Schadensverteilung
+  en: Damage Distribution
+  es: Distribución de Daño
+  fr: Répartition des Dégâts
+  it: Distribuzione dei Danni
+  ja: ダメージ分布
+  nl: Schadebemering
+  pl: Rozkład Uszkodzeń
+  pt: Distribuição de Dano
+  ru: Распределение Урона
+  vi: Phân Phối Sát Thương
+  zh: 伤害分配
 _version: 2
