@@ -746,31 +746,52 @@ pub fn on_entity_defeated(instance: *const TurnBasedAbilityComponent, entity: *c
     let res = ON_ENTITY_DEFEATED_Detour.call(instance, entity);
     unsafe {
         let defeated_entity = (*instance)._parent_object._OwnerRef;
-        if !TurnBasedAbilityComponent_TryCheckLimboWaitHeal(
-            instance,
-            (*instance)._parent_object._OwnerRef,
-        ) {
-            if (*entity)._EntityType == EntityType::Avatar {
-                let e = match helpers::get_avatar_from_entity(entity) {
-                    Ok(avatar) => Ok(Event::OnEntityDefeated(OnEntityDefeatedEvent {
-                        killer: Entity {
-                            uid: avatar.id,
-                            team: Team::Player,
-                        },
-                        entity_defeated: Entity {
-                            uid: (*defeated_entity).RuntimeID__BackingField,
-                            team: Team::Enemy,
-                        },
-                    })),
-                    Err(e) => {
-                        log::error!("Avatar Event Error: {}", e);
+        // if !TurnBasedAbilityComponent_TryCheckLimboWaitHeal(
+        //     instance,
+        //     (*instance)._parent_object._OwnerRef,
+        // ) {
+        //     if (*entity)._EntityType == EntityType::Avatar {
+        //         let e = match helpers::get_avatar_from_entity(entity) {
+        //             Ok(avatar) => Ok(Event::OnEntityDefeated(OnEntityDefeatedEvent {
+        //                 killer: Entity {
+        //                     uid: avatar.id,
+        //                     team: Team::Player,
+        //                 },
+        //                 entity_defeated: Entity {
+        //                     uid: (*defeated_entity).RuntimeID__BackingField,
+        //                     team: Team::Enemy,
+        //                 },
+        //             })),
+        //             Err(e) => {
+        //                 log::error!("Avatar Event Error: {}", e);
 
-                        Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
-                    }
-                };
-                BattleContext::handle_event(e);
+        //                 Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+        //             }
+        //         };
+        //         BattleContext::handle_event(e);
+        //     };
+        // }
+        if (*entity)._EntityType == EntityType::Avatar {
+            let e = match helpers::get_avatar_from_entity(entity) {
+                Ok(avatar) => Ok(Event::OnEntityDefeated(OnEntityDefeatedEvent {
+                    killer: Entity {
+                        uid: avatar.id,
+                        team: Team::Player,
+                    },
+                    entity_defeated: Entity {
+                        uid: (*defeated_entity).RuntimeID__BackingField,
+                        team: Team::Enemy,
+                    },
+                })),
+                Err(e) => {
+                    log::error!("Avatar Event Error: {}", e);
+
+                    Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+                }
             };
-        }
+            BattleContext::handle_event(e);
+        };
+
     }
     res
 }
@@ -841,6 +862,7 @@ pub fn on_initialize_enemy(
     }
     res
 }
+
 static_detour! {
 	static ON_DAMAGE_Detour: fn(*const c_void, *const c_void, *const NOPBAAAGGLA, *const TurnBasedAbilityComponent, *const TurnBasedAbilityComponent, *const GameEntity, *const GameEntity, *const GameEntity, bool, *const c_void) -> bool;
 	static ON_COMBO_Detour: fn(*const MMNDIEBMDNL);
@@ -853,8 +875,8 @@ static_detour! {
 	static ON_UPDATE_WAVE_Detour: fn(*const TurnBasedGameMode);
 	static ON_UPDATE_CYCLE_Detour: fn(*const TurnBasedGameMode) -> u32;
 	static ON_DIRECT_CHANGE_HP_Detour: fn(*const TurnBasedAbilityComponent, i32, FixPoint, *const c_void);
-	static ON_DIRECT_DAMAGE_HP_Detour: fn(*const TurnBasedAbilityComponent, FixPoint, i32, *const c_void, FixPoint, c_void);
-	static ON_STAT_CHANGE_Detour: fn(*const TurnBasedAbilityComponent, i32, i32, FixPoint, *const c_void);
+	static ON_DIRECT_DAMAGE_HP_Detour: fn(*const TurnBasedAbilityComponent, FixPoint, i32, *const c_void, FixPoint, *const c_void);
+	static ON_STAT_CHANGE_Detour: fn(*const TurnBasedAbilityComponent, AbilityProperty, i32, FixPoint, *const c_void);
 	static ON_ENTITY_DEFEATED_Detour: fn(*const TurnBasedAbilityComponent, *const GameEntity);
 	static ON_UPDATE_TEAM_FORMATION_Detour: fn(*const TeamFormationComponent);
 	static ON_INITIALIZE_ENEMY_Detour: fn(*const MonsterDataComponent, *const TurnBasedAbilityComponent);
