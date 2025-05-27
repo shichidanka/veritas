@@ -341,6 +341,7 @@ impl BattleContext {
                         }
                         crate::models::misc::Stat::Speed(stat) => avatar.battle_stats.speed = stat,
                         crate::models::misc::Stat::AV(stat) => avatar.battle_stats.av = stat,
+                        _ => {}
                     }
                 }
             },
@@ -358,6 +359,7 @@ impl BattleContext {
                         }
                         crate::models::misc::Stat::Speed(stat) => enemy.battle_stats.speed = stat,
                         crate::models::misc::Stat::AV(stat) => enemy.battle_stats.av = stat,
+                        _ => {}
                     }
                 }
             }
