@@ -2,11 +2,6 @@
 #[macro_use]
 extern crate rust_i18n;
 
-macro_rules! lazy_initialize_address {
-    ($addr:expr) => {
-        std::sync::LazyLock::new(|| unsafe { std::mem::transmute($addr + *$crate::GAMEASSEMBLY_HANDLE) })
-    };
-}
 mod battle;
 mod entry;
 mod subscribers;
@@ -26,6 +21,9 @@ use windows::{
 
 pub static GAMEASSEMBLY_HANDLE: LazyLock<usize> =
     LazyLock::new(|| unsafe { GetModuleHandleW(w!("GameAssembly")).expect("GameAssembly was not found in the game process").0 as usize });
+
+pub static UNITYPLAYER_HANDLE: LazyLock<usize> =
+    LazyLock::new(|| unsafe { GetModuleHandleW(w!("UnityPlayer")).expect("UnityPlayer was not found in the game process").0 as usize });
 
 static LOCALES: phf::Map<&'static str, &'static str> = phf_map! {
     "en" => "English",

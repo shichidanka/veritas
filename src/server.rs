@@ -43,7 +43,7 @@ async fn redirect_to_new_page() -> Redirect {
 }
 
 fn on_connect(socket: SocketRef) {
-    let packet = Packet::Connected { version: env!("TARGET_BUILD").to_string() };
+    let packet = Packet::Connected { version: env!("CARGO_PKG_VERSION").to_string() };
     socket.emit(&packet.name(), &packet.payload()).ok();
 }
 

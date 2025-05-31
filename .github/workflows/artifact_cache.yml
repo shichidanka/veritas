@@ -3,7 +3,7 @@ name: Artifact Cache
 on:
   push:
     branches:
-      - global-beta  # Replace with your default branch if needed
+      - main  # Replace with your default branch if needed
     paths:
       - '**/Cargo.lock'
       - '**/Cargo.toml'
@@ -21,5 +21,5 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: "shared"
-          save-if: ${{ github.ref == 'refs/heads/global-beta' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: cargo build --release

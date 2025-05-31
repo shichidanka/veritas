@@ -3,12 +3,7 @@ name = "veritas"
 edition = "2024"
 license-file = "LICENSE"
 repository = "https://github.com/hessiser/veritas/"
-
-[package.metadata]
-region = "global"
-is_beta = true
-patch = "3.3.2"
-hotfix = "0.2"
+version = "0.1.0"
 
 [package.metadata.i18n]
 available-locales = ["en", "fr", "es", "de", "it", "ja", "pt", "nl", "ru", "vi", "zh", "pl"]
@@ -54,6 +49,8 @@ rust-i18n = "3.1.4"
 phf = { version = "0.11.3", features = ["macros"] }
 directories = "6.0.0"
 paste = "1.0.15"
+patternscan = "1.2.0"
+microseh = "1.1.2"
 
 [dependencies.windows]
 version = "0.61.1"
@@ -68,9 +65,9 @@ features = [
     "Win32_Graphics_Direct3D",
     "Win32_Graphics_Dxgi_Common",
     "Win32_Graphics_Direct3D11",
-    "Win32_UI_Input_KeyboardAndMouse"
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_System_ProcessStatus",
 ]
 
 [build-dependencies]
-cargo_metadata = "0.19.2"
 winres = "0.1.12"

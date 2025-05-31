@@ -3,10 +3,8 @@
 
 Veritas, the magnum opus, of a mundane-chalk-throwing pillar man. Long-lost brethren of Kars, Esidisi, Wamuu, and Santana. Perhaps a Hirohiko Araki's critically acclaimed JoJo's Bizarre Adventure reference? Could be for the game JoJo's Bizarre Adventure: Eyes of Heaven. Powered by rust and egui. Consult the [wiki](https://github.com/hessiser/veritas/wiki) for usage.
 
-# Supported Targets (Windows)
-- Global-Beta
-- Global-Prod
-- CN-Beta (infrequently)
+# Supported Targets
+- Windows
 
 # Clients
 - [Desktop App](https://github.com/NightKoneko/veritas-app) by [@NightKoneko](https://github.com/NightKoneko)
@@ -24,3 +22,4 @@ Veritas, the magnum opus, of a mundane-chalk-throwing pillar man. Long-lost bret
 # Maintainers
 - Hessiser: Backend/UI
 - NightKoneko: UI
+- Nushen: Il2Cpp Run-Time Implementation
