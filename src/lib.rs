@@ -11,6 +11,7 @@ mod overlay;
 mod server;
 mod subscribers;
 mod ui;
+mod prelude;
 
 use phf::phf_map;
 use std::{sync::LazyLock, thread, time::Duration};

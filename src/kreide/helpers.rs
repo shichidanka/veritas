@@ -27,12 +27,10 @@ use super::types::{
     RPG_Client_TextID,
 };
 
-#[inline]
 pub fn get_textmap_content(hash: &RPG_Client_TextID_Boxed) -> Cow<'static, str> {
     get_textmap_content_from_textid(&hash.unbox())
 }
 
-#[inline]
 pub fn get_textmap_content_from_textid(hash: &RPG_Client_TextID) -> Cow<'static, str> {
     RPG_Client_TextmapStatic::get_text(*hash, Il2CppObject::NULL)
         .map(|s| s.as_str())
@@ -251,7 +249,6 @@ pub unsafe fn get_entity_ability_properties(
 }
 
 #[named]
-#[inline(always)]
 pub unsafe fn get_monster_from_runtime_id(
     id: u32,
     battle_instance: RPG_GameCore_BattleInstance,
@@ -268,7 +265,6 @@ pub unsafe fn get_monster_from_runtime_id(
 }
 
 #[named]
-#[inline(always)]
 pub fn fixpoint_to_raw(fixpoint: &RPG_GameCore_FixPoint) -> f64 {
     log::debug!(function_name!());
     static FLOAT_CONVERSION_CONSTANT: LazyLock<f64> = LazyLock::new(|| (1f64 / (2f64.powf(32f64))));

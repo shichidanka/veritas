@@ -1,11 +1,10 @@
-use std::borrow::Cow;
-
 use super::{native::Il2CppObject, util};
+use crate::prelude::*;
+use std::borrow::Cow;
 
 macro_rules! il2cpp_api {
     ($index:expr, $name:ident($($arg_name:ident: $arg_type:ty),*) -> $ret_type:ty) => {
         #[allow(warnings)]
-        #[inline(always)]
         pub fn $name($($arg_name: $arg_type,)*) -> $ret_type {
             unsafe {
                 type FuncType = unsafe extern "fastcall" fn($($arg_type,)*) -> $ret_type;
@@ -25,6 +24,7 @@ il2cpp_api!(63, il2cpp_domain_get() -> Il2CppDomain);
 il2cpp_api!(65, il2cpp_domain_get_assemblies(domain: Il2CppDomain, size: *mut usize) -> *mut Il2CppAssembly);
 il2cpp_api!(73, il2cpp_field_get_name(field: Il2CppField) -> *const i8);
 il2cpp_api!(77, il2cpp_field_get_value_object(field: Il2CppField, obj: Il2CppObject) -> Il2CppObject);
+il2cpp_api!(116, il2cpp_method_get_return_type(method: Il2CppMethod) -> Il2CppType);
 il2cpp_api!(117, il2cpp_method_get_name(method: Il2CppMethod) -> *const i8);
 il2cpp_api!(123, il2cpp_method_get_param_count(method: Il2CppMethod) -> u32);
 il2cpp_api!(124, il2cpp_method_get_param(method: Il2CppMethod, index: u32) -> Il2CppType);
@@ -38,7 +38,6 @@ il2cpp_api!(170, il2cpp_image_get_class(image: Il2CppImage, index: usize) -> Il2
 pub struct Il2CppDomain(pub usize);
 
 impl Il2CppDomain {
-    #[inline(always)]
     pub fn assemblies(&self) -> Vec<Il2CppAssembly> {
         let mut count = 0;
         let assemblies = il2cpp_domain_get_assemblies(*self, &mut count);
@@ -51,12 +50,10 @@ impl Il2CppDomain {
 pub struct Il2CppImage(pub usize);
 
 impl Il2CppImage {
-    #[inline(always)]
     pub fn class_count(&self) -> usize {
         il2cpp_image_get_class_count(*self)
     }
 
-    #[inline(always)]
     pub fn classes(&self) -> Vec<Il2CppClass> {
         (0..self.class_count())
             .map(|index| il2cpp_image_get_class(*self, index))
@@ -73,17 +70,14 @@ pub struct Il2CppAssembly(pub usize);
 pub struct Il2CppClass(pub usize);
 
 impl Il2CppClass {
-    #[inline(always)]
     pub fn name(&self) -> Cow<'static, str> {
         unsafe { util::cstr_to_str(il2cpp_class_get_name(*self)) }
     }
 
-    #[inline(always)]
     pub fn byval_arg(&self) -> Il2CppType {
         Il2CppType(self.0 + 128)
     }
 
-    #[inline(always)]
     pub fn methods(&self) -> Vec<Il2CppMethod> {
         let iter = std::ptr::null();
         let mut result = Vec::new();
@@ -97,34 +91,92 @@ impl Il2CppClass {
         result
     }
 
-    #[inline(always)]
-    pub fn find_method_by_name(&self, name: &str) -> Option<Il2CppMethod> {
-        self.methods()
-            .into_iter()
-            .find(|&method| method.name() == name)
-    }
+    // pub fn find_method_by_name(&self, name: &str) -> Option<Il2CppMethod> {
+    //     self.methods()
+    //         .into_iter()
+    //         .find(|&method| method.name() == name)
+    // }
 
-    #[inline(always)]
-    pub fn find_method(&self, name: &str, arg_types: &[&str]) -> Option<Il2CppMethod> {
-        for method in self.methods() {
-            if method.name() == name {
-                let count = method.args_cnt() as usize;
-                if count == arg_types.len() {
-                    let mut fail = false;
-                    for (i, arg_type) in arg_types.iter().enumerate() {
-                        if *arg_type != method.arg_type_formatted(i as u32) {
-                            fail = true;
-                            break;
-                        }
-                    }
-
-                    if !fail {
-                        return Some(method);
+    pub fn find_method(&self, name: &str, arg_types: &[&str]) -> Result<Il2CppMethod> {
+        let qualified_name = format!("{}::{}", self.name(), name);
+        if let Some(method) = self.methods().iter().find(|method| method.name() == name) {
+            let count = method.args_cnt() as usize;
+            if count == arg_types.len() {
+                let mut fail = false;
+                let mut mistmatched_index = 0;
+                for (i, arg_type) in arg_types.iter().enumerate() {
+                    if *arg_type != method.arg_type_formatted(i as u32) {
+                        fail = true;
+                        mistmatched_index = i;
+                        break;
                     }
                 }
+
+                if !fail {
+                    Ok(*method)
+                } else {
+                    Err(anyhow!(
+                        "Method {} arg {} should be {}",
+                        qualified_name,
+                        arg_types[mistmatched_index],
+                        method.arg_type_formatted(mistmatched_index as u32)
+                    ))
+                }
+            } else {
+                Err(anyhow!(
+                    "Method {} contains {} args and not {} args",
+                    qualified_name,
+                    count,
+                    arg_types.len()
+                ))
             }
+        } else {
+            Err(anyhow!("Could not find method {}", qualified_name))
         }
-        None
+    }
+
+    pub fn find_method_full(
+        &self,
+        name: &str,
+        arg_types: &[&str],
+        ret_type: &str,
+    ) -> Result<Il2CppMethod> {
+        let qualified_name = format!("{}::{}", self.name(), name);
+        if let Some(method) = self.methods().iter().find(|method| method.name() == name) {
+            let ret = il2cpp_method_get_return_type(*method);
+            let count = method.args_cnt() as usize;
+            if count == arg_types.len() && ret.formatted_name() == ret_type {
+                let mut fail = false;
+                let mut mistmatched_index = 0;
+                for (i, arg_type) in arg_types.iter().enumerate() {
+                    if *arg_type != method.arg_type_formatted(i as u32) {
+                        fail = true;
+                        mistmatched_index = i;
+                        break;
+                    }
+                }
+
+                if !fail {
+                    Ok(*method)
+                } else {
+                    Err(anyhow!(
+                        "Method {} arg {} should be {}",
+                        qualified_name,
+                        arg_types[mistmatched_index],
+                        method.arg_type_formatted(mistmatched_index as u32)
+                    ))
+                }
+            } else {
+                Err(anyhow!(
+                    "Method {} contains {} args and not {} args",
+                    qualified_name,
+                    count,
+                    arg_types.len()
+                ))
+            }
+        } else {
+            Err(anyhow!("Could not find method {}", qualified_name))
+        }
     }
 }
 
@@ -133,12 +185,10 @@ impl Il2CppClass {
 pub struct Il2CppType(pub usize);
 
 impl Il2CppType {
-    #[inline(always)]
     pub fn name(&self) -> Cow<'static, str> {
         unsafe { util::cstr_to_str(il2cpp_type_get_name(*self)) }
     }
 
-    #[inline(always)]
     pub fn formatted_name(&self) -> String {
         let name = self.name();
 
@@ -165,7 +215,6 @@ impl Il2CppType {
         .to_string()
     }
 
-    #[inline(always)]
     pub fn class(&self) -> Il2CppClass {
         il2cpp_class_from_type(*self)
     }
@@ -176,22 +225,18 @@ impl Il2CppType {
 pub struct Il2CppMethod(pub usize);
 
 impl Il2CppMethod {
-    #[inline(always)]
     pub fn name(&self) -> Cow<'static, str> {
         unsafe { util::cstr_to_str(il2cpp_method_get_name(*self)) }
     }
 
-    #[inline(always)]
     pub fn class(&self) -> Il2CppClass {
         unsafe { *((self.0) as *const Il2CppClass) }
     }
 
-    #[inline(always)]
     pub fn va(&self) -> usize {
         unsafe { *((self.0 + 8) as *const usize) }
     }
 
-    #[inline(always)]
     pub fn rva(&self) -> usize {
         let va = self.va();
         if va == 0 {
@@ -200,22 +245,18 @@ impl Il2CppMethod {
         self.va() - *crate::GAMEASSEMBLY_HANDLE
     }
 
-    #[inline(always)]
     pub fn args_cnt(&self) -> u32 {
         il2cpp_method_get_param_count(*self)
     }
 
-    #[inline(always)]
     pub fn arg(&self, i: u32) -> Il2CppType {
         il2cpp_method_get_param(*self, i)
     }
 
-    #[inline(always)]
     pub fn arg_type_formatted(&self, i: u32) -> String {
         self.arg(i).formatted_name()
     }
 
-    #[inline(always)]
     pub fn format_params(&self) -> String {
         use std::fmt::Write;
         let param_count = il2cpp_method_get_param_count(*self);
@@ -242,18 +283,16 @@ impl Il2CppMethod {
 pub struct Il2CppField(pub usize);
 
 impl Il2CppField {
-    #[inline(always)]
     pub fn name(&self) -> Cow<'static, str> {
         unsafe { util::cstr_to_str(il2cpp_field_get_name(*self)) }
     }
 
-    #[inline(always)]
-    pub fn get_value(&self, instance: Il2CppObject) -> Option<Il2CppObject> {
+    pub fn get_value(&self, instance: Il2CppObject) -> Result<Il2CppObject> {
         let value = il2cpp_field_get_value_object(*self, instance);
         if value.0 == 0 {
-            None
+            Err(anyhow!("Could not get value of field {}", self.name()))
         } else {
-            Some(value)
+            Ok(value)
         }
     }
 }

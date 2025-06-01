@@ -1280,16 +1280,13 @@ pub fn on_stat_change(
 }
 
 #[named]
-pub fn on_entity_defeated(
-    instance: RPG_GameCore_TurnBasedGameMode,
-    a2: HBIAGLPHICO,
-) -> bool {
+pub fn on_entity_defeated(instance: RPG_GameCore_TurnBasedGameMode, a2: HBIAGLPHICO) -> bool {
     log::debug!(function_name!());
     let res = ON_ENTITY_DEFEATED_Detour.call(instance, a2);
     safe_call!(unsafe {
         let defeated_entity = a2.KNDJNKNHFFG()?;
         let killer_entity = a2.JKCOIOLCMEP()?;
-        
+
         if res && defeated_entity._AliveState()? == RPG_GameCore_AliveState::Dying {
             if killer_entity._EntityType()? == RPG_GameCore_EntityType::Avatar {
                 let e = match helpers::get_avatar_from_entity(killer_entity) {
@@ -1406,104 +1403,138 @@ pub fn subscribe() -> Result<()> {
         subscribe_function!(
             ON_DAMAGE_Detour,
             DMFMLMJKKHB::get_class()?
-                .find_method_by_name("OMPLOLLELLK")
-                .unwrap()
+                .find_method_full(
+                    "OMPLOLLELLK",
+                    &[
+                        "RPG.GameCore.TaskContext",
+                        "RPG.GameCore.DamageByAttackProperty",
+                        "NOPBAAAGGLA",
+                        "RPG.GameCore.TurnBasedAbilityComponent",
+                        "RPG.GameCore.TurnBasedAbilityComponent",
+                        "RPG.GameCore.GameEntity",
+                        "RPG.GameCore.GameEntity",
+                        "RPG.GameCore.GameEntity",
+                        "bool",
+                        "OBKBGHMGBNE"
+                    ],
+                    "bool"
+                )?
                 .va(),
             on_damage
         );
         subscribe_function!(
             ON_COMBO_Detour,
             MMNDIEBMDNL::get_class()?
-                .find_method_by_name("FECMPGBOBOI")
-                .unwrap()
+                .find_method_full("FECMPGBOBOI", &[], "void")?
                 .va(),
             on_combo
         );
         subscribe_function!(
             ON_USE_SKILL_Detour,
             RPG_GameCore_SkillCharacterComponent::get_class()?
-                .find_method_by_name("UseSkill")
-                .unwrap()
+                .find_method_full(
+                    "UseSkill",
+                    &["int", "RPG.GameCore.AbilityCursorInfo", "bool", "int"],
+                    "bool"
+                )?
                 .va(),
             on_use_skill
         );
         subscribe_function!(
             ON_SET_LINEUP_Detour,
             RPG_Client_BattleAssetPreload::get_class()?
-                .find_method_by_name("InBattleAssetPreload")
-                .unwrap()
+                .find_method_full("InBattleAssetPreload", &["bool", "System.Action"], "void")?
                 .va(),
             on_set_lineup
         );
         subscribe_function!(
             ON_BATTLE_BEGIN_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
-                .find_method_by_name("_GameModeBegin")
-                .unwrap()
+                .find_method_full("_GameModeBegin", &[], "void")?
                 .va(),
             on_battle_begin
         );
         subscribe_function!(
             ON_BATTLE_END_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
-                .find_method_by_name("_GameModeEnd")
-                .unwrap()
+                .find_method_full("_GameModeEnd", &[], "void")?
                 .va(),
             on_battle_end
         );
         subscribe_function!(
             ON_TURN_BEGIN_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
-                .find_method_by_name("DoTurnPrepareStartWork")
-                .unwrap()
+                .find_method_full("DoTurnPrepareStartWork", &[], "void")?
                 .va(),
             on_turn_begin
         );
         subscribe_function!(
             ON_TURN_END_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
-                .find_method_by_name("ProcessOnLevelTurnActionEndEvent")
-                .unwrap()
+                .find_method_full("ProcessOnLevelTurnActionEndEvent", &["int"], "void")?
                 .va(),
             on_turn_end
         );
         subscribe_function!(
             ON_UPDATE_WAVE_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
-                .find_method_by_name("UpdateCurrentWaveCount")
-                .unwrap()
+                .find_method_full("UpdateCurrentWaveCount", &[], "void")?
                 .va(),
             on_update_wave
         );
         subscribe_function!(
             ON_UPDATE_CYCLE_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
-                .find_method_by_name("get_ChallengeTurnLeft")
-                .unwrap()
+                .find_method_full("get_ChallengeTurnLeft", &[], "uint")?
                 .va(),
             on_update_cycle
         );
         subscribe_function!(
             ON_DIRECT_CHANGE_HP_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
-                .find_method_by_name("DirectChangeHP")
-                .unwrap()
+                .find_method_full(
+                    "DirectChangeHP",
+                    &[
+                        "RPG.GameCore.PropertyModifyFunction",
+                        "RPG.GameCore.FixPoint",
+                        "JIFOMIOBMDL"
+                    ],
+                    "void"
+                )?
                 .va(),
             on_direct_change_hp
         );
         subscribe_function!(
             ON_DIRECT_DAMAGE_HP_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
-                .find_method_by_name("DirectDamageHP")
-                .unwrap()
+                // Not sure if I need keyword out
+                .find_method_full(
+                    "DirectDamageHP",
+                    &[
+                        "RPG.GameCore.FixPoint",
+                        "RPG.GameCore.AntiLockHPStrength",
+                        "JIFOMIOBMDL",
+                        "RPG.GameCore.FixPoint&",
+                        "System.Nullable<RPG.GameCore.FixPoint>"
+                    ],
+                    "void"
+                )?
                 .va(),
             on_direct_damage_hp
         );
         subscribe_function!(
             ON_STAT_CHANGE_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
-                .find_method_by_name("ModifyProperty")
-                .unwrap()
+                .find_method_full(
+                    "ModifyProperty",
+                    &[
+                        "RPG.GameCore.AbilityProperty",
+                        "RPG.GameCore.PropertyModifyFunction",
+                        "RPG.GameCore.FixPoint",
+                        "JIFOMIOBMDL"
+                    ],
+                    "void"
+                )?
                 .va(),
             on_stat_change
         );
@@ -1511,24 +1542,25 @@ pub fn subscribe() -> Result<()> {
             ON_ENTITY_DEFEATED_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()
                 .unwrap()
-                .find_method_by_name("_MakeLimboEntityDie")
-                .unwrap()
+                .find_method_full("_MakeLimboEntityDie", &["HBIAGLPHICO"], "bool")?
                 .va(),
             on_entity_defeated
         );
         subscribe_function!(
             ON_UPDATE_TEAM_FORMATION_Detour,
             RPG_GameCore_TeamFormationComponent::get_class()?
-                .find_method_by_name("_RefreshTeammateIndex")
-                .unwrap()
+                .find_method_full("_RefreshTeammateIndex", &[], "void")?
                 .va(),
             on_update_team_formation
         );
         subscribe_function!(
             ON_INITIALIZE_ENEMY_Detour,
             RPG_GameCore_MonsterDataComponent::get_class()?
-                .find_method_by_name("OnAbilityCharacterInitialized")
-                .unwrap()
+                .find_method_full(
+                    "OnAbilityCharacterInitialized",
+                    &["RPG.GameCore.TurnBasedAbilityComponent"],
+                    "void"
+                )?
                 .va(),
             on_initialize_enemy
         );
