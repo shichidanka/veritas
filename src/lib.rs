@@ -4,26 +4,35 @@ extern crate rust_i18n;
 
 mod battle;
 mod entry;
-mod subscribers;
-mod models;
-mod server;
 mod kreide;
-mod ui;
 mod logging;
+mod models;
 mod overlay;
+mod server;
+mod subscribers;
+mod ui;
 
-use std::sync::LazyLock;
 use phf::phf_map;
-use windows::{
-    core::w,
-    Win32::System::LibraryLoader::GetModuleHandleW,
-};
+use std::{sync::LazyLock, thread, time::Duration};
+use windows::{Win32::System::LibraryLoader::GetModuleHandleW, core::w};
 
-pub static GAMEASSEMBLY_HANDLE: LazyLock<usize> =
-    LazyLock::new(|| unsafe { GetModuleHandleW(w!("GameAssembly")).expect("GameAssembly was not found in the game process").0 as usize });
+pub static GAMEASSEMBLY_HANDLE: LazyLock<usize> = LazyLock::new(|| unsafe {
+    loop {
+        if let Ok(module) = GetModuleHandleW(w!("GameAssembly")) {
+            return module.0 as usize
+        }
+        thread::sleep(Duration::from_millis(1));
+    }
+});
 
-pub static UNITYPLAYER_HANDLE: LazyLock<usize> =
-    LazyLock::new(|| unsafe { GetModuleHandleW(w!("UnityPlayer")).expect("UnityPlayer was not found in the game process").0 as usize });
+pub static UNITYPLAYER_HANDLE: LazyLock<usize> = LazyLock::new(|| unsafe {
+    loop {
+        if let Ok(module) = GetModuleHandleW(w!("UnityPlayer")) {
+            return module.0 as usize
+        }
+        thread::sleep(Duration::from_millis(1));
+    }
+});
 
 static LOCALES: phf::Map<&'static str, &'static str> = phf_map! {
     "en" => "English",

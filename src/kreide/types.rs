@@ -28,6 +28,20 @@ pub enum RPG_GameCore_TeamType {
     Count = 5,
 }
 
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum RPG_GameCore_AliveState {
+    Unknown = 0,
+    Alive = 1,
+    Limbo = 2,
+    LimboRevivable = 3,
+    Deathrattle = 4,
+    Dying = 5,
+    Died = 6,
+    WillBeDestroyed = 7,
+    Destroyed = 8,
+}
+
 #[repr(transparent)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 // OLHMAHMMBNN
@@ -39,6 +53,28 @@ impl OLHMAHMMBNN {
     cs_field!(FKHHOBBFMEH, "FKHHOBBFMEH", self, |v| -> Il2CppString {
         Il2CppString(v.0)
     });
+}
+
+#[repr(transparent)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+// OLHMAHMMBNN
+pub struct HBIAGLPHICO(pub usize);
+impl HBIAGLPHICO {
+    cs_class!("HBIAGLPHICO");
+
+    cs_field!(
+        JKCOIOLCMEP,
+        "JKCOIOLCMEP",
+        self,
+        |v| -> RPG_GameCore_GameEntity { RPG_GameCore_GameEntity(v.0) }
+    );
+
+    cs_field!(
+        KNDJNKNHFFG,
+        "KNDJNKNHFFG",
+        self,
+        |v| -> RPG_GameCore_GameEntity { RPG_GameCore_GameEntity(v.0) }
+    );
 }
 
 #[repr(transparent)]
@@ -111,7 +147,11 @@ impl RPG_GameCore_TurnBasedGameMode {
         _ElapsedActionDelay_k__BackingField,
         "<ElapsedActionDelay>k__BackingField",
         self,
-        |v| -> RPG_GameCore_FixPoint { RPG_GameCore_FixPoint { m_rawValue: v.unbox::<i64>() } }
+        |v| -> RPG_GameCore_FixPoint {
+            RPG_GameCore_FixPoint {
+                m_rawValue: v.unbox::<i64>(),
+            }
+        }
     );
 
     // RPG.GameCore.TurnBasedGameMode -> Type: int | Name: <WaveMonsterMaxCount>k__BackingField | Offset: 0x2E4
@@ -164,6 +204,13 @@ impl RPG_GameCore_TurnBasedAbilityComponent {
         "_AbilityProperties",
         self,
         |v| -> Il2CppArray { Il2CppArray(v.0) }
+    );
+
+    cs_field!(
+        _KillerEntity,
+        "_KillerEntity",
+        self,
+        |v| -> RPG_GameCore_GameEntity { RPG_GameCore_GameEntity(v.0) }
     );
 
     // RPG.GameCore.TurnBasedAbilityComponent -> Type: CharacterDataComponent | Name: _CharacterDataRef | Offset: 0x1C0
@@ -273,9 +320,12 @@ impl RPG_GameCore_MonsterRow {
     cs_class!("RPG.GameCore.MonsterRow");
 
     // RPG.GameCore.MonsterRow -> Type: TextID | Name: MonsterName | Offset: 0x90
-    cs_field!(MonsterName, "MonsterName", self, |v| -> RPG_Client_TextID_Boxed {
-        RPG_Client_TextID_Boxed(v.0)
-    });
+    cs_field!(
+        MonsterName,
+        "MonsterName",
+        self,
+        |v| -> RPG_Client_TextID_Boxed { RPG_Client_TextID_Boxed(v.0) }
+    );
 }
 
 #[repr(transparent)]
@@ -316,7 +366,11 @@ impl RPG_GameCore_MonsterDataComponent {
         _DefaultMaxHP,
         "_DefaultMaxHP",
         self,
-        |v| -> RPG_GameCore_FixPoint { RPG_GameCore_FixPoint { m_rawValue: v.unbox::<i64>() } }
+        |v| -> RPG_GameCore_FixPoint {
+            RPG_GameCore_FixPoint {
+                m_rawValue: v.unbox::<i64>(),
+            }
+        }
     );
 }
 
@@ -643,13 +697,9 @@ impl RPG_GameCore_SkillData {
         |v| -> RPG_GameCore_ICharacterSkillRowData { RPG_GameCore_ICharacterSkillRowData(v.0) }
     );
 
-    cs_field!(
-        SkillConfigID,
-        "SkillConfigID",
-        self,
-        |v| -> u32 { v.unbox::<u32>() }
-    );
-
+    cs_field!(SkillConfigID, "SkillConfigID", self, |v| -> u32 {
+        v.unbox::<u32>()
+    });
 }
 
 #[repr(transparent)]
@@ -740,7 +790,7 @@ pub enum StageBudgetTool_EntityType {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 // RPG.GameCore.FixPoint
 pub struct RPG_GameCore_FixPoint {
-    pub m_rawValue: i64
+    pub m_rawValue: i64,
 }
 
 #[repr(transparent)]
@@ -755,7 +805,11 @@ impl NOPBAAAGGLA {
         JFKEEOMKMLI,
         "JFKEEOMKMLI",
         self,
-        |v| -> RPG_GameCore_FixPoint { RPG_GameCore_FixPoint { m_rawValue: v.unbox::<i64>() } }
+        |v| -> RPG_GameCore_FixPoint {
+            RPG_GameCore_FixPoint {
+                m_rawValue: v.unbox::<i64>(),
+            }
+        }
     );
 
     // NOPBAAAGGLA -> Type: AttackType | Name: APDDLHNGGIM | Offset: 0x434
@@ -815,6 +869,12 @@ impl RPG_GameCore_GameEntity {
     cs_field!(_ComponentList, "_ComponentList", self, |v| -> Il2CppArray {
         Il2CppArray(v.0)
     });
+
+    // RPG.GameCore.GameEntity -> Type: GameEntity.GameComponentList | Name: _ComponentList | Offset: 0x48
+    cs_field!(_AliveState, "_AliveState", self, |v| -> RPG_GameCore_AliveState {
+        v.unbox::<RPG_GameCore_AliveState>()
+    });
+
 
     // RPG.GameCore.GameEntity -> Type: TeamType | Name: _Team | Offset: 0xF0
     cs_field!(_Team, "_Team", self, |v| -> RPG_GameCore_TeamType {
@@ -934,7 +994,6 @@ impl RPG_GameCore_GameWorld {
         self,
         |v| -> RPG_GameCore_BattleInstance { RPG_GameCore_BattleInstance(v.0) }
     );
-
 }
 
 #[repr(transparent)]
@@ -1086,9 +1145,12 @@ impl RPG_GameCore_AvatarServantRow {
     });
 
     // RPG.GameCore.AvatarServantRow -> Type: TextID | Name: ServantName | Offset: 0x98
-    cs_field!(ServantName, "ServantName", self, |v| -> RPG_Client_TextID_Boxed {
-        RPG_Client_TextID_Boxed(v.0)
-    });
+    cs_field!(
+        ServantName,
+        "ServantName",
+        self,
+        |v| -> RPG_Client_TextID_Boxed { RPG_Client_TextID_Boxed(v.0) }
+    );
 }
 
 #[repr(transparent)]
@@ -1128,14 +1190,20 @@ impl RPG_GameCore_StatusRow {
     cs_class!("RPG.GameCore.StatusRow");
 
     // RPG.GameCore.StatusRow -> Type: TextID | Name: StatusName | Offset: 0x38
-    cs_field!(StatusName, "StatusName", self, |v| -> RPG_Client_TextID_Boxed {
-        RPG_Client_TextID_Boxed(v.0)
-    });
+    cs_field!(
+        StatusName,
+        "StatusName",
+        self,
+        |v| -> RPG_Client_TextID_Boxed { RPG_Client_TextID_Boxed(v.0) }
+    );
 
     // RPG.GameCore.StatusRow -> Type: TextID | Name: StatusDesc | Offset: 0x48
-    cs_field!(StatusDesc, "StatusDesc", self, |v| -> RPG_Client_TextID_Boxed {
-        RPG_Client_TextID_Boxed(v.0)
-    });
+    cs_field!(
+        StatusDesc,
+        "StatusDesc",
+        self,
+        |v| -> RPG_Client_TextID_Boxed { RPG_Client_TextID_Boxed(v.0) }
+    );
 }
 
 #[repr(transparent)]

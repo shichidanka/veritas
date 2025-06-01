@@ -1281,58 +1281,37 @@ pub fn on_stat_change(
 
 #[named]
 pub fn on_entity_defeated(
-    instance: RPG_GameCore_TurnBasedAbilityComponent,
-    entity: RPG_GameCore_GameEntity,
-) {
+    instance: RPG_GameCore_TurnBasedGameMode,
+    a2: HBIAGLPHICO,
+) -> bool {
     log::debug!(function_name!());
-    let res = ON_ENTITY_DEFEATED_Detour.call(instance, entity);
+    let res = ON_ENTITY_DEFEATED_Detour.call(instance, a2);
     safe_call!(unsafe {
-        let defeated_entity = instance._OwnerRef()?;
-        // if !TurnBasedAbilityComponent_TryCheckLimboWaitHeal(
-        //     instance,
-        //     (*instance)._parent_object._OwnerRef,
-        // ) {
-        //     if (*entity)._EntityType == RPG_GameCore_EntityType::Avatar {
-        //         let e = match helpers::get_avatar_from_entity(entity) {
-        //             Ok(avatar) => Ok(Event::OnEntityDefeated(OnEntityDefeatedEvent {
-        //                 killer: Entity {
-        //                     uid: avatar.id,
-        //                     team: Team::Player,
-        //                 },
-        //                 entity_defeated: Entity {
-        //                     uid: (*defeated_entity).RuntimeID__BackingField,
-        //                     team: Team::Enemy,
-        //                 },
-        //             })),
-        //             Err(e) => {
-        //                 log::error!("Avatar Event Error: {}", e);
+        let defeated_entity = a2.KNDJNKNHFFG()?;
+        let killer_entity = a2.JKCOIOLCMEP()?;
+        
+        if res && defeated_entity._AliveState()? == RPG_GameCore_AliveState::Dying {
+            if killer_entity._EntityType()? == RPG_GameCore_EntityType::Avatar {
+                let e = match helpers::get_avatar_from_entity(killer_entity) {
+                    Ok(avatar) => Ok(Event::OnEntityDefeated(OnEntityDefeatedEvent {
+                        killer: Entity {
+                            uid: avatar.id,
+                            team: Team::Player,
+                        },
+                        entity_defeated: Entity {
+                            uid: defeated_entity._RuntimeID_k__BackingField()?,
+                            team: Team::Enemy,
+                        },
+                    })),
+                    Err(e) => {
+                        log::error!("Avatar Event Error: {}", e);
 
-        //                 Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
-        //             }
-        //         };
-        //         BattleContext::handle_event(e);
-        //     };
-        // }
-        if entity._EntityType()? == RPG_GameCore_EntityType::Avatar {
-            let e = match helpers::get_avatar_from_entity(entity) {
-                Ok(avatar) => Ok(Event::OnEntityDefeated(OnEntityDefeatedEvent {
-                    killer: Entity {
-                        uid: avatar.id,
-                        team: Team::Player,
-                    },
-                    entity_defeated: Entity {
-                        uid: defeated_entity._RuntimeID_k__BackingField()?,
-                        team: Team::Enemy,
-                    },
-                })),
-                Err(e) => {
-                    log::error!("Avatar Event Error: {}", e);
-
-                    Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
-                }
+                        Err(anyhow!("{} Avatar Event Error: {}", function_name!(), e))
+                    }
+                };
+                BattleContext::handle_event(e);
             };
-            BattleContext::handle_event(e);
-        };
+        }
         Ok(())
     });
     res
@@ -1417,7 +1396,7 @@ static_detour! {
     static ON_DIRECT_CHANGE_HP_Detour: fn(RPG_GameCore_TurnBasedAbilityComponent, i32, RPG_GameCore_FixPoint, *const c_void);
     static ON_DIRECT_DAMAGE_HP_Detour: fn(RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_FixPoint, i32, *const c_void, RPG_GameCore_FixPoint, *const c_void);
     static ON_STAT_CHANGE_Detour: fn(RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_AbilityProperty, i32, RPG_GameCore_FixPoint, *const c_void);
-    static ON_ENTITY_DEFEATED_Detour: fn(RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_GameEntity);
+    static ON_ENTITY_DEFEATED_Detour: fn(RPG_GameCore_TurnBasedGameMode, HBIAGLPHICO) -> bool;
     static ON_UPDATE_TEAM_FORMATION_Detour: fn(RPG_GameCore_TeamFormationComponent);
     static ON_INITIALIZE_ENEMY_Detour: fn(RPG_GameCore_MonsterDataComponent, RPG_GameCore_TurnBasedAbilityComponent);
 }
@@ -1528,15 +1507,15 @@ pub fn subscribe() -> Result<()> {
                 .va(),
             on_stat_change
         );
-        // subscribe_function!(
-        //     ON_KILL_ENEMY_Detour,
-        //     RPG_GameCore_TurnBasedAbilityComponent::get_class()
-        //         .unwrap()
-        //         .find_method_by_name("set_KillerEntity")
-        //         .unwrap()
-        //         .va(),
-        //     on_entity_defeated::on_entity_defeated
-        // );
+        subscribe_function!(
+            ON_ENTITY_DEFEATED_Detour,
+            RPG_GameCore_TurnBasedGameMode::get_class()
+                .unwrap()
+                .find_method_by_name("_MakeLimboEntityDie")
+                .unwrap()
+                .va(),
+            on_entity_defeated
+        );
         subscribe_function!(
             ON_UPDATE_TEAM_FORMATION_Detour,
             RPG_GameCore_TeamFormationComponent::get_class()?

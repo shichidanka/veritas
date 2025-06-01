@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use super::{native::Il2CppObject, util, GA_BASE};
+use super::{native::Il2CppObject, util};
 
 macro_rules! il2cpp_api {
     ($index:expr, $name:ident($($arg_name:ident: $arg_type:ty),*) -> $ret_type:ty) => {
@@ -10,7 +10,7 @@ macro_rules! il2cpp_api {
             unsafe {
                 type FuncType = unsafe extern "fastcall" fn($($arg_type,)*) -> $ret_type;
                 ::std::mem::transmute::<usize, FuncType>(
-                    *((super::UP_BASE + super::API_BASE_PTR + 8 * $index) as *const usize)
+                    *((*crate::UNITYPLAYER_HANDLE + super::API_BASE_PTR + 8 * $index) as *const usize)
                 )($($arg_name,)*)
            }
         }
@@ -197,7 +197,7 @@ impl Il2CppMethod {
         if va == 0 {
             return 0;
         }
-        unsafe { self.va() - GA_BASE }
+        self.va() - *crate::GAMEASSEMBLY_HANDLE
     }
 
     #[inline(always)]
