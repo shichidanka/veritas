@@ -15,6 +15,7 @@ use egui::{
     epaint::text::{FontInsert, InsertFontFamily},
 };
 use egui_colors::Colorix;
+use egui_notify::Toasts;
 use windows::Win32::{
     Foundation::{LPARAM, WPARAM},
     UI::{Input::KeyboardAndMouse::VK_MENU, WindowsAndMessaging::WM_KEYDOWN},
@@ -45,6 +46,7 @@ pub struct AppState {
     pub should_hide: bool,
     pub graph_x_unit: GraphUnit,
     pub use_custom_color: bool,
+    pub notifs: Toasts
 }
 
 #[derive(Default)]
@@ -71,6 +73,8 @@ impl Overlay for App {
         if ctx.input_mut(|i| i.consume_shortcut(&HIDE_UI)) {
             self.state.should_hide = !self.state.should_hide;
         }
+
+        self.state.notifs.show(ctx);
 
         if self.settings.streamer_mode {
             egui::TopBottomPanel::bottom("statusbar")

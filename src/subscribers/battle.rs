@@ -1363,7 +1363,7 @@ pub fn on_initialize_enemy(
         };
 
         let name_id = row.MonsterName()?;
-        let monster_name = get_textmap_content(&name_id);
+        let monster_name = get_textmap_content(&name_id)?;
         let entity = instance._OwnerRef()?;
 
         BattleContext::handle_event(Ok(Event::OnInitializeEnemy(OnInitializeEnemyEvent {
@@ -1421,14 +1421,14 @@ pub fn subscribe() -> Result<()> {
                 )?
                 .va(),
             on_damage
-        );
+        )?;
         subscribe_function!(
             ON_COMBO_Detour,
             MMNDIEBMDNL::get_class()?
                 .find_method_full("FECMPGBOBOI", &[], "void")?
                 .va(),
             on_combo
-        );
+        )?;
         subscribe_function!(
             ON_USE_SKILL_Detour,
             RPG_GameCore_SkillCharacterComponent::get_class()?
@@ -1439,56 +1439,56 @@ pub fn subscribe() -> Result<()> {
                 )?
                 .va(),
             on_use_skill
-        );
+        )?;
         subscribe_function!(
             ON_SET_LINEUP_Detour,
             RPG_Client_BattleAssetPreload::get_class()?
                 .find_method_full("InBattleAssetPreload", &["bool", "System.Action"], "void")?
                 .va(),
             on_set_lineup
-        );
+        )?;
         subscribe_function!(
             ON_BATTLE_BEGIN_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
                 .find_method_full("_GameModeBegin", &[], "void")?
                 .va(),
             on_battle_begin
-        );
+        )?;
         subscribe_function!(
             ON_BATTLE_END_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
                 .find_method_full("_GameModeEnd", &[], "void")?
                 .va(),
             on_battle_end
-        );
+        )?;
         subscribe_function!(
             ON_TURN_BEGIN_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
                 .find_method_full("DoTurnPrepareStartWork", &[], "void")?
                 .va(),
             on_turn_begin
-        );
+        )?;
         subscribe_function!(
             ON_TURN_END_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
                 .find_method_full("ProcessOnLevelTurnActionEndEvent", &["int"], "void")?
                 .va(),
             on_turn_end
-        );
+        )?;
         subscribe_function!(
             ON_UPDATE_WAVE_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
                 .find_method_full("UpdateCurrentWaveCount", &[], "void")?
                 .va(),
             on_update_wave
-        );
+        )?;
         subscribe_function!(
             ON_UPDATE_CYCLE_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()?
                 .find_method_full("get_ChallengeTurnLeft", &[], "uint")?
                 .va(),
             on_update_cycle
-        );
+        )?;
         subscribe_function!(
             ON_DIRECT_CHANGE_HP_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
@@ -1503,7 +1503,7 @@ pub fn subscribe() -> Result<()> {
                 )?
                 .va(),
             on_direct_change_hp
-        );
+        )?;
         subscribe_function!(
             ON_DIRECT_DAMAGE_HP_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
@@ -1521,7 +1521,7 @@ pub fn subscribe() -> Result<()> {
                 )?
                 .va(),
             on_direct_damage_hp
-        );
+        )?;
         subscribe_function!(
             ON_STAT_CHANGE_Detour,
             RPG_GameCore_TurnBasedAbilityComponent::get_class()?
@@ -1537,7 +1537,7 @@ pub fn subscribe() -> Result<()> {
                 )?
                 .va(),
             on_stat_change
-        );
+        )?;
         subscribe_function!(
             ON_ENTITY_DEFEATED_Detour,
             RPG_GameCore_TurnBasedGameMode::get_class()
@@ -1545,14 +1545,14 @@ pub fn subscribe() -> Result<()> {
                 .find_method_full("_MakeLimboEntityDie", &["HBIAGLPHICO"], "bool")?
                 .va(),
             on_entity_defeated
-        );
+        )?;
         subscribe_function!(
             ON_UPDATE_TEAM_FORMATION_Detour,
             RPG_GameCore_TeamFormationComponent::get_class()?
                 .find_method_full("_RefreshTeammateIndex", &[], "void")?
                 .va(),
             on_update_team_formation
-        );
+        )?;
         subscribe_function!(
             ON_INITIALIZE_ENEMY_Detour,
             RPG_GameCore_MonsterDataComponent::get_class()?
@@ -1563,7 +1563,7 @@ pub fn subscribe() -> Result<()> {
                 )?
                 .va(),
             on_initialize_enemy
-        );
+        )?;
         Ok(())
     }
 }

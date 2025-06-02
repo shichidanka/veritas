@@ -1,4 +1,5 @@
 #![recursion_limit = "256"]
+#![allow(static_mut_refs)]
 #[macro_use]
 extern crate rust_i18n;
 

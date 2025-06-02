@@ -27,26 +27,25 @@ use super::types::{
     RPG_Client_TextID,
 };
 
-pub fn get_textmap_content(hash: &RPG_Client_TextID_Boxed) -> Cow<'static, str> {
+pub fn get_textmap_content(hash: &RPG_Client_TextID_Boxed) -> Result<Cow<'static, str>> {
     get_textmap_content_from_textid(&hash.unbox())
 }
 
-pub fn get_textmap_content_from_textid(hash: &RPG_Client_TextID) -> Cow<'static, str> {
-    RPG_Client_TextmapStatic::get_text(*hash, Il2CppObject::NULL)
-        .map(|s| s.as_str())
-        .unwrap()
+pub fn get_textmap_content_from_textid(hash: &RPG_Client_TextID) -> Result<Cow<'static, str>> {
+    Ok(RPG_Client_TextmapStatic::get_text(*hash, Il2CppObject::NULL)
+        .map(|s| s.as_str())?)
 }
 
 #[named]
-pub fn get_module_manager() -> RPG_Client_ModuleManager {
+pub fn get_module_manager() -> Result<RPG_Client_ModuleManager> {
     log::debug!(function_name!());
-    RPG_Client_GlobalVars::s_ModuleManager().unwrap()
+    Ok(RPG_Client_GlobalVars::s_ModuleManager()?)
 }
 
 #[named]
 fn get_avatar_data_from_id(avatar_id: u32) -> Result<RPG_Client_AvatarData> {
     log::debug!(function_name!());
-    let s_module_manager = get_module_manager();
+    let s_module_manager = get_module_manager()?;
     let avatar_module = s_module_manager.AvatarModule()?;
     avatar_module.get_avatar(avatar_id)
 }
@@ -82,11 +81,10 @@ pub unsafe fn get_skill_from_skilldata(skill_data: RPG_GameCore_SkillData) -> Re
     let text_id = row_data.get_skillname().context("Skill name was null")?;
 
     let skill_type = row_data
-        .get_attacktype()
-        .unwrap_or(RPG_GameCore_AttackType::Unknown);
+        .get_attacktype()?;
 
     Ok(Skill {
-        name: get_textmap_content_from_textid(&text_id).to_string(),
+        name: get_textmap_content_from_textid(&text_id)?.to_string(),
         skill_type: skill_type as isize,
         skill_config_id: skill_data.SkillConfigID()? as isize
     })
@@ -155,7 +153,7 @@ pub unsafe fn get_monster_from_entity(entity: RPG_GameCore_GameEntity) -> Result
 
     Ok(Avatar {
         id: monster_id,
-        name: get_textmap_content(&monster_name).to_string(),
+        name: get_textmap_content(&monster_name)?.to_string(),
     })
 }
 
@@ -176,7 +174,7 @@ pub unsafe fn get_servant_from_entity(entity: RPG_GameCore_GameEntity) -> Result
 
     Ok(Avatar {
         id: servant_row.ServantID()?,
-        name: get_textmap_content(&servant_row.ServantName()?).to_string(),
+        name: get_textmap_content(&servant_row.ServantName()?)?.to_string(),
     })
 }
 

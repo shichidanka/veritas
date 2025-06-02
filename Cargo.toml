@@ -51,6 +51,7 @@ directories = "6.0.0"
 paste = "1.0.15"
 patternscan = "1.2.0"
 microseh = "1.1.2"
+egui-notify = "0.19.0"
 
 [dependencies.windows]
 version = "0.61.1"
