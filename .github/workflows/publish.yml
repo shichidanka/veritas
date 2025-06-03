@@ -13,14 +13,6 @@ jobs:
       contents: write  # Required to create GitHub releases
 
     steps:
-      - name: Set release name from tag
-        id: format_name
-        run: |
-          # Extract tag name (without refs/tags/ prefix)
-          TAG_NAME="${GITHUB_REF##*/}"
-          echo "Release Name: $TAG_NAME"
-          echo "release_name=$TAG_NAME" >> $GITHUB_OUTPUT
-
       - uses: actions/checkout@v4
       
       - uses: dtolnay/rust-toolchain@master
@@ -37,7 +29,7 @@ jobs:
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ steps.format_name.outputs.release_name }}
+          name: ${{ github.ref_name }}
           generate_release_notes: true
           target_commitish: ${{ github.sha }}
           files: target/release/veritas.dll
