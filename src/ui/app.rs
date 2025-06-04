@@ -96,6 +96,9 @@ impl Overlay for App {
                     if notification_area.contains(screen_rect) {
                         self.state.show_menu = true;
                         self.state.show_settings = true;
+                        self.state.notifs.dismiss_all_toasts();
+                        self.state.update_toast_id = None;
+                        self.state.update_toast_shown = false;
                     }
                 }
             }
@@ -579,17 +582,17 @@ This is recommended to be enabled (if disabled, Windows Defender may cause the u
 
                 let current_version = env!("CARGO_PKG_VERSION");
                 if let Some(new_version) = &self.state.update_available {
+                    ui.colored_label(Color32::GREEN, format!("Version {} is available!", new_version));
                     ui.horizontal(|ui| {
                         ui.label(format!(
-                            "{} ➡️ {}",
+                            "{} ➡ {}",
                             current_version,
                             new_version
                         ));
                     });
-                    ui.colored_label(Color32::GREEN, format!("Version {} is available!", new_version));
                     let can_update = self.settings.dll_directory.is_some() && self.settings.dll_filename.is_some();
                     if ui
-                        .add_enabled(can_update, egui::Button::new(t!("Update")))
+                        .add_enabled(can_update, egui::Button::new(t!("Update and Restart")))
                         .clicked()
                     {
                         let dll_dir = self.settings.dll_directory.as_ref().unwrap();
