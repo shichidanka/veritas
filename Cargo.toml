@@ -3,7 +3,7 @@ name = "veritas"
 edition = "2024"
 license-file = "LICENSE"
 repository = "https://github.com/hessiser/veritas/"
-version = "0.1.0"
+version = "0.2.0"
 
 [package.metadata.i18n]
 available-locales = ["en", "fr", "es", "de", "it", "ja", "pt", "nl", "ru", "vi", "zh", "pl"]
@@ -52,6 +52,10 @@ paste = "1.0.15"
 patternscan = "1.2.0"
 microseh = "1.1.2"
 egui-notify = "0.19.0"
+reqwest = { version = "0.12.19", features = ["json", "blocking"] }
+tempfile = "3.20.0"
+rfd = "0.15.3"
+semver = "1.0.26"
 
 [dependencies.windows]
 version = "0.61.1"

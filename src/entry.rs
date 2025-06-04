@@ -5,7 +5,10 @@ use std::{thread::{self}, time::Duration};
 
 #[ctor]
 fn entry() {
-    thread::spawn(|| init());
+    thread::spawn(|| {
+        thread::sleep(Duration::from_secs(2));
+        init()
+    });
 
     thread::spawn(|| {
         server::start_server();

@@ -45,7 +45,9 @@ config!(
     streamer_msg: String,
     streamer_msg_size_pt: f32,
     theme: egui_colors::Theme,
-    theme_mode: egui::Theme
+    theme_mode: egui::Theme,
+    dll_directory: Option<String>,
+    dll_filename: Option<String>
 );
 
 impl Default for Config {
@@ -58,7 +60,9 @@ impl Default for Config {
             streamer_msg: String::new(),
             theme: EGUI_THEME,
             theme_mode: egui::Theme::Dark,
-            streamer_msg_size_pt: 1.0
+            streamer_msg_size_pt: 1.0,
+            dll_directory: None,
+            dll_filename: None,
         }
     }
 }

@@ -12,6 +12,7 @@ mod overlay;
 mod server;
 mod subscribers;
 mod ui;
+mod updater;
 mod prelude;
 
 use phf::phf_map;
