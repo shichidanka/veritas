@@ -1,5 +1,4 @@
 use edio11::{Overlay, WindowMessage, WindowProcessOptions, input::InputResult};
-use egui::Button;
 use egui::CollapsingHeader;
 use egui::Key;
 use egui::KeyboardShortcut;
@@ -62,8 +61,6 @@ pub struct Settings {
     pub streamer_msg: String,
     // pub fps: i32,
     pub colorix: Colorix,
-    pub dll_directory: Option<String>,
-    pub dll_filename: Option<String>,
     pub defender_exclusion: bool,
 }
 
@@ -83,8 +80,8 @@ impl Overlay for App {
         }
 
         if let Some(_toast_id) = &self.state.update_toast_id {
-            let message = format!("Version {} is available! Click here to open settings and update.", 
-                self.state.update_available.as_ref().unwrap());
+            // let message = format!("Version {} is available! Click here to open settings and update.", 
+            //     self.state.update_available.as_ref().unwrap());
             
             if let Some(screen_rect) = ctx.input(|i| i.pointer.hover_pos()) {
                 if ctx.input(|i| i.pointer.primary_clicked()) {
@@ -403,8 +400,6 @@ impl App {
                 streamer_msg_size_pt: *config.get_streamer_msg_size_pt(),
                 streamer_msg: config.get_streamer_msg().to_owned(),
                 colorix: Colorix::global(&ctx, *config.get_theme()),
-                dll_directory: config.get_dll_directory().clone(),
-                dll_filename: config.get_dll_filename().clone(),
                 defender_exclusion: true,
             },
             config,
@@ -529,60 +524,23 @@ impl App {
         ui.separator();
 
         // maybe move this out of the settings window and into it's own menu
-        CollapsingHeader::new(t!("Updates"))
+        CollapsingHeader::new(t!("Update"))
+            .id_salt("updates_header")
             .default_open(true)
             .show(ui, |ui| {
-                ui.horizontal(|ui| {
-                    ui.label(t!("DLL File:"));
-                    let dll_file = self.settings.dll_filename.as_deref().unwrap_or("<not set>");
-                    let dll_dir = self.settings.dll_directory.as_deref().unwrap_or("<not set>");
-                    let short_path = if dll_dir != "<not set>" && dll_file != "<not set>" {
-                        let dir_name = std::path::Path::new(dll_dir)
-                            .file_name()
-                            .map(|n| n.to_string_lossy())
-                            .unwrap_or_else(|| dll_dir.into());
-                        format!("{}/{}", dir_name, dll_file)
-                    } else {
-                        format!("{}\\{}", dll_dir, dll_file)
-                    };
-                    let full_path = if dll_dir != "<not set>" && dll_file != "<not set>" {
-                        format!("{}\\{}", dll_dir, dll_file)
-                    } else {
-                        String::new()
-                    };
-                    ui.add(
-                        egui::Label::new(short_path)
-                            .sense(egui::Sense::hover())
-                    ).on_hover_text(full_path);
-                    if ui.button(t!("Pick DLL File")).clicked() {
-                        if let Some(path) = rfd::FileDialog::new()
-                            .set_title("Select DLL file")
-                            .add_filter("DLL", &["dll"])
-                            .pick_file()
-                        {
-                            let dir = path.parent().map(|p| p.display().to_string()).unwrap_or_default();
-                            let file = path.file_name().map(|f| f.to_string_lossy().to_string()).unwrap_or_default();
-                            self.settings.dll_directory = Some(dir.clone());
-                            self.settings.dll_filename = Some(file.clone());
-                            self.config.set_dll_directory(Some(dir));
-                            self.config.set_dll_filename(Some(file));
-                        }
-                    }
-                });
-
                 ui.horizontal(|ui| {
                     ui.checkbox(&mut self.settings.defender_exclusion, t!("Add Defender Exclusion during update"));
                     ui.add(egui::widgets::Label::new(egui::RichText::new(egui_phosphor::regular::INFO).size(16.0))
                         .sense(egui::Sense::hover()))
-                        .on_hover_text(
-                            "If enabled, the updater will temporarily add the new DLL file to Windows Defender exclusions during update to avoid false positives. \
-This is recommended to be enabled (if disabled, Windows Defender may cause the update to fail) however you can disable it if you prefer. The exclusion is removed after the update is finished."
-                        );
+                        .on_hover_text(t!(indoc::indoc!(
+                            "If enabled, the updater will temporarily add the new DLL file to Windows Defender exclusions during update to avoid false positives.
+                            This is recommended to be enabled (if disabled, Windows Defender may cause the update to fail) however you can disable it if you prefer. The exclusion is removed after the update is finished."
+                        )));
                 });
 
                 let current_version = env!("CARGO_PKG_VERSION");
                 if let Some(new_version) = &self.state.update_available {
-                    ui.colored_label(Color32::GREEN, format!("Version {} is available!", new_version));
+                    ui.colored_label(Color32::GREEN, t!("Version {version} is available!", version = new_version));
                     ui.horizontal(|ui| {
                         ui.label(format!(
                             "{} ➡ {}",
@@ -590,26 +548,17 @@ This is recommended to be enabled (if disabled, Windows Defender may cause the u
                             new_version
                         ));
                     });
-                    let can_update = self.settings.dll_directory.is_some() && self.settings.dll_filename.is_some();
                     if ui
-                        .add_enabled(can_update, egui::Button::new(t!("Update and Restart")))
+                        .add(egui::Button::new(t!("Update")))
                         .clicked()
                     {
-                        let dll_dir = self.settings.dll_directory.as_ref().unwrap();
-                        let dll_filename = self.settings.dll_filename.as_ref().unwrap();
                         if let Err(e) = Updater::new(env!("CARGO_PKG_VERSION"))
                             .download_update(
-                                new_version,
-                                dll_dir,
-                                dll_filename,
                                 self.settings.defender_exclusion,
                             )
                         {
                             self.state.notifs.error(format!("Update failed: {}", e));
                         }
-                    }
-                    if !can_update {
-                        ui.colored_label(Color32::YELLOW, t!("Please pick the DLL file first."));
                     }
                 } else if self.state.update_checked {
                     ui.horizontal(|ui| {
@@ -617,7 +566,7 @@ This is recommended to be enabled (if disabled, Windows Defender may cause the u
                     });
                     ui.colored_label(Color32::GREEN, t!("Up to date"));
                 } else {
-                    ui.label(t!("Checking for updates..."));
+                    ui.label(t!("Checking for update..."));
                 }
             });
 

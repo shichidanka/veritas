@@ -573,7 +573,7 @@ fn on_turn_end(instance: RPG_GameCore_TurnBasedAbilityComponent, a1: i32) {
 #[named]
 pub fn on_update_wave(instance: RPG_GameCore_TurnBasedGameMode) {
     let res = ON_UPDATE_WAVE_Detour.call(instance);
-    safe_call!(unsafe {
+    safe_call!({
         BattleContext::handle_event(Ok(Event::OnUpdateWave(OnUpdateWaveEvent {
             wave: instance._WaveMonsterCurrentCount()? as _,
         })));

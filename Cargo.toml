@@ -23,6 +23,7 @@ egui_plot = "0.32.1"
 edio11 = { git = "https://github.com/hessiser/edio11-rs.git", rev = "7c1f4ab" }
 egui-phosphor = { version = "0.9.0", features = ["bold"]}
 egui_colors = { version = "0.8.0", features = ["serde"] }
+egui-notify = "0.19.0"
 
 # Logging
 log = "0.4"
@@ -51,11 +52,10 @@ directories = "6.0.0"
 paste = "1.0.15"
 patternscan = "1.2.0"
 microseh = "1.1.2"
-egui-notify = "0.19.0"
 reqwest = { version = "0.12.19", features = ["json", "blocking"] }
-tempfile = "3.20.0"
 rfd = "0.15.3"
 semver = "1.0.26"
+indoc = "2.0.6"
 
 [dependencies.windows]
 version = "0.61.1"

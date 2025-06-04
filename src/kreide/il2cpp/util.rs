@@ -4,7 +4,6 @@ use windows::{
     Win32::{
         Foundation::HMODULE,
         System::{
-            LibraryLoader::GetModuleHandleA,
             ProcessStatus::{GetModuleInformation, MODULEINFO},
             Threading::GetCurrentProcess,
         },

@@ -1,35 +1,36 @@
 use crate::{kreide, logging, overlay, server, subscribers};
 use ctor::ctor;
-use egui_notify::{Toast, ToastOptions};
+use egui_notify::Toast;
+use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use std::{thread::{self}, time::Duration};
 
 #[ctor]
 fn entry() {
     thread::spawn(|| {
-        thread::sleep(Duration::from_secs(2));
         init()
-    });
-
-    thread::spawn(|| {
-        server::start_server();
     });
 }
 
 fn init() {
-    logging::MultiLogger::init();
-    log::info!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-    log::info!("Setting up...");
     let mut toasts = Vec::<Toast>::new();
-    match (|| -> anyhow::Result<()> {
-        unsafe {
-            #[cfg(debug_assertions)]
-            windows::Win32::System::Console::AllocConsole()?;
+    match (|| -> anyhow::Result<()> { unsafe {
+        logging::MultiLogger::init();
+        #[cfg(debug_assertions)]
+        windows::Win32::System::Console::AllocConsole()?;
+
+        log::info!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        log::info!("Setting up...");
+
+        while GetModuleHandleW(windows::core::w!("GameAssembly")).is_err() ||
+            GetModuleHandleW(windows::core::w!("UnityPlayer")).is_err() {
+            thread::sleep(Duration::from_millis(1));
         }
+
         kreide::il2cpp::init()?;
         subscribers::battle::subscribe()?;
         subscribers::enable_subscribers!()?;
         Ok(())
-    })() {
+    } })() {
         Ok(_) => {
             let msg = format!("Finished setting up {} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
             log::info!("{}", msg);
@@ -44,9 +45,13 @@ fn init() {
             toasts.push(Toast::error(err));
         },
     };
-    if overlay::initialize(toasts).is_err() {
-        log::error!("Failed to initialize overlay");
-    } else {
-        log::info!("Finished setting up overlay");
+
+    match overlay::initialize(toasts) {
+        Ok(_) => log::info!("Finished setting up overlay"),
+        Err(e) => log::error!("Failed to initialize overlay: {}", e),
     }
+
+    thread::spawn(|| {
+        server::start_server();
+    });
 }

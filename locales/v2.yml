@@ -476,4 +476,69 @@ Theme:
   ru: Распределение Урона
   vi: Phân Phối Sát Thương
   zh: 伤害分配
+2ex8FbVERHgW:
+  de: Version {version} ist verfügbar!
+  en: Version {version} is available!
+  es: La versión {version} está disponible.
+  fr: La version {version} est disponible !
+  it: Versione {version} disponibile!
+  ja: バージョン {version} が利用可能です！
+  nl: Versie {version} is beschikbaar!
+  pl: Wersja {version} jest dostępna!
+  pt: Versão {version} disponível!
+  ru: Версия {version} доступна!
+  vi: Phiên bản {version} đã có sẵn!
+  zh: 版本 {version} 已发布！
+2mpZHk13uu0E:
+  de: Während des Updates Defender-Ausschluss hinzufügen
+  en: Add Defender Exclusion during update
+  es: Agregar exclusión de Defensor durante la actualización
+  fr: Ajouter une exclusion Defender pendant la mise à jour
+  it: Aggiungi esclusione Defender durante l'aggiornamento
+  ja: アップデート中にDefender除外を追加
+  nl: Voeg Defender-uitsluiting toe tijdens de update
+  pl: Dodaj wykluczenie obrońcy podczas aktualizacji
+  pt: Adicionar exclusão do Defensor durante a atualização
+  ru: Добавить исключение защитника во время обновления
+  vi: Thêm ngoại lệ Defender trong quá trình cập nhật
+  zh: 在更新期间添加 Defender 排除
+4WDJuTVMeg1s:
+  de: Auf dem neuesten Stand
+  en: Up to date
+  es: Actualizado
+  fr: À jour
+  it: Aggiornato
+  ja: 最新
+  nl: Up-to-date
+  pl: Aktualny
+  pt: Atualizado
+  ru: Обновлено
+  vi: Đã cập nhật
+  zh: 已更新
+5VhpZGQr1sOt:
+  de: Nach Updates suchen...
+  en: Checking for update...
+  es: Buscando actualizaciones...
+  fr: Recherche de mises à jour...
+  it: Controllo aggiornamenti...
+  ja: アップデートを確認中...
+  nl: Zoeken naar updates...
+  pl: Sprawdzanie aktualizacji...
+  pt: Verificando atualização...
+  ru: Проверка обновлений...
+  vi: Kiểm tra cập nhật...
+  zh: 正在检查更新...
+Update:
+  de: Aktualisierung
+  en: Update
+  es: Actualización
+  fr: Mise à jour
+  it: Aggiornamento
+  ja: アップデート
+  nl: Update
+  pl: Aktualizacja
+  pt: Atualização
+  ru: Обновление
+  vi: Cập nhật
+  zh: 更新
 _version: 2

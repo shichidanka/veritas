@@ -21,6 +21,7 @@ macro_rules! subscribe_function {
 macro_rules! enable_subscribers {
     () => {
         (|| -> anyhow::Result<()> {
+            #[allow(unused_unsafe)]
             for func in unsafe { &mut $crate::subscribers::SUBSCRIBERS_ENABLE_FN } {
                 func()?
             }

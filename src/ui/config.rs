@@ -45,9 +45,7 @@ config!(
     streamer_msg: String,
     streamer_msg_size_pt: f32,
     theme: egui_colors::Theme,
-    theme_mode: egui::Theme,
-    dll_directory: Option<String>,
-    dll_filename: Option<String>
+    theme_mode: egui::Theme
 );
 
 impl Default for Config {
@@ -61,15 +59,13 @@ impl Default for Config {
             theme: EGUI_THEME,
             theme_mode: egui::Theme::Dark,
             streamer_msg_size_pt: 1.0,
-            dll_directory: None,
-            dll_filename: None,
         }
     }
 }
 
 impl Config {
     pub fn new(ctx: &egui::Context) -> Result<Self> {
-        match ProjectDirs::from("", "", "veritas") {
+        match ProjectDirs::from("", "", env!("CARGO_PKG_NAME")) {
             Some(proj_dirs) => {
                 let config_local_dir = proj_dirs.config_local_dir();
                 let config_path = config_local_dir.join(CONFIG_FILENAME);
@@ -107,7 +103,7 @@ impl Config {
     }
 
     fn write(&self) -> Result<()> {
-        match ProjectDirs::from("", "", "veritas") {
+        match ProjectDirs::from("", "", env!("CARGO_PKG_NAME")) {
             Some(proj_dirs) => {
                 let config_local_dir = proj_dirs.config_local_dir();
                 let config_path = config_local_dir.join(CONFIG_FILENAME);
