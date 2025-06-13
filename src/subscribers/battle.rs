@@ -455,9 +455,7 @@ fn on_set_lineup(instance: RPG_Client_BattleAssetPreload, a1: bool, a2: *const c
             let avatar_id = character.CharacterID()?;
             match helpers::get_avatar_from_id(avatar_id) {
                 Ok(avatar) => avatars.push(avatar),
-                Err(e) => {
-                    errors.push(e);
-                }
+                Err(e) => errors.push(e)
             }
         }
 
@@ -467,16 +465,14 @@ fn on_set_lineup(instance: RPG_Client_BattleAssetPreload, a1: bool, a2: *const c
             let avatar_id = character.CharacterID()?;
             match helpers::get_avatar_from_id(avatar_id) {
                 Ok(avatar) => avatars.push(avatar),
-                Err(e) => {
-                    errors.push(e);
-                }
+                Err(e) => errors.push(e)
             }
         }
 
         let event = if !errors.is_empty() {
             let errors = errors
                 .iter()
-                .map(|e| format!("{}\n", e.to_string()))
+                .map(|e| format!("{}. ", e.to_string()))
                 .collect::<String>();
             Err(anyhow!(errors))
         } else {

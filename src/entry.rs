@@ -14,7 +14,7 @@ fn entry() {
 fn init() {
     let mut toasts = Vec::<Toast>::new();
     match (|| -> anyhow::Result<()> { unsafe {
-        logging::MultiLogger::init();
+        logging::MultiLogger::init()?;
         #[cfg(debug_assertions)]
         windows::Win32::System::Console::AllocConsole()?;
 
@@ -39,10 +39,14 @@ fn init() {
         Err(e) => {
             let err = format!("{}", e);
             log::error!("{}", err);
-            toasts.push(Toast::error(err));
+            let mut toast = Toast::error(err);
+            toast.duration(None);
+            toasts.push(toast);
             let err = format!("{} {} has been disabled", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
             log::error!("{}", err);
-            toasts.push(Toast::error(err));
+            let mut toast = Toast::error(err);
+            toast.duration(None);
+            toasts.push(toast);
         },
     };
 

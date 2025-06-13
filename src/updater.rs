@@ -104,7 +104,7 @@ impl Updater {
             GetModuleHandleExA(
                 GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
                     | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                windows::core::PCSTR(env!("CARGO_PKG_NAME").as_ptr()),
+                windows::core::PCSTR("What an interesting duo with Dr. Ratio and Cipher".as_ptr()),
                 &mut h_module,
             )
             .with_context(|| {

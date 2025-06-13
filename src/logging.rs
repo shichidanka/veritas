@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Context, Result};
 use egui_logger::EguiLogger;
 use log::{Level, LevelFilter, Metadata, Record};
 use slog::{Drain, Logger, o};
@@ -41,7 +42,7 @@ impl log::Log for MultiLogger {
 }
 
 impl MultiLogger {
-    pub fn init() {
+    pub fn init() -> Result<()> {
         let mut sloggers = Vec::new();
 
         // Info+ log file
@@ -51,8 +52,7 @@ impl MultiLogger {
                 .create(true)
                 .write(true)
                 .truncate(true)
-                .open(log_path)
-                .unwrap();
+                .open(log_path)?;
 
             let decorator = slog_term::PlainSyncDecorator::new(file);
             let drain = slog_term::FullFormat::new(decorator).build().fuse();
@@ -69,8 +69,7 @@ impl MultiLogger {
                 .create(true)
                 .write(true)
                 .truncate(true)
-                .open(log_path)
-                .unwrap();
+                .open(log_path)?;
 
             let decorator = slog_term::PlainSyncDecorator::new(file);
             let drain = slog_term::FullFormat::new(decorator).build().fuse();
@@ -104,10 +103,13 @@ impl MultiLogger {
         };
 
         if LOGGER.set(multi_logger).is_err() {
-            panic!("Failed to initialize MultiLogger");
+            return Err(anyhow!("Failed to initialize MultiLogger"));
         }
         
-        log::set_logger(LOGGER.get().unwrap()).unwrap();
+        if log::set_logger(LOGGER.get().context("Failed to get MultiLogger")?).is_err() {
+            return Err(anyhow!("Failed to set MultiLogger"));
+        }
         log::set_max_level(LevelFilter::Trace);
+        Ok(())
     }
 }
