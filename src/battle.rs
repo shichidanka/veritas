@@ -141,9 +141,9 @@ impl BattleContext {
         mut battle_context: MutexGuard<'static, BattleContext>,
     ) -> Result<Packet> {
         Self::initialize_battle_context(&mut battle_context);
-        battle_context.current_turn_info.avatars_turn_damage = vec![0f64; e.avatars.len()];
-        battle_context.real_time_damages = vec![0f64; e.avatars.len()];
-        battle_context.avatar_lineup = e.avatars;
+        battle_context.current_turn_info.avatars_turn_damage = vec![0f64; 4];
+        battle_context.real_time_damages = vec![0f64; 4];
+        battle_context.avatar_lineup.push(e.avatars[0].clone());
 
         let mut battle_avatars = Vec::new();
         for avatar in &battle_context.avatar_lineup {

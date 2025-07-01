@@ -374,6 +374,23 @@ impl RPG_GameCore_MonsterDataComponent {
     );
 }
 
+
+#[repr(transparent)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+// RPG.GameCore.MonsterDataComponent
+pub struct RPG_GameCore_AvatarDataComponent(pub usize);
+impl RPG_GameCore_AvatarDataComponent {
+    cs_class!("RPG.GameCore.AvatarDataComponent");
+
+    // RPG.GameCore.GameComponentBase -> Type: GameEntity | Name: _OwnerRef | Offset: 0x10
+    cs_field!(
+        _OwnerRef,
+        "_OwnerRef",
+        self,
+        |v| -> RPG_GameCore_GameEntity { RPG_GameCore_GameEntity(v.0) }
+    );
+}
+
 #[repr(transparent)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 // RPG.GameCore.ServantSkillRowData
