@@ -871,6 +871,15 @@ impl RPG_GameCore_BattleInstance {
         self,
         |v| -> RPG_GameCore_GameWorld { RPG_GameCore_GameWorld(v.0) }
     );
+
+    cs_field!(
+        _BattleLineupData,
+        "_BattleLineupData",
+        self,
+        |v| -> RPG_GameCore_BattleLineupData { RPG_GameCore_BattleLineupData(v.0) }
+    );
+
+    
 }
 
 #[repr(transparent)]

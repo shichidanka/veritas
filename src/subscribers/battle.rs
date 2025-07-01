@@ -443,17 +443,43 @@ fn on_combo(instance: MMNDIEBMDNL) {
 }
 
 #[named]
-fn on_set_lineup(instance: RPG_GameCore_AvatarDataComponent, turn_based_ability_component: RPG_GameCore_TurnBasedAbilityComponent) {
+fn on_set_lineup(instance: RPG_GameCore_BattleInstance, a1: *const c_void, a2: RPG_GameCore_BattleLineupData, a3: i32, a4: u32, a5: bool) {
     log::debug!(function_name!());
     safe_call!(unsafe {
-        let data = RPG_GameCore_CharacterDataComponent::from(instance);
-        let entity = data._OwnerRef()?;
-        let avatar = get_avatar_from_entity(entity)?;
-        let avatars = vec![avatar];
-        BattleContext::handle_event(Ok(Event::OnSetBattleLineup(OnSetLineupEvent { avatars })));
+        let light_team = a2.LightTeam()?;
+        let mut avatars = Vec::<Avatar>::new();
+        let mut errors = Vec::<Error>::new();
+        for character in light_team.to_vec::<RPG_GameCore_LineUpCharacter>() {
+            let avatar_id = character.CharacterID()?;
+            match helpers::get_avatar_from_id(avatar_id) {
+                Ok(avatar) => avatars.push(avatar),
+                Err(e) => errors.push(e)
+            }
+        }
+
+        // Unsure if you can have more than one support char
+        let extra_team = a2.ExtraTeam()?;
+        for character in extra_team.to_vec::<RPG_GameCore_LineUpCharacter>() {
+            let avatar_id = character.CharacterID()?;
+            match helpers::get_avatar_from_id(avatar_id) {
+                Ok(avatar) => avatars.push(avatar),
+                Err(e) => errors.push(e)
+            }
+        }
+
+        let event = if !errors.is_empty() {
+            let errors = errors
+                .iter()
+                .map(|e| format!("{}. ", e.to_string()))
+                .collect::<String>();
+            Err(anyhow!(errors))
+        } else {
+            Ok(Event::OnSetBattleLineup(OnSetLineupEvent { avatars }))
+        };
+        BattleContext::handle_event(event);
         Ok(())
     });
-    ON_SET_LINEUP_Detour.call(instance, turn_based_ability_component)
+    ON_SET_LINEUP_Detour.call(instance, a1, a2, a3, a4, a5)
 }
 
 #[named]
@@ -1350,7 +1376,7 @@ static_detour! {
     static ON_DAMAGE_Detour: fn(*const c_void, *const c_void, NOPBAAAGGLA, RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_GameEntity, RPG_GameCore_GameEntity, RPG_GameCore_GameEntity, bool, *const c_void) -> bool;
     static ON_COMBO_Detour: fn(MMNDIEBMDNL);
     static ON_USE_SKILL_Detour: fn(RPG_GameCore_SkillCharacterComponent, i32, *const c_void, bool, i32) -> bool;
-    static ON_SET_LINEUP_Detour: fn(RPG_GameCore_AvatarDataComponent, RPG_GameCore_TurnBasedAbilityComponent);
+    static ON_SET_LINEUP_Detour: fn(RPG_GameCore_BattleInstance, *const c_void, RPG_GameCore_BattleLineupData, i32, u32, bool);
     static ON_BATTLE_BEGIN_Detour: fn(RPG_GameCore_TurnBasedGameMode);
     static ON_BATTLE_END_Detour: fn(RPG_GameCore_TurnBasedGameMode);
     static ON_TURN_BEGIN_Detour: fn(RPG_GameCore_TurnBasedGameMode);
@@ -1409,10 +1435,10 @@ pub fn subscribe() -> Result<()> {
         )?;
         subscribe_function!(
             ON_SET_LINEUP_Detour,
-            RPG_GameCore_AvatarDataComponent::get_class()?
+            RPG_GameCore_BattleInstance::get_class()?
                 .find_method_full(
-                    "OnAbilityCharacterInitialized",
-                    &["RPG.GameCore.TurnBasedAbilityComponent"],
+                    ".ctor",
+                    &["EJJPAFIJPMN", "RPG.GameCore.BattleLineupData", "int", "uint", "bool"],
                     "void"
                 )?
                 .va(),
