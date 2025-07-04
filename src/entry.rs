@@ -23,7 +23,7 @@ fn init() {
 
         while GetModuleHandleW(windows::core::w!("GameAssembly")).is_err() ||
             GetModuleHandleW(windows::core::w!("UnityPlayer")).is_err() {
-            thread::sleep(Duration::from_millis(1));
+            thread::sleep(Duration::from_millis(10));
         }
 
         kreide::il2cpp::init()?;
