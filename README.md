@@ -7,6 +7,6 @@ Veritas, the magnum opus, of a mundane-chalk-throwing pillar man from Hirohiko A
 - Windows
 
 # Maintainers
-- Hessiser: Backend/UI
-- NightKoneko: UI
-- Nushen: Il2Cpp Run-Time Implementation
+- [Hessiser](https://github.com/hessiser/) (Backend/UI/Misc)
+- [NightKoneko](https://github.com/NightKoneko/) (UI/Misc)
+- [Nushen](https://github.com/NuShen1337/) (Backend/Il2Cpp)
