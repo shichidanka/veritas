@@ -1,51 +1,44 @@
 use anyhow::Result;
 use egui_notify::Toast;
+use widestring::u16str;
 use std::{
     ffi::c_void,
     mem::{self},
     ptr::null_mut, time::Duration,
 };
 use windows::{
-    Win32::{
+    core::{w, Interface, PCWSTR}, Win32::{
         Foundation::HMODULE,
         Graphics::{
             Direct3D::{D3D_DRIVER_TYPE_HARDWARE, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0},
             Direct3D11::{
-                D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION, D3D11CreateDeviceAndSwapChain,
-                ID3D11Device, ID3D11DeviceContext,
+                D3D11CreateDeviceAndSwapChain, ID3D11Device, ID3D11DeviceContext, D3D11_CREATE_DEVICE_FLAG, D3D11_SDK_VERSION
             },
             Dxgi::{
                 Common::{
                     DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_MODE_DESC, DXGI_MODE_SCALING_UNSPECIFIED,
                     DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_RATIONAL, DXGI_SAMPLE_DESC,
-                },
-                DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH,
-                DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT, IDXGISwapChain,
+                }, IDXGISwapChain, DXGI_SWAP_CHAIN_DESC, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH, DXGI_SWAP_EFFECT_DISCARD, DXGI_USAGE_RENDER_TARGET_OUTPUT
             },
         },
         UI::WindowsAndMessaging::{
-            CS_HREDRAW, CS_VREDRAW, CreateWindowExW, DefWindowProcW, DestroyWindow,
-            RegisterClassExW, UnregisterClassW, WINDOW_EX_STYLE, WNDCLASSEXW, WS_OVERLAPPEDWINDOW,
+            CreateWindowExW, DefWindowProcW, DestroyWindow, RegisterClassExW, UnregisterClassW, CS_HREDRAW, CS_VREDRAW, WINDOW_EX_STYLE, WNDCLASSEXW, WS_OVERLAPPEDWINDOW
         },
-    },
-    core::{Interface, w},
+    }
 };
 
 use crate::ui::app::App;
 
 // rdbo Kiero
 // https://github.com/eugen15/directx-present-hook
-
-// This can be done in shorter calls
-// Should we tho?
-pub fn get_vtable() -> Box<[usize; 205]> {
+pub fn get_vtable() -> Result<Box<[usize; 205]>> {
     // Initializes a dummy swapchain to get the vtable
     unsafe {
         let window_class = WNDCLASSEXW {
             cbSize: mem::size_of::<WNDCLASSEXW>() as _,
             style: CS_HREDRAW | CS_VREDRAW,
             lpfnWndProc: Some(mem::transmute(DefWindowProcW as *const c_void)),
-            lpszClassName: w!("veritas"),
+            lpszClassName: PCWSTR::from_raw(u16str!(env!("CARGO_PKG_NAME")).as_ptr()),
             ..Default::default()
         };
 
@@ -54,7 +47,7 @@ pub fn get_vtable() -> Box<[usize; 205]> {
         let window = CreateWindowExW(
             WINDOW_EX_STYLE::default(),
             window_class.lpszClassName,
-            w!("veritas DirectX Window"),
+            PCWSTR::from_raw(u16str!(env!("CARGO_PKG_NAME")).as_ptr()),
             WS_OVERLAPPEDWINDOW,
             0,
             0,
@@ -143,15 +136,15 @@ pub fn get_vtable() -> Box<[usize; 205]> {
             144,
         );
 
-        DestroyWindow(window).unwrap();
-        UnregisterClassW(window_class.lpszClassName, Some(window_class.hInstance)).unwrap();
+        DestroyWindow(window)?;
+        UnregisterClassW(window_class.lpszClassName, Some(window_class.hInstance))?;
 
-        vtable
+        Ok(vtable)
     }
 }
 
 pub fn initialize(toasts: Vec<Toast>) -> Result<()> {
-    let vtable = get_vtable();
+    let vtable = get_vtable()?;
     unsafe {
         Ok(edio11::set_overlay(
             Box::new(|ctx| {

@@ -13,12 +13,13 @@ fn entry() {
 
 fn init() {
     let mut toasts = Vec::<Toast>::new();
+    let plugin_name = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
     match (|| -> anyhow::Result<()> { unsafe {
         logging::MultiLogger::init()?;
         #[cfg(debug_assertions)]
         windows::Win32::System::Console::AllocConsole()?;
 
-        log::info!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        log::info!("{plugin_name}");
         log::info!("Setting up...");
 
         while GetModuleHandleW(windows::core::w!("GameAssembly")).is_err() ||
@@ -32,22 +33,17 @@ fn init() {
         Ok(())
     } })() {
         Ok(_) => {
-            let msg = format!("Finished setting up {} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+            let msg = format!("Finished setting up {plugin_name}");
             log::info!("{}", msg);
             toasts.push(Toast::success(msg));
         },
         Err(e) => {
-            let err = format!("{}", e);
+            let err = format!("{plugin_name} has been disabled: {e}");
             log::error!("{}", err);
             let mut toast = Toast::error(err);
             toast.duration(None);
             toasts.push(toast);
-            let err = format!("{} {} has been disabled", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-            log::error!("{}", err);
-            let mut toast = Toast::error(err);
-            toast.duration(None);
-            toasts.push(toast);
-        },
+        }
     };
 
     match overlay::initialize(toasts) {
