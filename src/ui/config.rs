@@ -55,7 +55,7 @@ impl Default for Config {
             // fps: 60,
             widget_opacity: 0.15,
             streamer_mode: true,
-            streamer_msg: String::new(),
+            streamer_msg: env!("CARGO_PKG_NAME").to_string(),
             theme: EGUI_THEME,
             theme_mode: egui::Theme::Dark,
             streamer_msg_size_pt: 1.0,

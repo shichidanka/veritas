@@ -532,10 +532,10 @@ impl App {
                     ui.checkbox(&mut self.settings.defender_exclusion, t!("Add Defender Exclusion during update"));
                     ui.add(egui::widgets::Label::new(egui::RichText::new(egui_phosphor::regular::INFO).size(16.0))
                         .sense(egui::Sense::hover()))
-                        .on_hover_text(t!(indoc::indoc!(
-                            "If enabled, the updater will temporarily add the new DLL file to Windows Defender exclusions during update to avoid false positives.
-                            This is recommended to be enabled (if disabled, Windows Defender may cause the update to fail) however you can disable it if you prefer. The exclusion is removed after the update is finished."
-                        )));
+                        .on_hover_text(t!(indoc::indoc!("
+                            If enabled, the updater will temporarily add the new DLL file to Windows Defender exclusions during update to avoid false positives.
+                            This is recommended to be enabled (if disabled, Windows Defender may cause the update to fail) however you can disable it if you prefer. The exclusion is removed after the update is finished.
+                        ")));
                 });
 
                 let current_version = env!("CARGO_PKG_VERSION");

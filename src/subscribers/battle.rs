@@ -14,7 +14,6 @@ use crate::models::misc::Team;
 use anyhow::Result;
 use anyhow::{Error, anyhow};
 use function_name::named;
-use retour::static_detour;
 use std::ffi::c_void;
 
 #[named]
@@ -1372,7 +1371,7 @@ pub fn on_initialize_enemy(
     res
 }
 
-static_detour! {
+retour::static_detour! {
     static ON_DAMAGE_Detour: fn(*const c_void, *const c_void, NOPBAAAGGLA, RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_TurnBasedAbilityComponent, RPG_GameCore_GameEntity, RPG_GameCore_GameEntity, RPG_GameCore_GameEntity, bool, *const c_void) -> bool;
     static ON_COMBO_Detour: fn(MMNDIEBMDNL);
     static ON_USE_SKILL_Detour: fn(RPG_GameCore_SkillCharacterComponent, i32, *const c_void, bool, i32) -> bool;
